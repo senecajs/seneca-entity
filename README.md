@@ -1,2 +1,2 @@
-# seneca-entities
-Entities plugin for seneca
+# seneca-entity
+Entity plugin for seneca
