@@ -30,7 +30,7 @@
   "scripts": {
     "test": "lab -v -P test -L -t 80",
     "test-html": "lab -v -P test -L -t 80 -r html > testcov.html",
-    "lint": "lab -P test -dL",
+    "lint": "lab -P test -dL"
   },
   "devDependencies": {
     "code": "1.5.0",
