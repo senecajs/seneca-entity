@@ -1,6 +1,6 @@
 {
-  "name": "seneca-entities",
-  "description": "Entities plugin for seneca",
+  "name": "seneca-entity",
+  "description": "Entity plugin for seneca",
   "keywords": [
     "seneca",
     "plugin"
@@ -10,10 +10,11 @@
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
   "dependencies": {
+    "eraro": "0.4.1",
     "jsonic": "0.2.2",
-    "seneca-mem-store": "0.5.0"
+    "lodash": "4.0.1"
   },
-  "main": "entities.js",
+  "main": "entity.js",
   "engines": {
     "node": ">=0.10.0"
   },
@@ -21,11 +22,11 @@
     "LICENSE",
     "README.md",
     "lib",
-    "entities.js"
+    "entity.js"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/senecajs/seneca-entities.git"
+    "url": "https://github.com/senecajs/seneca-entity.git"
   },
   "scripts": {
     "test": "lab -v -P test -L -t 80",
