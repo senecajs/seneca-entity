@@ -1,11 +1,9 @@
-![Seneca](http://senecajs.org/files/assets/seneca-logo.png)
-> A Node.js toolkit for Micro-Service Architectures
+![Seneca Entity](http://senecajs.org/files/assets/seneca-logo.png)
 
-# seneca
+# Seneca Entity
 [![npm version][npm-badge]][npm-url]
 [![Build Status][travis-badge]][travis-url]
 
-## About Seneca Entity
 _Seneca Entity_ is an entity plugin for Seneca
 
 ## Install
@@ -13,6 +11,12 @@ To install, simply use npm.
 
 ```
 npm install seneca-entity
+```
+## Using Seneca Entity
+
+```
+require('seneca')()
+  .use('entity')
 ```
 
 ## Test
