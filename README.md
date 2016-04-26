@@ -15,7 +15,7 @@ If you're using this module, and need help, you can:
 - Ask on the [Gitter][gitter-url].
 
 ### Seneca compatibility
-Supports Seneca versions from **0.6.5** up to **2.0.0**
+Supports Seneca versions **1.x** and **2.x**
 
 ## Install
 To install, simply use npm.
