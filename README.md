@@ -14,6 +14,9 @@ If you're using this module, and need help, you can:
 - Tweet to [@senecajs][],
 - Ask on the [Gitter][gitter-url].
 
+### Seneca compatibility
+Supports Seneca versions **1.x** and **2.x**
+
 ## Install
 To install, simply use npm.
 
