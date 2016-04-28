@@ -1,6 +1,6 @@
 ![Seneca Entity](http://senecajs.org/files/assets/seneca-logo.png)
 
-> _Seneca Entity_ is an entity plugin for Seneca
+> _Seneca Entity_ is an entity plugin for [Seneca](http://senecajs.org)
 
 # Seneca Entity
 [![npm version][npm-badge]][npm-url]
