@@ -2,6 +2,7 @@
 
 var Common = require('./lib/common')
 var MakeEntity = require('./lib/make_entity')
+var Store = require('./lib/store')
 
 
 module.exports = function (options) {
@@ -42,6 +43,12 @@ module.exports.preload = function () {
 
   seneca.decorate('make$', api_make)
   seneca.decorate('make', api_make)
+
+  // Handle old versions of seneca were the
+  // store init was already included by default.
+  if (!seneca.store && !seneca.store.init) {
+    seneca.decorate('store', Store())
+  }
 
   return {
     name: 'entity'

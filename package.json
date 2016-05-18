@@ -29,7 +29,7 @@
     "url": "https://github.com/senecajs/seneca-entity.git"
   },
   "scripts": {
-    "test": "lab -v -L -t 80 $LAB_FLAGS",
+    "test": "lab -v -L -t 74 $LAB_FLAGS",
     "test:node6": "LAB_FLAGS='--leaks' && npm test",
     "test-html": "lab -v -L -t 80 -r html > testcov.html",
     "lint": "lab -dL"
