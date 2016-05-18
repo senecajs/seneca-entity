@@ -46,7 +46,7 @@ module.exports.preload = function () {
 
   // Handle old versions of seneca were the
   // store init was already included by default.
-  if (!seneca.store && !seneca.store.init) {
+  if (!seneca.store || !seneca.store.init) {
     seneca.decorate('store', Store())
   }
 
