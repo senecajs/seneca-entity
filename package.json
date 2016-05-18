@@ -32,6 +32,7 @@
     "test": "lab -v -L -t 74 $LAB_FLAGS",
     "test:node6": "LAB_FLAGS='--leaks' && npm test",
     "test-html": "lab -v -L -t 80 -r html > testcov.html",
+    "coverage": "lab test -v -r lcov | coveralls",
     "lint": "lab -dL"
   },
   "devDependencies": {
@@ -42,6 +43,7 @@
     "gex": "0.2.2",
     "joi": "6.10.x",
     "lab": "6.2.x",
-    "seneca": "https://github.com/senecajs/seneca.git"
+    "seneca": "plugin",
+    "coveralls": "2.11.x"
   }
 }

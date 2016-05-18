@@ -6,6 +6,7 @@
 [![npm version][npm-badge]][npm-url]
 [![Build Status][travis-badge]][travis-url]
 [![Dependency Status][david-badge]][david-url]
+[![Coveralls][BadgeCoveralls]][Coveralls]
 [![Gitter][gitter-badge]][gitter-url]
 
 Lead Maintainer: [Wyatt Preul](https://github.com/geek)
@@ -61,4 +62,6 @@ Licensed under [MIT][].
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/senecajs/seneca
 [Senecajs org]: https://github.com/senecajs/
+[Coveralls]: https://coveralls.io/github/senecajs/seneca-entity?branch=master
+[BadgeCoveralls]: https://coveralls.io/repos/github/senecajs/seneca-entity/badge.svg?branch=master
 [MIT]: ./LICENSE
