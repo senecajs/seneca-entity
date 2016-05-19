@@ -9,7 +9,8 @@
 [![Coveralls][BadgeCoveralls]][Coveralls]
 [![Gitter][gitter-badge]][gitter-url]
 
-Lead Maintainer: [Wyatt Preul](https://github.com/geek)
+A seneca plugin that provides the ability to use Active Record style entites in Seneca. Please note
+that this module does not come with a store, you must in a backing store plugin.
 
 If you're using this module, and need help, you can:
 
@@ -28,10 +29,12 @@ npm install seneca-entity
 ```
 
 ## Using Seneca Entity
+The code below shows how to load this plugin as well as an in memory store.
 
 ```js
 require('seneca')()
   .use('entity')
+  .use('mem-store')
 ```
 
 ## Contributing
