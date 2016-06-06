@@ -17,7 +17,14 @@ var it = lab.it
 var assert = Assert
 
 var SenecaInstance = function () {
-  var seneca = Seneca({ log: 'silent', default_plugins: { entity: false }, plugins: [Entity] })
+  var seneca = Seneca({
+    log: 'silent',
+    default_plugins: {
+      entity: false,
+      'mem-store': false
+    },
+    plugins: [Entity]
+  })
 
   return seneca
 }
