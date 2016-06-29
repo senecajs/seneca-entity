@@ -2,14 +2,29 @@
 
 var Common = require('./lib/common')
 var MakeEntity = require('./lib/make_entity')
+var Store = require('./lib/store')
+var MemStore = require('seneca-mem-store')
 
+var opts = {
+  mem_store: true
+}
 
 module.exports = function entity (options) {
+  var seneca = this
+  var extend = seneca.util.deepextend
+
+  opts = extend(opts, options)
+
+  // Ensures legacy versions of seneca that load mem-store do not
+  // crash the system. Seneca 2.x and lower loads mem-store by default.
+  if (!seneca.options().default_plugins['mem-store'] & opts.mem_store) {
+    seneca.use(MemStore)
+  }
+
   return {
     name: 'entity'
   }
 }
-
 
 // All functionality should be loaded when defining plugin
 module.exports.preload = function () {
@@ -36,6 +51,12 @@ module.exports.preload = function () {
 
   seneca.decorate('make$', api_make)
   seneca.decorate('make', api_make)
+
+  // Handle old versions of seneca were the
+  // store init was already included by default.
+  if (!seneca.store || !seneca.store.init) {
+    seneca.decorate('store', Store())
+  }
 
   return {
     name: 'entity'
