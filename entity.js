@@ -15,12 +15,6 @@ module.exports = function entity (options) {
 
   opts = extend(opts, options)
 
-  // Ensures legacy versions of seneca that load mem-store do not
-  // crash the system. Seneca 2.x and lower loads mem-store by default.
-  if (!seneca.options().default_plugins['mem-store'] & opts.mem_store) {
-    seneca.use(MemStore)
-  }
-
   return {
     name: 'entity'
   }
@@ -56,6 +50,12 @@ module.exports.preload = function () {
   // store init was already included by default.
   if (!seneca.store || !seneca.store.init) {
     seneca.decorate('store', Store())
+  }
+
+  // Ensures legacy versions of seneca that load mem-store do not
+  // crash the system. Seneca 2.x and lower loads mem-store by default.
+  if (!seneca.options().default_plugins['mem-store'] & opts.mem_store) {
+    seneca.root.use(MemStore)
   }
 
   return {
