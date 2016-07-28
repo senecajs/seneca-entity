@@ -10,19 +10,17 @@ var opts = {
 }
 
 module.exports = function entity (options) {
-  var seneca = this
-  var extend = seneca.util.deepextend
-
-  opts = extend(opts, options)
-
   return {
     name: 'entity'
   }
 }
 
 // All functionality should be loaded when defining plugin
-module.exports.preload = function () {
+module.exports.preload = function (context) {
   var seneca = this
+
+  var extend = seneca.util.deepextend
+  opts = extend(opts, context.options)
 
   seneca.util.parsecanon = seneca.util.parsecanon || MakeEntity.parsecanon
 
