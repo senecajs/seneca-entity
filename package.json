@@ -25,8 +25,7 @@
     "url": "https://github.com/senecajs/seneca-entity.git"
   },
   "scripts": {
-   "test": "lab -v -L -t 74 $LAB_FLAGS",
-   "test:node6": "LAB_FLAGS='--leaks' && npm test",
+   "test": "lab -v -L -t 74",
    "test-html": "lab -v -L -t 80 -r html > testcov.html",
    "coveralls": "lab -s -P test -r lcov | coveralls",
    "coverage": "lab -v -P test -L -t 80 -r html > coverage.html",
@@ -53,7 +52,6 @@
     "seneca": "plugin"
   },
   "pre-commit": [
-    "test",
-    "lint"
+    "test"
   ]
 }
