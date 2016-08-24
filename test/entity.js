@@ -1,7 +1,4 @@
-/* Copyright (c) 2013 Richard Rodger */
 'use strict'
-
-// mocha entity.test.js
 
 var Util = require('util')
 var Assert = require('assert')
@@ -14,6 +11,7 @@ var Entity = require('../')
 var lab = exports.lab = Lab.script()
 var describe = lab.describe
 var it = lab.it
+var beforeEach = lab.beforeEach
 var assert = Assert
 
 var SenecaInstance = function () {
@@ -29,10 +27,20 @@ var SenecaInstance = function () {
   return seneca
 }
 
-
+var si
 describe('entity', function () {
+  beforeEach({}, function (done) {
+    si = SenecaInstance()
+    if (si.version >= '3.0.0') {
+      si.use(require('seneca-basic'))
+      si.ready(done)
+    }
+    else {
+      done()
+    }
+  })
+
   it('happy-mem', function (done) {
-    var si = SenecaInstance()
     si.options({errhandler: done})
 
     var fooent = si.make$('foo')
@@ -50,8 +58,6 @@ describe('entity', function () {
   })
 
   it('setid-mem', function (done) {
-    var si = SenecaInstance().error(done)
-
     var z0 = si.make('zed')
     z0.id$ = 0
     z0.z = 0
@@ -74,7 +80,6 @@ describe('entity', function () {
   })
 
   it('mem-ops', function (done) {
-    var si = SenecaInstance()
     si.options({
       errhandler: function (err) { err && done(err); return true }
     })
@@ -175,7 +180,6 @@ describe('entity', function () {
   })
 
   it('parsecanon', function (done) {
-    var si = SenecaInstance()
     function def (v, d) { return v == null ? d : v }
     function fmt (cn) { return def(cn.zone, '-') + '/' + def(cn.base, '-') + '/' + def(cn.name, '-') }
 
@@ -215,8 +219,6 @@ describe('entity', function () {
   })
 
   it('make', function (done) {
-    var si = SenecaInstance()
-
     var foo = si.make$('foo')
     assert.equal('-/-/foo', foo.entity$)
     assert.equal('-/-/foo', foo.canon$())
@@ -267,8 +269,6 @@ describe('entity', function () {
   })
 
   it('toString', function (done) {
-    var si = SenecaInstance()
-
     var f1 = si.make$('foo')
     f1.a = 1
     assert.equal('$-/-/foo;id=;{a:1}', '' + f1)
@@ -285,8 +285,6 @@ describe('entity', function () {
   })
 
   it('isa', function (done) {
-    var si = SenecaInstance()
-
     var f1 = si.make$('foo')
 
     assert.ok(f1.canon$({isa: 'foo'}))
@@ -321,10 +319,7 @@ describe('entity', function () {
   })
 
   it('mem-store-import-export', function (done) {
-    var si = SenecaInstance().error(done)
-
     // NOTE: zone is NOT saved! by design!
-
     var x1, x2, x3
 
     Async.series([
@@ -390,8 +385,6 @@ describe('entity', function () {
   })
 
   it('close', function (done) {
-    var si = SenecaInstance().error(done)
-
     var tmp = {s0: 0, s1: 0, s2: 0}
 
     function noopcb (args, cb) { cb() }
@@ -441,8 +434,6 @@ describe('entity', function () {
 
 
   it('entity.mapping', function (done) {
-    var si = SenecaInstance()
-
     si.use('mem-store', {map: {'-/-/foo': '*'}})
     si.use('mem-store', {map: {'-/-/bar': '*'}})
 
