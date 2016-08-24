@@ -451,4 +451,11 @@ describe('entity', function () {
       done()
     })
   })
+
+  it('mem store disabled by user', function (done) {
+    assert.ok(!si.hasplugin('seneca-mem-store'))
+    assert.ok(!si.plugins()['seneca-mem-store'])
+
+    done()
+  })
 })
