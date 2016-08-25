@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "1.2.0",
+  "version": "1.3.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -25,11 +25,11 @@
     "url": "https://github.com/senecajs/seneca-entity.git"
   },
   "scripts": {
-   "test": "lab -v -L -t 74",
-   "test-html": "lab -v -L -t 80 -r html > testcov.html",
-   "coveralls": "lab -s -P test -r lcov | coveralls",
-   "coverage": "lab -v -P test -L -t 80 -r html > coverage.html",
-   "annotate": "docco entity.js lib/*.js -o docs/annotated"
+    "test": "lab -v -L -t 74",
+    "test-html": "lab -v -L -t 80 -r html > testcov.html",
+    "coveralls": "lab -s -P test -r lcov | coveralls",
+    "coverage": "lab -v -P test -L -t 80 -r html > coverage.html",
+    "annotate": "docco entity.js lib/*.js -o docs/annotated"
   },
   "dependencies": {
     "eraro": "0.4.1",
