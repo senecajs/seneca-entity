@@ -35,7 +35,7 @@
     "eraro": "0.4.1",
     "jsonic": "0.2.2",
     "lodash": "4.15.0",
-    "seneca-mem-store": "0.5.1"
+    "seneca-mem-store": "0.6.0"
   },
   "devDependencies": {
     "async": "2.0.x",
