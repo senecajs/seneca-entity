@@ -37,7 +37,7 @@
     "test": "lab -v -L -t 74",
     "test-html": "lab -v -L -t 74 -r html > testcov.html",
     "coveralls": "lab -s -P test -r lcov | coveralls",
-    "coverage": "lab -v -P test -L -t 74 -r html > coverage.html",
+    "coverage": "lab -v -P test -L -t 74 -r html > docs/coverage.html",
     "annotate": "docco entity.js lib/*.js -o docs/annotated"
   },
   "dependencies": {
