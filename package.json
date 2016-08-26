@@ -10,6 +10,15 @@
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
+  "contributors": [
+    "Richard Rodger (https://github.com/rjrodger)",
+    "Mihai Dima (https://github.com/mihaidma)",
+    "Dean McDonnell (https://github.com/mcdonnelldean)",
+    "Wyatt Preul (https://github.com/geek)",
+    "Shane Lacey (https://github.com/shanel262)",
+    "Emer Rutherford (https://github.com/eeswr)",
+    "Nicolás Fantone (https://github.com/nfantone)"
+  ],
   "main": "entity.js",
   "engines": {
     "node": ">=4.0.0"
@@ -26,9 +35,9 @@
   },
   "scripts": {
     "test": "lab -v -L -t 74",
-    "test-html": "lab -v -L -t 80 -r html > testcov.html",
+    "test-html": "lab -v -L -t 74 -r html > testcov.html",
     "coveralls": "lab -s -P test -r lcov | coveralls",
-    "coverage": "lab -v -P test -L -t 80 -r html > coverage.html",
+    "coverage": "lab -v -P test -L -t 74 -r html > coverage.html",
     "annotate": "docco entity.js lib/*.js -o docs/annotated"
   },
   "dependencies": {
