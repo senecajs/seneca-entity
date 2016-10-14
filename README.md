@@ -28,10 +28,10 @@ To install, simply use npm.
 npm install seneca-entity
 ```
 
-if your're using seneca-entity >= 1.3.0 you must install seneca-basic package
+if your're using seneca >= 3.x you must install also the seneca-basic package
 
 ```
-npm install seneca-entity seneca-basic
+npm install seneca-basic seneca-entity
 ```
 
 
@@ -42,12 +42,12 @@ require('seneca')()
   .use('entity')
 ```
 
-### For version >= 1.3.0
+### For Seneca >= 3.x
 
 ```js
 require('seneca')()
-  .use('entity')
   .use('basic')
+  .use('entity')
 ```
 
 ## Contributing
