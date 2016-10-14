@@ -23,15 +23,31 @@ Supports Seneca versions **1.x** - **3.x**
 ## Install
 To install, simply use npm.
 
+
 ```
 npm install seneca-entity
 ```
+
+if your're using seneca-entity >= 1.3.0 you must install seneca-basic package
+
+```
+npm install seneca-entity seneca-basic
+```
+
 
 ## Using Seneca Entity
 
 ```js
 require('seneca')()
   .use('entity')
+```
+
+### For version >= 1.3.0
+
+```js
+require('seneca')()
+  .use('entity')
+  .use('basic')
 ```
 
 ## Contributing
