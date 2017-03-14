@@ -457,4 +457,13 @@ describe('entity', function () {
 
     done()
   })
+
+
+  it('exports', function (done) {
+    var generate_id = si.export('entity/generate_id')
+
+    var id0 = generate_id(6)
+    Assert(6 === id0.length)
+    done()
+  })
 })

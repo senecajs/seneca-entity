@@ -6,7 +6,8 @@ var Store = require('./lib/store')
 var MemStore = require('seneca-mem-store')
 
 var opts = {
-  mem_store: true
+  mem_store: true,
+  generate_id: Common.generate_id
 }
 
 module.exports = function entity (options) {
@@ -61,6 +62,9 @@ module.exports.preload = function (context) {
   }
 
   return {
-    name: 'entity'
+    name: 'entity',
+    exports: {
+      generate_id: opts.generate_id
+    }
   }
 }
