@@ -28,12 +28,6 @@ To install, simply use npm.
 npm install seneca-entity
 ```
 
-if your're using seneca >= 3.x you must install also the seneca-basic package
-
-```
-npm install seneca-basic seneca-entity
-```
-
 
 ## Using Seneca Entity
 

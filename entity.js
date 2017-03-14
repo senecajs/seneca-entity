@@ -19,8 +19,12 @@ module.exports = function entity (options) {
 module.exports.preload = function (context) {
   var seneca = this
 
-  var extend = seneca.util.deepextend
-  opts = extend(opts, context.options)
+  opts = seneca.util.deepextend(opts, context.options)
+
+  // Removes dependency on seneca-basic
+  // TODO: deprecate this
+  seneca.add('role:basic,cmd:generate_id', Common.generate_id)
+
 
   seneca.util.parsecanon = seneca.util.parsecanon || MakeEntity.parsecanon
 

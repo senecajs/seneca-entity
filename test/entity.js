@@ -32,7 +32,6 @@ describe('entity', function () {
   beforeEach({}, function (done) {
     si = SenecaInstance()
     if (si.version >= '3.0.0') {
-      si.use(require('seneca-basic'))
       si.ready(done)
     }
     else {
