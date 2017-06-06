@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -42,23 +42,23 @@
   },
   "dependencies": {
     "eraro": "0.4.1",
-    "jsonic": "0.2.2",
-    "lodash": "4.15.0",
+    "jsonic": "0.3.0",
+    "lodash": "4.17.4",
     "nid": "0.3.2",
     "seneca-mem-store": "1.0.0"
   },
   "devDependencies": {
-    "async": "2.0.x",
-    "code": "3.0.x",
-    "coveralls": "2.11.x",
+    "async": "2.4.x",
+    "code": "4.0.x",
+    "coveralls": "2.13.x",
     "eslint-config-seneca": "3.x.x",
     "eslint-plugin-hapi": "4.x.x",
-    "eslint-plugin-standard": "2.x.x",
+    "eslint-plugin-standard": "3.x.x",
     "gex": "0.2.2",
-    "joi": "9.0.x",
-    "pre-commit": "1.1.x",
-    "lab": "11.0.x",
-    "seneca": "git:github.com/rjrodger/seneca"
+    "joi": "10.5.x",
+    "pre-commit": "1.2.x",
+    "lab": "13.1.x",
+    "seneca": "plugin"
   },
   "pre-commit": [
     "test"
