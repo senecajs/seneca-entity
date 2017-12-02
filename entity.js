@@ -10,14 +10,14 @@ var opts = {
   generate_id: Common.generate_id
 }
 
-module.exports = function entity (options) {
+module.exports = function entity() {
   return {
     name: 'entity'
   }
 }
 
 // All functionality should be loaded when defining plugin
-module.exports.preload = function entity (context) {
+module.exports.preload = function entity(context) {
   var seneca = this
 
   opts = seneca.util.deepextend(opts, context.options)
@@ -25,7 +25,6 @@ module.exports.preload = function entity (context) {
   // Removes dependency on seneca-basic
   // TODO: deprecate this
   seneca.add('role:basic,cmd:generate_id', Common.generate_id)
-
 
   seneca.util.parsecanon = seneca.util.parsecanon || MakeEntity.parsecanon
 
@@ -36,10 +35,11 @@ module.exports.preload = function entity (context) {
   seneca.private$.entity = seneca.private$.entity || MakeEntity({}, sd)
 
   // Expose the Entity object so third-parties can do interesting things with it
-  seneca.private$.exports.Entity = seneca.private$.exports.Entity || MakeEntity.Entity
+  seneca.private$.exports.Entity =
+    seneca.private$.exports.Entity || MakeEntity.Entity
 
   // all optional
-  function api_make () {
+  function api_make() {
     var self = this
     var args = Common.arrayify(arguments)
     args.unshift(self)

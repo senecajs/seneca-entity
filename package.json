@@ -38,7 +38,8 @@
     "test-html": "lab -v -L -t 70 -r html -I WebAssembly > testcov.html",
     "coveralls": "lab -s -P test -r lcov -I WebAssembly | coveralls",
     "coverage": "lab -v -P test -L -t 70 -r html -I WebAssembly > docs/coverage.html",
-    "annotate": "docco entity.js lib/*.js -o docs/annotated"
+    "annotate": "docco entity.js lib/*.js -o docs/annotated",
+    "prettier": "prettier --write --no-semi --single-quote entity.js lib/*.js test/*.js"
   },
   "dependencies": {
     "eraro": "0.4.1",
@@ -56,8 +57,9 @@
     "eslint-plugin-standard": "3.x.x",
     "gex": "0.2.2",
     "joi": "10.5.x",
-    "pre-commit": "1.2.x",
     "lab": "13.1.x",
+    "pre-commit": "1.2.x",
+    "prettier": "^1.8.2",
     "seneca": "plugin"
   },
   "pre-commit": [
