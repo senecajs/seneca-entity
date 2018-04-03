@@ -2,9 +2,11 @@
 
 var Util = require('util')
 var Assert = require('assert')
+
 var Async = require('async')
 var Gex = require('gex')
 var Lab = require('lab')
+var Code = require('code')
 var Seneca = require('seneca')
 var Entity = require('../')
 
@@ -13,6 +15,7 @@ var describe = lab.describe
 var it = lab.it
 var beforeEach = lab.beforeEach
 var assert = Assert
+var expect = Code.expect
 
 var SenecaInstance = function() {
   var seneca = Seneca({
@@ -29,17 +32,17 @@ var SenecaInstance = function() {
 
 var si
 describe('entity', function() {
-  beforeEach({}, function(done) {
+  beforeEach({}, function(fin) {
     si = SenecaInstance()
     if (si.version >= '3.0.0') {
-      si.ready(done)
+      si.ready(fin)
     } else {
-      done()
+      fin()
     }
   })
 
-  it('happy-mem', function(done) {
-    si.options({ errhandler: done })
+  it('happy-mem', function(fin) {
+    si.test(fin)
 
     var fooent = si.make$('foo')
     assert.ok(fooent.is$('foo'))
@@ -51,11 +54,11 @@ describe('entity', function() {
       assert.equal(1, out.a)
       assert.equal(2, out.b)
 
-      si.close(done)
+      si.close(fin)
     })
   })
 
-  it('setid-mem', function(done) {
+  it('setid-mem', function(fin) {
     var z0 = si.make('zed')
     z0.id$ = 0
     z0.z = 0
@@ -74,19 +77,14 @@ describe('entity', function() {
             assert.equal(2, z.id)
             assert.equal(2, z.z)
 
-            si.close(done)
+            si.close(fin)
           })
       })
     })
   })
 
-  it('mem-ops', function(done) {
-    si.options({
-      errhandler: function(err) {
-        err && done(err)
-        return true
-      }
-    })
+  it('mem-ops', function(fin) {
+    si.test(fin)
 
     var fooent = si.make$('foo')
 
@@ -182,7 +180,7 @@ describe('entity', function() {
                                             assert.equal(err, null)
                                             assert.equal(1, list.length)
 
-                                            si.close(done)
+                                            si.close(fin)
                                           })
                                         })
                                       })
@@ -205,7 +203,7 @@ describe('entity', function() {
     })
   })
 
-  it('parsecanon', function(done) {
+  it('parsecanon', function(fin) {
     function def(v, d) {
       return v == null ? d : v
     }
@@ -245,10 +243,28 @@ describe('entity', function() {
 
     var foo = si.make$('foo')
     assert.equal('a/b/c', fmt(foo.canon$({ parse: 'a/b/c' })))
-    si.close(done)
+    si.close(fin)
   })
 
-  it('make', function(done) {
+  // TODO: a bit more please!
+  it('load', function(fin) {
+    var foo = si.make$('foo')
+    foo.load$(null, function() {
+      expect(this.seneca).exists()
+      fin()
+    })
+  })
+
+  // TODO: a bit more please!
+  it('remove', function(fin) {
+    var foo = si.make$('foo')
+    foo.remove$(null, function() {
+      expect(this.seneca).exists()
+      fin()
+    })
+  })
+
+  it('make', function(fin) {
     var foo = si.make$('foo')
     assert.equal('-/-/foo', foo.entity$)
     assert.equal('-/-/foo', foo.canon$())
@@ -301,10 +317,10 @@ describe('entity', function() {
     var esc1 = si.make$('esc', { x: 1, y_$: 2 })
     assert.equal(esc1.toString(), '$-/-/esc;id=;{x:1,y:2}')
 
-    done()
+    fin()
   })
 
-  it('toString', function(done) {
+  it('toString', function(fin) {
     var f1 = si.make$('foo')
     f1.a = 1
     assert.equal('$-/-/foo;id=;{a:1}', '' + f1)
@@ -317,10 +333,10 @@ describe('entity', function() {
     var f3 = f1.make$({ c: 4 })
     f3.d = 5
     assert.equal('$-/-/foo;id=;{c:4,d:5}', '' + f3)
-    done()
+    fin()
   })
 
-  it('isa', function(done) {
+  it('isa', function(fin) {
     var f1 = si.make$('foo')
 
     assert.ok(f1.canon$({ isa: 'foo' }))
@@ -351,10 +367,10 @@ describe('entity', function() {
     assert.ok(!f3.canon$({ isa: ['zar', 'far', 'bar'] }))
     assert.ok(!f3.canon$({ isa: { zone: 'zar', base: 'far', name: 'bar' } }))
 
-    done()
+    fin()
   })
 
-  it('mem-store-import-export', function(done) {
+  it('mem-store-import-export', function(fin) {
     // NOTE: zone is NOT saved! by design!
     var x1, x2, x3
 
@@ -442,12 +458,12 @@ describe('entity', function() {
       ],
       function(err) {
         si.close()
-        done(err)
+        fin(err)
       }
     )
   })
 
-  it('close', function(done) {
+  it('close', function(fin) {
     var tmp = { s0: 0, s1: 0, s2: 0 }
 
     function noopcb(args, cb) {
@@ -511,7 +527,7 @@ describe('entity', function() {
     })
 
     si.close(function(err) {
-      if (err) return done(err)
+      if (err) return fin(err)
 
       // close gets called on all of them
       // any store may have open db connections
@@ -519,11 +535,11 @@ describe('entity', function() {
       assert.equal(1, tmp.s1)
       assert.equal(1, tmp.s2)
 
-      done()
+      fin()
     })
   })
 
-  it('entity.mapping', function(done) {
+  it('entity.mapping', function(fin) {
     si.use('mem-store', { map: { '-/-/foo': '*' } })
     si.use('mem-store', { map: { '-/-/bar': '*' } })
 
@@ -538,22 +554,22 @@ describe('entity', function() {
 
       // TODO: need to be able to introspect store map
 
-      done()
+      fin()
     })
   })
 
-  it('mem store disabled by user', function(done) {
+  it('mem store disabled by user', function(fin) {
     assert.ok(!si.hasplugin('seneca-mem-store'))
     assert.ok(!si.plugins()['seneca-mem-store'])
 
-    done()
+    fin()
   })
 
-  it('exports', function(done) {
+  it('exports', function(fin) {
     var generate_id = si.export('entity/generate_id')
 
     var id0 = generate_id(6)
     Assert(6 === id0.length)
-    done()
+    fin()
   })
 })
