@@ -13,12 +13,11 @@ node_js:
   - '4'
 
 install:
-  - if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm i -g npm@6; npm ci; else npm install; fi
+  - NODE_VERSION=$(node -v); if [ ${NODE_VERSION:1:2} -ge 10 ]; then npm i -g npm@6; npm ci; else npm install; fi
 
 before_script:
   - npm uninstall seneca
   - npm install $SENECA_VER
-  - NODE_VERSION=$(node -v)
 
 script:
   - npm test
