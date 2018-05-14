@@ -34,24 +34,22 @@
     "url": "https://github.com/senecajs/seneca-entity.git"
   },
   "scripts": {
-    "test": "lab -v -L -t 70 -I WebAssembly",
-    "test-html": "lab -v -L -t 70 -r html -I WebAssembly > testcov.html",
-    "coveralls": "lab -s -P test -r lcov -I WebAssembly | coveralls",
-    "coverage": "lab -v -P test -L -t 70 -r html -I WebAssembly > docs/coverage.html",
-    "annotate": "docco entity.js lib/*.js -o docs/annotated",
+    "test": "lab -v -t 70 -I URL,URLSearchParams",
+    "coveralls": "lab -s -P test -r lcov -I URL,URLSearchParams | coveralls",
+    "coverage": "lab -v -P test -t 70 -r html -I URL,URLSearchParams > coverage.html",
     "prettier": "prettier --write --no-semi --single-quote entity.js lib/*.js test/*.js"
   },
   "dependencies": {
-    "eraro": "0.4.1",
-    "jsonic": "0.3.0",
-    "lodash": "4.17.4",
-    "nid": "0.3.2",
-    "seneca-mem-store": "1.0.1"
+    "eraro": "1.0",
+    "jsonic": "0.3",
+    "lodash": "4.17",
+    "nid": "0.3",
+    "seneca-mem-store": "1.1"
   },
   "devDependencies": {
     "async": "2",
     "code": "4",
-    "coveralls": "2",
+    "coveralls": "3",
     "gex": "0",
     "joi": "12",
     "lab": "14",
