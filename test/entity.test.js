@@ -572,4 +572,24 @@ describe('entity', function() {
     Assert(6 === id0.length)
     fin()
   })
+
+  it('client-server', function(fin) {
+    Seneca()
+      .test(fin)
+      .use(Entity, {server:true})
+      .ready(function() {
+        expect(this.list('role:remote-entity')).length(4)
+
+        Seneca()
+          .test(fin)
+          .use(Entity, {client:true})
+          .ready(function() {
+            this
+              .add('role:remote-entity,cmd:load',function(msg, reply){
+                reply()
+              })
+              .make$('foo').load$(0,fin)
+          })
+      })
+  })
 })

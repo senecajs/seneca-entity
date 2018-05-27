@@ -7,6 +7,8 @@ var Store = require('./lib/store')
 
 var opts = {
   mem_store: true,
+  server: false,
+  client: false,
   generate_id: Common.generate_id
 }
 
@@ -21,7 +23,7 @@ module.exports.preload = function entity(context) {
   var seneca = this
 
   opts = seneca.util.deepextend(opts, context.options)
-
+  
   // Removes dependency on seneca-basic
   // TODO: deprecate this
   seneca.add('role:basic,cmd:generate_id', Common.generate_id)
@@ -57,9 +59,28 @@ module.exports.preload = function entity(context) {
 
   // Ensures legacy versions of seneca that load mem-store do not
   // crash the system. Seneca 2.x and lower loads mem-store by default.
-  if (!seneca.options().default_plugins['mem-store'] & opts.mem_store) {
+  if (!seneca.options().default_plugins['mem-store'] &&
+      opts.mem_store &&
+      !opts.client)
+  {
     seneca.root.use(require('seneca-mem-store'))
   }
+
+  if(opts.client) {
+    this
+      .translate('role:entity,cmd:load',   'role:remote-entity')
+      .translate('role:entity,cmd:save',   'role:remote-entity')
+      .translate('role:entity,cmd:list',   'role:remote-entity')
+      .translate('role:entity,cmd:remove', 'role:remote-entity')
+  } 
+
+  else if(opts.server) {
+    this
+      .translate('role:remote-entity,cmd:load',   'role:entity')
+      .translate('role:remote-entity,cmd:save',   'role:entity')
+      .translate('role:remote-entity,cmd:list',   'role:entity')
+      .translate('role:remote-entity,cmd:remove', 'role:entity')
+  } 
 
   return {
     name: 'entity',

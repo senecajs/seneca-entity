@@ -54,6 +54,6 @@
     "joi": "12",
     "lab": "14",
     "prettier": "1",
-    "seneca": "plugin"
+    "seneca": "github:senecajs/seneca"
   }
 }
