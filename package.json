@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "2.1.0",
+  "version": "2.2.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -54,6 +54,6 @@
     "joi": "12",
     "lab": "14",
     "prettier": "1",
-    "seneca": "github:senecajs/seneca"
+    "seneca": "plugin"
   }
 }
