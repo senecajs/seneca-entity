@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "2.2.0",
+  "version": "2.3.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -44,7 +44,7 @@
     "jsonic": "0.3",
     "lodash": "4.17",
     "nid": "0.3",
-    "seneca-mem-store": "1.1"
+    "seneca-mem-store": "1.2"
   },
   "devDependencies": {
     "async": "2",

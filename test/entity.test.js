@@ -264,6 +264,24 @@ describe('entity', function() {
     })
   })
 
+  it('fields-directive', function(fin) {
+    si.test(fin)
+    si.make$('fdent',{a:1,b:2}).save$(function(err, out0){
+      out0.load$({id:out0.id,fields$:['a']}, function(err, out1) {
+        expect(out1.a).equals(1)
+        expect(out1.b).not.exists()
+
+        out0.list$({id:out0.id,fields$:['b']}, function(err, list) {
+          expect(list[0].b).equals(2)
+          expect(list[0].a).not.exists()
+
+          fin()
+        })
+      })
+    })
+  })
+
+  
   it('make', function(fin) {
     var foo = si.make$('foo')
     assert.equal('-/-/foo', foo.entity$)
