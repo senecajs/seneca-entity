@@ -77,65 +77,78 @@ describe('entity', function() {
 
   it('tag-load', function(fin) {
     var s0 = Seneca()
-        .test(fin)
-        .use('../')
-        .use('../')
-        .use('../$a')
-        .use('../$b')
+      .test(fin)
+      .use('../')
+      .use('../')
+      .use('../$a')
+      .use('../$b')
     fin()
   })
-  
-  
+
   it('plain-messages', function(fin) {
     var s0 = Seneca()
-        .test(fin)
-        .use(Entity)
+      .test(fin)
+      .use(Entity)
 
-    s0
-      .gate()
-      .act('role:entity,cmd:save,base:b0,name:n0',
-           {ent:{id$:'e0',f0:1}},
-           function(err, out) {
-             expect(out.data$()).equals({
-               entity$:{zone: undefined, base: 'b0', name: 'n0'},
-               id:'e0',
-               f0:1
-             })
-           })
-      .act('role:entity,cmd:load,base:b0,name:n0', {id:'e0'},
-           function(err, out) {
-             expect(out.data$()).equals({
-               entity$:{zone: undefined, base: 'b0', name: 'n0'},
-               id:'e0',
-               f0:1
-             })
-           })
-      .act('role:entity,cmd:load,base:b0,name:n0', {q:{id:'e0'}},
-           function(err, out) {
-             expect(out.data$()).equals({
-               entity$:{zone: undefined, base: 'b0', name: 'n0'},
-               id:'e0',
-               f0:1
-             })
-           })
-      .act('role:entity,cmd:list,base:b0,name:n0', {q:{id:'e0'}},
-           function(err, out) {
-             expect(out[0].data$()).equals({
-               entity$:{zone: undefined, base: 'b0', name: 'n0'},
-               id:'e0',
-               f0:1
-             })
-           })
-      .act('role:entity,cmd:remove,base:b0,name:n0', {id:'e0'})
-      .act('role:entity,cmd:load,base:b0,name:n0', {id:'e0'},
-           function(err, out) {
-             expect(out).not.exist()
-           })
-      .act('role:entity,cmd:list,base:b0,name:n0', {q:{id:'e0'}},
-           function(err, out) {
-             expect(out.length).equals(0)
-           })
-    
+    s0.gate()
+      .act(
+        'role:entity,cmd:save,base:b0,name:n0',
+        { ent: { id$: 'e0', f0: 1 } },
+        function(err, out) {
+          expect(out.data$()).equals({
+            entity$: { zone: undefined, base: 'b0', name: 'n0' },
+            id: 'e0',
+            f0: 1
+          })
+        }
+      )
+      .act('role:entity,cmd:load,base:b0,name:n0', { id: 'e0' }, function(
+        err,
+        out
+      ) {
+        expect(out.data$()).equals({
+          entity$: { zone: undefined, base: 'b0', name: 'n0' },
+          id: 'e0',
+          f0: 1
+        })
+      })
+      .act(
+        'role:entity,cmd:load,base:b0,name:n0',
+        { q: { id: 'e0' } },
+        function(err, out) {
+          expect(out.data$()).equals({
+            entity$: { zone: undefined, base: 'b0', name: 'n0' },
+            id: 'e0',
+            f0: 1
+          })
+        }
+      )
+      .act(
+        'role:entity,cmd:list,base:b0,name:n0',
+        { q: { id: 'e0' } },
+        function(err, out) {
+          expect(out[0].data$()).equals({
+            entity$: { zone: undefined, base: 'b0', name: 'n0' },
+            id: 'e0',
+            f0: 1
+          })
+        }
+      )
+      .act('role:entity,cmd:remove,base:b0,name:n0', { id: 'e0' })
+      .act('role:entity,cmd:load,base:b0,name:n0', { id: 'e0' }, function(
+        err,
+        out
+      ) {
+        expect(out).not.exist()
+      })
+      .act(
+        'role:entity,cmd:list,base:b0,name:n0',
+        { q: { id: 'e0' } },
+        function(err, out) {
+          expect(out.length).equals(0)
+        }
+      )
+
       .ready(fin)
   })
 
@@ -146,7 +159,7 @@ describe('entity', function() {
       reply()
     })
 
-    w0.call(si,{role:'entity',zone:'z0',base:'b0',name:'n0'},fin)
+    w0.call(si, { role: 'entity', zone: 'z0', base: 'b0', name: 'n0' }, fin)
   })
 
   it('reify_entity_wrap_with_ent', function(fin) {
@@ -157,34 +170,44 @@ describe('entity', function() {
       reply()
     })
 
-    w0.call(si,{role:'entity',zone:'z0',base:'b0',name:'n0',cmd:'save',ent:{f0:1}},fin)
+    w0.call(
+      si,
+      {
+        role: 'entity',
+        zone: 'z0',
+        base: 'b0',
+        name: 'n0',
+        cmd: 'save',
+        ent: { f0: 1 }
+      },
+      fin
+    )
   })
 
   it('cmd_wrap_list', function(fin) {
     var w0 = Entity.intern.store.cmd_wrap.list(function(msg, reply) {
-      expect(msg.sort).equal({foo:-1})
+      expect(msg.sort).equal({ foo: -1 })
       reply()
     })
 
-    w0.call(si,{role:'entity',cmd:'list',name:'n0',sort:'-foo'},fin)
+    w0.call(si, { role: 'entity', cmd: 'list', name: 'n0', sort: '-foo' }, fin)
   })
 
   it('common', function(fin) {
     expect(Entity.intern.common.generate_id(3).length).equal(3)
-    expect(Entity.intern.common.generate_id({length:1}).length).equal(1)
+    expect(Entity.intern.common.generate_id({ length: 1 }).length).equal(1)
     expect(Entity.intern.common.generate_id(66).length).equal(66)
 
     // default length
     expect(Entity.intern.common.generate_id().length).equal(6)
     expect(Entity.intern.common.generate_id(0).length).equal(6)
 
-    Entity.intern.common.generate_id(null,function(n) {
+    Entity.intern.common.generate_id(null, function(n) {
       expect(n.length).equal(6)
       fin()
     })
   })
-  
-  
+
   it('setid-mem', function(fin) {
     var z0 = si.make('zed')
     z0.id$ = 0
@@ -197,8 +220,7 @@ describe('entity', function() {
         assert.equal(1, z.id)
         assert.equal(1, z.z)
 
-        si
-          .make('zed')
+        si.make('zed')
           .data$({ id$: 2, z: 2 })
           .save$(function(e, z) {
             assert.equal(2, z.id)
@@ -393,12 +415,12 @@ describe('entity', function() {
 
   it('fields-directive', function(fin) {
     si.test(fin)
-    si.make$('fdent',{a:1,b:2}).save$(function(err, out0){
-      out0.load$({id:out0.id,fields$:['a']}, function(err, out1) {
+    si.make$('fdent', { a: 1, b: 2 }).save$(function(err, out0) {
+      out0.load$({ id: out0.id, fields$: ['a'] }, function(err, out1) {
         expect(out1.a).equals(1)
         expect(out1.b).not.exists()
 
-        out0.list$({id:out0.id,fields$:['b']}, function(err, list) {
+        out0.list$({ id: out0.id, fields$: ['b'] }, function(err, list) {
           expect(list[0].b).equals(2)
           expect(list[0].a).not.exists()
 
@@ -408,7 +430,6 @@ describe('entity', function() {
     })
   })
 
-  
   it('make', function(fin) {
     var foo = si.make$('foo')
     assert.equal('-/-/foo', foo.entity$)
@@ -684,7 +705,6 @@ describe('entity', function() {
     })
   })
 
-
   it('entity.mapping', function(fin) {
     si.use('mem-store', { map: { '-/-/foo': '*' } })
     si.use('mem-store', { map: { '-/-/bar': '*' } })
@@ -722,21 +742,20 @@ describe('entity', function() {
   it('client-server', function(fin) {
     Seneca()
       .test(fin)
-      .use(Entity, {server:true})
+      .use(Entity, { server: true })
       .ready(function() {
         expect(this.list('role:remote-entity')).length(4)
 
         Seneca()
           .test(fin)
-          .use(Entity, {client:true})
+          .use(Entity, { client: true })
           .ready(function() {
-            this
-              .add('role:remote-entity,cmd:load',function(msg, reply){
-                reply()
-              })
-              .make$('foo').load$(0,fin)
+            this.add('role:remote-entity,cmd:load', function(msg, reply) {
+              reply()
+            })
+              .make$('foo')
+              .load$(0, fin)
           })
       })
   })
-
 })
