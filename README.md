@@ -7,6 +7,7 @@
 [![Build Status][travis-badge]][travis-url]
 [![Dependency Status][david-badge]][david-url]
 [![Coveralls][BadgeCoveralls]][Coveralls]
+[![Maintainability](https://api.codeclimate.com/v1/badges/a285dd6eeb3cbcf39f38/maintainability)](https://codeclimate.com/github/senecajs/seneca-entity/maintainability)
 [![Gitter][gitter-badge]][gitter-url]
 
 Lead Maintainer: [Wyatt Preul](https://github.com/geek)
