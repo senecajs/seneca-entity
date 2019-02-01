@@ -58,6 +58,133 @@ describe('entity', function() {
     })
   })
 
+  it('happy-mem-zone-base-name', function(fin) {
+    si.test(fin)
+
+    var z0b0n0ent = si.make$('z0/b0/n0')
+    assert.ok(z0b0n0ent.is$('z0/b0/n0'))
+    assert.ok(!z0b0n0ent.is$('z0/b0/n1'))
+
+    z0b0n0ent.data$({ a: 1, b: 2 }).save$(function(err, out) {
+      assert.equal(err, null)
+      assert.ok(out.id)
+      assert.equal(1, out.a)
+      assert.equal(2, out.b)
+
+      si.close(fin)
+    })
+  })
+
+  it('tag-load', function(fin) {
+    var s0 = Seneca()
+        .test(fin)
+        .use('../')
+        .use('../')
+        .use('../$a')
+        .use('../$b')
+    fin()
+  })
+  
+  
+  it('plain-messages', function(fin) {
+    var s0 = Seneca()
+        .test(fin)
+        .use(Entity)
+
+    s0
+      .gate()
+      .act('role:entity,cmd:save,base:b0,name:n0',
+           {ent:{id$:'e0',f0:1}},
+           function(err, out) {
+             expect(out.data$()).equals({
+               entity$:{zone: undefined, base: 'b0', name: 'n0'},
+               id:'e0',
+               f0:1
+             })
+           })
+      .act('role:entity,cmd:load,base:b0,name:n0', {id:'e0'},
+           function(err, out) {
+             expect(out.data$()).equals({
+               entity$:{zone: undefined, base: 'b0', name: 'n0'},
+               id:'e0',
+               f0:1
+             })
+           })
+      .act('role:entity,cmd:load,base:b0,name:n0', {q:{id:'e0'}},
+           function(err, out) {
+             expect(out.data$()).equals({
+               entity$:{zone: undefined, base: 'b0', name: 'n0'},
+               id:'e0',
+               f0:1
+             })
+           })
+      .act('role:entity,cmd:list,base:b0,name:n0', {q:{id:'e0'}},
+           function(err, out) {
+             expect(out[0].data$()).equals({
+               entity$:{zone: undefined, base: 'b0', name: 'n0'},
+               id:'e0',
+               f0:1
+             })
+           })
+      .act('role:entity,cmd:remove,base:b0,name:n0', {id:'e0'})
+      .act('role:entity,cmd:load,base:b0,name:n0', {id:'e0'},
+           function(err, out) {
+             expect(out).not.exist()
+           })
+      .act('role:entity,cmd:list,base:b0,name:n0', {q:{id:'e0'}},
+           function(err, out) {
+             expect(out.length).equals(0)
+           })
+    
+      .ready(fin)
+  })
+
+  it('reify_entity_wrap_without_ent', function(fin) {
+    var w0 = Entity.intern.store.reify_entity_wrap(function(msg, reply) {
+      expect(msg.q).equal({})
+      expect(msg.qent.entity$).equal('z0/b0/n0')
+      reply()
+    })
+
+    w0.call(si,{role:'entity',zone:'z0',base:'b0',name:'n0'},fin)
+  })
+
+  it('reify_entity_wrap_with_ent', function(fin) {
+    var w0 = Entity.intern.store.reify_entity_wrap(function(msg, reply) {
+      expect(msg.q).not.exist()
+      expect(msg.qent).not.exist()
+      expect(msg.ent.entity$).equal('z0/b0/n0')
+      reply()
+    })
+
+    w0.call(si,{role:'entity',zone:'z0',base:'b0',name:'n0',cmd:'save',ent:{f0:1}},fin)
+  })
+
+  it('cmd_wrap_list', function(fin) {
+    var w0 = Entity.intern.store.cmd_wrap.list(function(msg, reply) {
+      expect(msg.sort).equal({foo:-1})
+      reply()
+    })
+
+    w0.call(si,{role:'entity',cmd:'list',name:'n0',sort:'-foo'},fin)
+  })
+
+  it('common', function(fin) {
+    expect(Entity.intern.common.generate_id(3).length).equal(3)
+    expect(Entity.intern.common.generate_id({length:1}).length).equal(1)
+    expect(Entity.intern.common.generate_id(66).length).equal(66)
+
+    // default length
+    expect(Entity.intern.common.generate_id().length).equal(6)
+    expect(Entity.intern.common.generate_id(0).length).equal(6)
+
+    Entity.intern.common.generate_id(null,function(n) {
+      expect(n.length).equal(6)
+      fin()
+    })
+  })
+  
+  
   it('setid-mem', function(fin) {
     var z0 = si.make('zed')
     z0.id$ = 0
@@ -557,6 +684,7 @@ describe('entity', function() {
     })
   })
 
+
   it('entity.mapping', function(fin) {
     si.use('mem-store', { map: { '-/-/foo': '*' } })
     si.use('mem-store', { map: { '-/-/bar': '*' } })
@@ -564,11 +692,11 @@ describe('entity', function() {
     si.ready(function() {
       var plugins = si.plugins()
 
-      assert.ok(!plugins['mem-store/4'])
-      assert.ok(plugins['mem-store/3'])
-      assert.ok(plugins['mem-store/2'])
-      assert.ok(plugins['mem-store/1'])
-      assert.ok(!plugins['mem-store/0'])
+      assert.ok(!plugins['mem-store$4'])
+      assert.ok(plugins['mem-store$3'])
+      assert.ok(plugins['mem-store$2'])
+      assert.ok(plugins['mem-store$1'])
+      assert.ok(!plugins['mem-store$0'])
 
       // TODO: need to be able to introspect store map
 
@@ -610,4 +738,5 @@ describe('entity', function() {
           })
       })
   })
+
 })

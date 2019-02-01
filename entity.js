@@ -18,6 +18,12 @@ module.exports = function entity() {
   }
 }
 
+
+module.exports.intern = {
+  store: Store.intern,
+  common: Common
+}
+
 // All functionality should be loaded when defining plugin
 module.exports.preload = function entity(context) {
   var seneca = this
@@ -48,9 +54,14 @@ module.exports.preload = function entity(context) {
     return seneca.private$.entity.make$.apply(seneca.private$.entity, args)
   }
 
-  seneca.decorate('make$', api_make)
-  seneca.decorate('make', api_make)
+  if(!seneca.make$) {
+    seneca.decorate('make$', api_make)
+  }
 
+  if(!seneca.make) {
+    seneca.decorate('make', api_make)
+  }
+  
   // Handle old versions of seneca were the
   // store init was already included by default.
   if (!seneca.store || !seneca.store.init) {
