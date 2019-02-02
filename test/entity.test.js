@@ -123,9 +123,21 @@ describe('entity', function() {
           })
         }
       )
+      .act('role:entity,cmd:list,base:b0,name:n0', { id: 'e0' }, function(
+        err,
+        out
+      ) {
+        expect(out[0].data$()).equals({
+          entity$: { zone: undefined, base: 'b0', name: 'n0' },
+          id: 'e0',
+          f0: 1
+        })
+      })
+
+      // q wins over id
       .act(
         'role:entity,cmd:list,base:b0,name:n0',
-        { q: { id: 'e0' } },
+        { q: { id: 'e0' }, id: 'e0x' },
         function(err, out) {
           expect(out[0].data$()).equals({
             entity$: { zone: undefined, base: 'b0', name: 'n0' },
