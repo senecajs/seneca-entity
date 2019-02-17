@@ -43,20 +43,20 @@
     "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish --access public"
   },
   "dependencies": {
-    "eraro": "1",
-    "jsonic": "0",
-    "lodash": "4",
-    "nid": "0",
-    "seneca-mem-store": "1"
+    "eraro": "^1.1.0",
+    "jsonic": "^0.3.1",
+    "lodash": "^4.17.11",
+    "nid": "^0.3.2",
+    "seneca-mem-store": "^1.5.1"
   },
   "devDependencies": {
-    "async": "2",
-    "code": "4",
-    "coveralls": "3",
-    "gex": "0",
-    "joi": "12",
-    "lab": "14",
-    "prettier": "1",
-    "seneca": "plugin"
+    "async": "^2.6.2",
+    "code": "^4.1.0",
+    "coveralls": "^3.0.2",
+    "gex": "^0.3.0",
+    "joi": "^12.0.0",
+    "lab": "^14.3.4",
+    "prettier": "^1.16.4",
+    "seneca": "senecajs/seneca"
   }
 }
