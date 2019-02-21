@@ -772,16 +772,15 @@ describe('entity', function() {
   })
 
   it('make-passes-through', function(fin) {
-    var foo0 = si.make('foo', {a:1})
-    expect(foo0.data$()).contains({a:1})
+    var foo0 = si.make('foo', { a: 1 })
+    expect(foo0.data$()).contains({ a: 1 })
     foo0.x$ = 2
 
     var foo1 = si.make(foo0)
     expect(foo0 === foo1).true()
-    expect(foo1.data$()).contains({a:1})
+    expect(foo1.data$()).contains({ a: 1 })
     expect(foo1.x$).equals(2)
-    
+
     fin()
   })
-
 })
