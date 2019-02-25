@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "3.0.1",
+  "version": "3.1.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -20,9 +20,6 @@
     "Nicolás Fantone (https://github.com/nfantone)"
   ],
   "main": "entity.js",
-  "engines": {
-    "node": ">=4"
-  },
   "files": [
     "LICENSE",
     "README.md",
@@ -34,8 +31,8 @@
     "url": "https://github.com/senecajs/seneca-entity.git"
   },
   "scripts": {
-    "test": "lab -v -t 80 -I URL,URLSearchParams,BigUint64Array,BigInt64Array,BigInt",
-    "coveralls": "lab -s -P test -r lcov -I URL,URLSearchParams | coveralls",
+    "test": "lab -v -t 80",
+    "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -t 80 -r html -I URL,URLSearchParams > coverage.html",
     "prettier": "prettier --write --no-semi --single-quote entity.js lib/*.js test/*.js",
     "clean-npm": "rm -rf node_modules package-lock.json",
@@ -51,12 +48,12 @@
   },
   "devDependencies": {
     "async": "^2.6.2",
-    "code": "^4.1.0",
-    "coveralls": "^3.0.2",
+    "code": "^5.2.4",
+    "coveralls": "^3.0.3",
     "gex": "^0.3.0",
-    "joi": "^12.0.0",
-    "lab": "^14.3.4",
+    "joi": "^14.3.1",
+    "lab": "^18.0.2",
     "prettier": "^1.16.4",
-    "seneca": "senecajs/seneca"
+    "seneca": "plugin"
   }
 }

@@ -12,7 +12,7 @@ var Entity = require('../')
 
 var lab = (exports.lab = Lab.script())
 var describe = lab.describe
-var it = lab.it
+var it = make_it(lab)
 var beforeEach = lab.beforeEach
 var assert = Assert
 var expect = Code.expect
@@ -784,3 +784,20 @@ describe('entity', function() {
     fin()
   })
 })
+
+function make_it(lab) {
+  return function it(name, opts, func) {
+    if ('function' === typeof opts) {
+      func = opts
+      opts = {}
+    }
+
+    lab.it(
+      name,
+      opts,
+      Util.promisify(function(x, fin) {
+        func(fin)
+      })
+    )
+  }
+}
