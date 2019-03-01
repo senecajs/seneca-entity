@@ -19,9 +19,6 @@ var expect = Code.expect
 
 const PluginValidator = require('seneca-plugin-validator')
 
-
-
-
 var SenecaInstance = function() {
   var seneca = Seneca({
     log: 'silent',
