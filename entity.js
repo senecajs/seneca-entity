@@ -9,7 +9,14 @@ var opts = {
   mem_store: true,
   server: false,
   client: false,
-  generate_id: Common.generate_id
+  generate_id: Common.generate_id,
+
+  // Control stringification of entities
+  jsonic: {
+    depth: 7,
+    maxitems: 33,
+    maxchars: 1111
+  }
 }
 
 module.exports = function entity() {
@@ -39,7 +46,7 @@ module.exports.preload = function entity(context) {
   var sd = seneca.delegate()
 
   // Template entity that makes all others.
-  seneca.private$.entity = seneca.private$.entity || MakeEntity({}, sd)
+  seneca.private$.entity = seneca.private$.entity || MakeEntity({}, sd, opts)
 
   // Expose the Entity object so third-parties can do interesting things with it
   seneca.private$.exports.Entity =

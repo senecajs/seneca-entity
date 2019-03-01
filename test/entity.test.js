@@ -17,6 +17,11 @@ var beforeEach = lab.beforeEach
 var assert = Assert
 var expect = Code.expect
 
+const PluginValidator = require('seneca-plugin-validator')
+
+
+
+
 var SenecaInstance = function() {
   var seneca = Seneca({
     log: 'silent',
@@ -40,6 +45,8 @@ describe('entity', function() {
       fin()
     }
   })
+
+  it('validate', PluginValidator(Entity, module))
 
   it('happy-mem', function(fin) {
     si.test(fin)
@@ -244,125 +251,8 @@ describe('entity', function() {
     })
   })
 
-  it('mem-ops', function(fin) {
-    si.test(fin)
-
-    var fooent = si.make$('foo')
-
-    fooent.load$(function(err, out) {
-      assert.equal(err, null)
-      assert.equal(out, null)
-
-      fooent.load$('', function(err, out) {
-        assert.equal(err, null)
-        assert.equal(out, null)
-
-        fooent.remove$(function(err, out) {
-          assert.equal(err, null)
-          assert.equal(out, null)
-
-          fooent.remove$('', function(err, out) {
-            assert.equal(err, null)
-            assert.equal(out, null)
-
-            fooent.list$(function(err, list) {
-              assert.equal(err, null)
-              assert.equal(0, list.length)
-
-              fooent.list$({ a: 1 }, function(err, list) {
-                assert.equal(err, null)
-                assert.equal(0, list.length)
-
-                fooent.make$({ a: 1 }).save$(function(err, foo1) {
-                  assert.equal(err, null)
-                  assert.ok(foo1.id)
-                  assert.equal(1, foo1.a)
-
-                  fooent.list$(function(err, list) {
-                    assert.equal(err, null)
-                    assert.equal(1, list.length)
-                    assert.equal(foo1.id, list[0].id)
-                    assert.equal(foo1.a, list[0].a)
-                    assert.equal('' + foo1, '' + list[0])
-
-                    fooent.list$({ a: 1 }, function(err, list) {
-                      assert.equal(err, null)
-                      assert.equal(1, list.length)
-                      assert.equal(foo1.id, list[0].id)
-                      assert.equal(foo1.a, list[0].a)
-                      assert.equal('' + foo1, '' + list[0])
-
-                      fooent.load$(foo1.id, function(err, foo11) {
-                        assert.equal(err, null)
-                        assert.equal(foo1.id, foo11.id)
-                        assert.equal(foo1.a, foo11.a)
-                        assert.equal('' + foo1, '' + foo11)
-
-                        foo11.a = 2
-                        foo11.save$(function(err, foo111) {
-                          assert.equal(err, null)
-                          assert.equal(foo11.id, foo111.id)
-                          assert.equal(2, foo111.a)
-
-                          fooent.list$(function(err, list) {
-                            assert.equal(err, null)
-                            assert.equal(1, list.length)
-                            assert.equal(foo1.id, list[0].id)
-                            assert.equal(2, list[0].a)
-                            assert.equal('' + foo111, '' + list[0])
-
-                            fooent.list$({ a: 2 }, function(err, list) {
-                              assert.equal(err, null)
-                              assert.equal(1, list.length)
-                              assert.equal(foo1.id, list[0].id)
-                              assert.equal(2, list[0].a)
-                              assert.equal('' + foo111, '' + list[0])
-
-                              list[0].remove$(function(err) {
-                                assert.equal(err, null)
-                                fooent.list$(function(err, list) {
-                                  assert.equal(err, null)
-                                  assert.equal(0, list.length)
-
-                                  fooent.list$({ a: 2 }, function(err, list) {
-                                    assert.equal(err, null)
-                                    assert.equal(0, list.length)
-
-                                    fooent.make$({ b: 1 }).save$(function() {
-                                      fooent.make$({ b: 2 }).save$(function() {
-                                        fooent.list$(function(err, list) {
-                                          assert.equal(err, null)
-                                          assert.equal(2, list.length)
-
-                                          fooent.list$({ b: 1 }, function(
-                                            err,
-                                            list
-                                          ) {
-                                            assert.equal(err, null)
-                                            assert.equal(1, list.length)
-
-                                            si.close(fin)
-                                          })
-                                        })
-                                      })
-                                    })
-                                  })
-                                })
-                              })
-                            })
-                          })
-                        })
-                      })
-                    })
-                  })
-                })
-              })
-            })
-          })
-        })
-      })
-    })
-  })
+  // TODO: promisify in Seneca 4
+  it('mem-ops', require('./mem-ops.js')(SenecaInstance()))
 
   it('parsecanon', function(fin) {
     function def(v, d) {
