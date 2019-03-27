@@ -694,7 +694,31 @@ describe('entity', function() {
     })
   })
 
+  it('id-handling', function(fin) {
+    var si0 = Seneca()
+        .test(fin)
+        .use(Entity)
 
+    var foo0 = si0.make('foo', { a: 0 })
+    foo0.save$(function(err, foo0a) {
+      // auto-generated
+      expect(foo0a.id.length).equal(6)
+
+      var foo1 = si0.make('foo', { id$: 'qaz', a: 1 })
+      foo1.save$(function(err, foo1a) {
+        // manually specified
+        expect(foo1a.id.length).equal(3)
+
+        var foo2 = si0.make('foo', { id: 'wsx', a: 2 })
+        foo1.save$(function(err, foo2a) {
+          // auto-generated - id ignored
+          expect(foo2a.id.length).equal(6)
+
+          fin()
+        })
+      })
+    })
+  })
 
 })
 
