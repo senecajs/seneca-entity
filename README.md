@@ -10,7 +10,11 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/a285dd6eeb3cbcf39f38/maintainability)](https://codeclimate.com/github/senecajs/seneca-entity/maintainability)
 [![Gitter][gitter-badge]][gitter-url]
 
-Lead Maintainer: [Wyatt Preul](https://github.com/geek)
+
+The best place to start is
+the [Data Entities tutorial](http://senecajs.org/docs/tutorials/understanding-data-entities.html)
+on the [Seneca](http://senecajs.org/) site.
+
 
 If you're using this module, and need help, you can:
 
