@@ -720,6 +720,51 @@ describe('entity', function() {
     })
   })
 
+
+  it('is-comparison', function(fin) {
+    var si0 = Seneca()
+        .test(fin)
+        .use(Entity)
+
+    var foo0 = si0.make('foo', { a: 0 })
+    expect(foo0.is$('foo')).true()
+    expect(foo0.is$(foo0.entity$)).true()
+    expect(foo0.is$(foo0)).true()
+    expect(foo0.is$(foo0.canon$())).true()
+
+    var foo1 = si0.make('foo', { a: 1 })
+    expect(foo1.is$('foo')).true()
+    expect(foo1.is$(foo0.entity$)).true()
+    expect(foo1.is$(foo0)).true()
+    expect(foo1.is$(foo0.canon$())).true()
+
+    var bar0 = si0.make('qaz/bar', { a: 0 })
+    expect(bar0.is$('qaz/bar')).true()
+    expect(bar0.is$(bar0.entity$)).true()
+    expect(bar0.is$(bar0)).true()
+    expect(bar0.is$(bar0.canon$())).true()
+
+    var bar1 = si0.make('qaz/bar', { a: 1 })
+    expect(bar1.is$('qaz/bar')).true()
+    expect(bar1.is$(bar0.entity$)).true()
+    expect(bar1.is$(bar0)).true()
+    expect(bar1.is$(bar0.canon$())).true()
+
+    var zed0 = si0.make('ned/qaz/zed', { a: 0 })
+    expect(zed0.is$('ned/qaz/zed')).true()
+    expect(zed0.is$(zed0.entity$)).true()
+    expect(zed0.is$(zed0)).true()
+    expect(zed0.is$(zed0.canon$())).true()
+
+    var zed1 = si0.make('ned/qaz/zed', { a: 1 })
+    expect(zed1.is$('ned/qaz/zed')).true()
+    expect(zed1.is$(zed0.entity$)).true()
+    expect(zed1.is$(zed0)).true()
+    expect(zed1.is$(zed0.canon$())).true()
+
+    fin()
+  })
+
 })
 
 function make_it(lab) {
