@@ -7,17 +7,31 @@ var Store = require('./lib/store')
 
 var opts = {
   mem_store: true,
-  generate_id: Common.generate_id
+  server: false,
+  client: false,
+  generate_id: Common.generate_id,
+
+  // Control stringification of entities
+  jsonic: {
+    depth: 7,
+    maxitems: 33,
+    maxchars: 1111
+  }
 }
 
-module.exports = function entity (options) {
+module.exports = function entity() {
   return {
     name: 'entity'
   }
 }
 
+module.exports.intern = {
+  store: Store.intern,
+  common: Common
+}
+
 // All functionality should be loaded when defining plugin
-module.exports.preload = function entity (context) {
+module.exports.preload = function entity(context) {
   var seneca = this
 
   opts = seneca.util.deepextend(opts, context.options)
@@ -26,28 +40,33 @@ module.exports.preload = function entity (context) {
   // TODO: deprecate this
   seneca.add('role:basic,cmd:generate_id', Common.generate_id)
 
-
   seneca.util.parsecanon = seneca.util.parsecanon || MakeEntity.parsecanon
 
   // Create entity delegate.
   var sd = seneca.delegate()
 
   // Template entity that makes all others.
-  seneca.private$.entity = seneca.private$.entity || MakeEntity({}, sd)
+  seneca.private$.entity = seneca.private$.entity || MakeEntity({}, sd, opts)
 
   // Expose the Entity object so third-parties can do interesting things with it
-  seneca.private$.exports.Entity = seneca.private$.exports.Entity || MakeEntity.Entity
+  seneca.private$.exports.Entity =
+    seneca.private$.exports.Entity || MakeEntity.Entity
 
   // all optional
-  function api_make () {
+  function api_make() {
     var self = this
     var args = Common.arrayify(arguments)
     args.unshift(self)
     return seneca.private$.entity.make$.apply(seneca.private$.entity, args)
   }
 
-  seneca.decorate('make$', api_make)
-  seneca.decorate('make', api_make)
+  if (!seneca.make$) {
+    seneca.decorate('make$', api_make)
+  }
+
+  if (!seneca.make) {
+    seneca.decorate('make', api_make)
+  }
 
   // Handle old versions of seneca were the
   // store init was already included by default.
@@ -57,8 +76,24 @@ module.exports.preload = function entity (context) {
 
   // Ensures legacy versions of seneca that load mem-store do not
   // crash the system. Seneca 2.x and lower loads mem-store by default.
-  if (!seneca.options().default_plugins['mem-store'] & opts.mem_store) {
+  if (
+    !seneca.options().default_plugins['mem-store'] &&
+    opts.mem_store &&
+    !opts.client
+  ) {
     seneca.root.use(require('seneca-mem-store'))
+  }
+
+  if (opts.client) {
+    this.translate('role:entity,cmd:load', 'role:remote-entity')
+      .translate('role:entity,cmd:save', 'role:remote-entity')
+      .translate('role:entity,cmd:list', 'role:remote-entity')
+      .translate('role:entity,cmd:remove', 'role:remote-entity')
+  } else if (opts.server) {
+    this.translate('role:remote-entity,cmd:load', 'role:entity')
+      .translate('role:remote-entity,cmd:save', 'role:entity')
+      .translate('role:remote-entity,cmd:list', 'role:entity')
+      .translate('role:remote-entity,cmd:remove', 'role:entity')
   }
 
   return {

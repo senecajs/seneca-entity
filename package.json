@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "2.0.0",
+  "version": "3.2.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -20,9 +20,6 @@
     "Nicolás Fantone (https://github.com/nfantone)"
   ],
   "main": "entity.js",
-  "engines": {
-    "node": ">=4.0.0"
-  },
   "files": [
     "LICENSE",
     "README.md",
@@ -34,33 +31,30 @@
     "url": "https://github.com/senecajs/seneca-entity.git"
   },
   "scripts": {
-    "test": "lab -v -L -t 74",
-    "test-html": "lab -v -L -t 74 -r html > testcov.html",
+    "test": "lab -v -t 80",
     "coveralls": "lab -s -P test -r lcov | coveralls",
-    "coverage": "lab -v -P test -L -t 74 -r html > docs/coverage.html",
-    "annotate": "docco entity.js lib/*.js -o docs/annotated"
+    "coverage": "lab -v -P test -t 80 -r html -I URL,URLSearchParams > coverage.html",
+    "prettier": "prettier --write --no-semi --single-quote entity.js lib/*.js test/*.js",
+    "clean-npm": "rm -rf node_modules package-lock.json",
+    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
+    "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish --access public"
   },
   "dependencies": {
-    "eraro": "0.4.1",
-    "jsonic": "0.2.2",
-    "lodash": "4.15.0",
-    "nid": "0.3.2",
-    "seneca-mem-store": "1.0.0"
+    "eraro": "^1.1.0",
+    "jsonic": "^0.3.1",
+    "lodash": "^4.17.11",
+    "nid": "^0.3.2",
+    "seneca-mem-store": "^1.5.1"
   },
   "devDependencies": {
-    "async": "2.0.x",
-    "code": "3.0.x",
-    "coveralls": "2.11.x",
-    "eslint-config-seneca": "3.x.x",
-    "eslint-plugin-hapi": "4.x.x",
-    "eslint-plugin-standard": "2.x.x",
-    "gex": "0.2.2",
-    "joi": "9.0.x",
-    "pre-commit": "1.1.x",
-    "lab": "11.0.x",
-    "seneca": "plugin"
-  },
-  "pre-commit": [
-    "test"
-  ]
+    "async": "^2.6.2",
+    "code": "^5.2.4",
+    "coveralls": "^3.0.3",
+    "gex": "^0.3.0",
+    "joi": "^14.3.1",
+    "lab": "^18.0.2",
+    "prettier": "^1.16.4",
+    "seneca": "plugin",
+    "seneca-plugin-validator": "0.0.1"
+  }
 }
