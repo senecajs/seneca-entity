@@ -5,7 +5,7 @@ var Common = require('./lib/common')
 var MakeEntity = require('./lib/make_entity')
 var Store = require('./lib/store')
 
-var opts = {
+var default_opts = {
   mem_store: true,
   server: false,
   client: false,
@@ -34,7 +34,7 @@ module.exports.intern = {
 module.exports.preload = function entity(context) {
   var seneca = this
 
-  opts = seneca.util.deepextend(opts, context.options)
+  var opts = seneca.util.deepextend({}, default_opts, context.options)
 
   // Removes dependency on seneca-basic
   // TODO: deprecate this

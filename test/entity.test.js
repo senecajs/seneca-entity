@@ -248,6 +248,7 @@ describe('entity', function() {
     })
   })
 
+  
   // TODO: promisify in Seneca 4
   it('mem-ops', require('./mem-ops.js')(SenecaInstance()))
 
@@ -528,6 +529,7 @@ describe('entity', function() {
     )
   })
 
+  
   it('close', function(fin) {
     var tmp = { s0: 0, s1: 0, s2: 0 }
 
@@ -643,33 +645,57 @@ describe('entity', function() {
       .test(fin)
       .use(Entity, { server: true })
       .ready(function() {
+        var s0 = this
         expect(this.list('role:remote-entity')).length(4)
 
         Seneca()
           .test(fin)
           .use(Entity, { client: true })
           .ready(function() {
+            var c0 = this
+            
             this.add('role:remote-entity,cmd:load', function(msg, reply) {
               reply()
             })
               .make$('foo')
-              .load$(0, fin)
+              .load$(0, function(err, out) {
+                c0.close(s0.close.bind(s0, fin))
+              })
           })
       })
   })
 
+  
   it('make-passes-through', function(fin) {
-    var foo0 = si.make('foo', { a: 1 })
+    var si0 = Seneca()
+        .test(fin)
+        .use(Entity)
+
+    var foo0 = si0.make('foo', { a: 1 })
     expect(foo0.data$()).contains({ a: 1 })
     foo0.x$ = 2
 
-    var foo1 = si.make(foo0)
+    var foo1 = si0.make(foo0)
     expect(foo0 === foo1).true()
     expect(foo1.data$()).contains({ a: 1 })
     expect(foo1.x$).equals(2)
 
-    fin()
+    
+    var bar0 = si0.make('bar', {a: 1})
+    bar0.save$(function(err, bar0a) {
+      expect(bar0a.a).equal(1)
+      bar0a.b = 2
+      bar0a.save$(function(err, bar0b) {
+        expect(bar0b.a).equal(1)
+        expect(bar0b.b).equal(2)
+        expect(bar0a.id).equal(bar0b.id)
+        fin()
+      })
+    })
   })
+
+
+
 })
 
 function make_it(lab) {
