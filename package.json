@@ -50,11 +50,9 @@
     "async": "^2.6.2",
     "code": "^5.2.4",
     "coveralls": "^3.0.3",
-    "doxdox": "^3.0.0",
     "gex": "^0.3.0",
     "joi": "^14.3.1",
     "lab": "^18.0.2",
-    "lodash": "^4.17.11",
     "prettier": "^1.16.4",
     "seneca": "plugin",
     "seneca-plugin-validator": "0.0.1"
