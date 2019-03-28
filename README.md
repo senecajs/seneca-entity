@@ -2,6 +2,8 @@
 
 > _Seneca Entity_ is an entity plugin for [Seneca](http://senecajs.org)
 
+[API Documentation](API.md)
+
 # Seneca Entity
 [![npm version][npm-badge]][npm-url]
 [![Build Status][travis-badge]][travis-url]
@@ -22,8 +24,6 @@ If you're using this module, and need help, you can:
 - Tweet to [@senecajs][],
 - Ask on the [Gitter][gitter-url].
 
-### Seneca compatibility
-Supports Seneca versions **2.x** and above.
 
 ## Install
 To install, simply use npm.
@@ -41,13 +41,6 @@ require('seneca')()
   .use('entity')
 ```
 
-### For Seneca >= 3.x
-
-```js
-require('seneca')()
-  .use('basic')
-  .use('entity')
-```
 
 ## Contributing
 The [Senecajs org][] encourage open participation. If you feel you can help in any way, be it with

@@ -19,7 +19,12 @@ var default_opts = {
   }
 }
 
-module.exports = function entity() {
+
+module.exports = entity
+
+
+/** Define the `entity` plugin. */
+function entity() {
   return {
     name: 'entity'
   }
