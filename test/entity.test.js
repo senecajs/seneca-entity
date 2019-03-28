@@ -765,6 +765,46 @@ describe('entity', function() {
     fin()
   })
 
+
+  it('multiple-instances', function(fin) {
+    var si0 = Seneca()
+        .test(fin)
+        .use({init:Entity,name:'entity',tag:'A'},{client:true})
+        .use({init:Entity,name:'entity',tag:'B'},{client:false})
+        .use({init:Entity,name:'entity',tag:'C'},{client:true})
+        .use({init:Entity,name:'entity',tag:'D'},{client:false})
+
+    si0.ready(function() {
+      var po = this.options().plugin
+      expect(po.entity$A.client).true()
+      expect(po.entity$B.client).false()
+      expect(po.entity$C.client).true()
+      expect(po.entity$D.client).false()
+      fin()
+    })
+  })
+
+
+  it('deep-clone', function(fin) {
+    var si0 = Seneca()
+        .test(fin)
+        .use(Entity)
+
+    var foo0 = si0.make('foo', { a: 0, b: {c: 1, d: {e: [{f:1},{f:2}]} } })
+    var foo1 = foo0.clone$()
+    foo1.b.c = 2
+    foo1.b.d.e[1].f = 22
+    foo1.b.d.e.push({f:3})
+
+    expect(foo0.a).equal(0)
+    expect(foo1.a).equal(0)
+    expect(foo0.b.c).equal(1)
+    expect(foo1.b.c).equal(2)
+    expect(foo0.b.d.e).equal([{f:1},{f:2}])
+    expect(foo1.b.d.e).equal([{f:1},{f:22},{f:3}])
+
+    fin()
+  })
 })
 
 function make_it(lab) {
