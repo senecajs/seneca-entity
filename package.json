@@ -35,6 +35,7 @@
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -t 80 -r html -I URL,URLSearchParams > coverage.html",
     "prettier": "prettier --write --no-semi --single-quote entity.js lib/*.js test/*.js",
+    "api-docs": "doxdox '*/**/*.js' --layout markdown --output API.md",
     "clean-npm": "rm -rf node_modules package-lock.json",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
     "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish --access public"
@@ -42,7 +43,6 @@
   "dependencies": {
     "eraro": "^1.1.0",
     "jsonic": "^0.3.1",
-    "lodash": "^4.17.11",
     "nid": "^0.3.2",
     "seneca-mem-store": "^1.5.1"
   },
@@ -50,9 +50,11 @@
     "async": "^2.6.2",
     "code": "^5.2.4",
     "coveralls": "^3.0.3",
+    "doxdox": "^3.0.0",
     "gex": "^0.3.0",
     "joi": "^14.3.1",
     "lab": "^18.0.2",
+    "lodash": "^4.17.11",
     "prettier": "^1.16.4",
     "seneca": "plugin",
     "seneca-plugin-validator": "0.0.1"
