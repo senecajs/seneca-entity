@@ -248,7 +248,6 @@ describe('entity', function() {
     })
   })
 
-  
   // TODO: promisify in Seneca 4
   it('mem-ops', require('./mem-ops.js')(SenecaInstance()))
 
@@ -529,7 +528,6 @@ describe('entity', function() {
     )
   })
 
-  
   it('close', function(fin) {
     var tmp = { s0: 0, s1: 0, s2: 0 }
 
@@ -653,7 +651,7 @@ describe('entity', function() {
           .use(Entity, { client: true })
           .ready(function() {
             var c0 = this
-            
+
             this.add('role:remote-entity,cmd:load', function(msg, reply) {
               reply()
             })
@@ -665,11 +663,10 @@ describe('entity', function() {
       })
   })
 
-  
   it('make-passes-through', function(fin) {
     var si0 = Seneca()
-        .test(fin)
-        .use(Entity)
+      .test(fin)
+      .use(Entity)
 
     var foo0 = si0.make('foo', { a: 1 })
     expect(foo0.data$()).contains({ a: 1 })
@@ -680,8 +677,7 @@ describe('entity', function() {
     expect(foo1.data$()).contains({ a: 1 })
     expect(foo1.x$).equals(2)
 
-    
-    var bar0 = si0.make('bar', {a: 1})
+    var bar0 = si0.make('bar', { a: 1 })
     bar0.save$(function(err, bar0a) {
       expect(bar0a.a).equal(1)
       bar0a.b = 2
@@ -696,8 +692,8 @@ describe('entity', function() {
 
   it('id-handling', function(fin) {
     var si0 = Seneca()
-        .test(fin)
-        .use(Entity)
+      .test(fin)
+      .use(Entity)
 
     var foo0 = si0.make('foo', { a: 0 })
     foo0.save$(function(err, foo0a) {
@@ -720,11 +716,10 @@ describe('entity', function() {
     })
   })
 
-
   it('is-comparison', function(fin) {
     var si0 = Seneca()
-        .test(fin)
-        .use(Entity)
+      .test(fin)
+      .use(Entity)
 
     var foo0 = si0.make('foo', { a: 0 })
     expect(foo0.is$('foo')).true()
@@ -765,14 +760,13 @@ describe('entity', function() {
     fin()
   })
 
-
   it('multiple-instances', function(fin) {
     var si0 = Seneca()
-        .test(fin)
-        .use({init:Entity,name:'entity',tag:'A'},{client:true})
-        .use({init:Entity,name:'entity',tag:'B'},{client:false})
-        .use({init:Entity,name:'entity',tag:'C'},{client:true})
-        .use({init:Entity,name:'entity',tag:'D'},{client:false})
+      .test(fin)
+      .use({ init: Entity, name: 'entity', tag: 'A' }, { client: true })
+      .use({ init: Entity, name: 'entity', tag: 'B' }, { client: false })
+      .use({ init: Entity, name: 'entity', tag: 'C' }, { client: true })
+      .use({ init: Entity, name: 'entity', tag: 'D' }, { client: false })
 
     si0.ready(function() {
       var po = this.options().plugin
@@ -784,24 +778,26 @@ describe('entity', function() {
     })
   })
 
-
   it('deep-clone', function(fin) {
     var si0 = Seneca()
-        .test(fin)
-        .use(Entity)
+      .test(fin)
+      .use(Entity)
 
-    var foo0 = si0.make('foo', { a: 0, b: {c: 1, d: {e: [{f:1},{f:2}]} } })
+    var foo0 = si0.make('foo', {
+      a: 0,
+      b: { c: 1, d: { e: [{ f: 1 }, { f: 2 }] } }
+    })
     var foo1 = foo0.clone$()
     foo1.b.c = 2
     foo1.b.d.e[1].f = 22
-    foo1.b.d.e.push({f:3})
+    foo1.b.d.e.push({ f: 3 })
 
     expect(foo0.a).equal(0)
     expect(foo1.a).equal(0)
     expect(foo0.b.c).equal(1)
     expect(foo1.b.c).equal(2)
-    expect(foo0.b.d.e).equal([{f:1},{f:2}])
-    expect(foo1.b.d.e).equal([{f:1},{f:22},{f:3}])
+    expect(foo0.b.d.e).equal([{ f: 1 }, { f: 2 }])
+    expect(foo1.b.d.e).equal([{ f: 1 }, { f: 22 }, { f: 3 }])
 
     fin()
   })
