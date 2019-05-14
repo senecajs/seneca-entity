@@ -19,9 +19,7 @@ var default_opts = {
   }
 }
 
-
 module.exports = entity
-
 
 /** Define the `entity` plugin. */
 function entity() {
