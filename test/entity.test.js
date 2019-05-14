@@ -5,7 +5,7 @@ var Assert = require('assert')
 
 var Async = require('async')
 var Gex = require('gex')
-var Lab = require('lab')
+var Lab = require('@hapi/lab')
 var Code = require('code')
 var Seneca = require('seneca')
 var Entity = require('../')
