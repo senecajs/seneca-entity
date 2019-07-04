@@ -38,13 +38,16 @@
     "api-docs": "doxdox '*/**/*.js' --layout markdown --output API.md",
     "clean-npm": "rm -rf node_modules package-lock.json",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish --access public"
+    "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish --access public",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "eraro": "^1.1.0",
     "jsonic": "^0.3.1",
     "nid": "^0.3.2",
-    "seneca-mem-store": "^1.5.1"
+    "seneca-mem-store": "^1.5.1",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "async": "^3.0.1",
@@ -56,5 +59,6 @@
     "prettier": "^1.17.1",
     "seneca": "plugin",
     "seneca-plugin-validator": "0.0.1"
-  }
+  },
+  "snyk": true
 }
