@@ -683,7 +683,6 @@ describe('entity', function() {
     expect(foo1c.data$()).contains({ a: 1 })
     expect(foo1c.x$).not.exists()
 
-    
     var bar0 = si0.make('bar', { a: 1 })
     bar0.save$(function(err, bar0a) {
       expect(bar0a.a).equal(1)
