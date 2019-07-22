@@ -47,13 +47,13 @@
     "seneca-mem-store": "^1.5.1"
   },
   "devDependencies": {
-    "async": "^3.0.1",
+    "@hapi/lab": "^19.1.0",
+    "async": "^3.1.0",
     "code": "^5.2.4",
-    "coveralls": "^3.0.3",
+    "coveralls": "^3.0.5",
     "gex": "^0.3.0",
     "joi": "^14.3.1",
-    "@hapi/lab": "^19.0.1",
-    "prettier": "^1.17.1",
+    "prettier": "^1.18.2",
     "seneca": "plugin",
     "seneca-plugin-validator": "0.0.1"
   }
