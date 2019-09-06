@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "4.1.0",
+  "version": "5.0.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -47,14 +47,14 @@
     "seneca-mem-store": "^1.5.1"
   },
   "devDependencies": {
-    "@hapi/lab": "^19.1.0",
+    "@hapi/code": "^6.0.0",
+    "@hapi/lab": "^20.2.2",
     "async": "^3.1.0",
-    "code": "^5.2.4",
-    "coveralls": "^3.0.5",
+    "coveralls": "^3.0.6",
     "gex": "^0.3.0",
     "joi": "^14.3.1",
     "prettier": "^1.18.2",
     "seneca": "plugin",
-    "seneca-plugin-validator": "0.0.1"
+    "seneca-plugin-validator": "0.3.0"
   }
 }

@@ -6,7 +6,7 @@ var Assert = require('assert')
 var Async = require('async')
 var Gex = require('gex')
 var Lab = require('@hapi/lab')
-var Code = require('code')
+var Code = require('@hapi/code')
 var Seneca = require('seneca')
 var Entity = require('../')
 
@@ -43,7 +43,7 @@ describe('entity', function() {
     }
   })
 
-  it('validate', PluginValidator(Entity, module))
+  lab.it('validate', PluginValidator(Entity, module))
 
   it('happy-mem', function(fin) {
     si.test(fin)
