@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "5.1.0",
+  "version": "5.1.1",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -38,7 +38,7 @@
     "api-docs": "doxdox '*/**/*.js' --layout markdown --output API.md",
     "clean-npm": "rm -rf node_modules package-lock.json",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish --access public"
+    "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish --access public --registry=http://registry.npmjs.org"
   },
   "dependencies": {
     "eraro": "^1.1.0",
