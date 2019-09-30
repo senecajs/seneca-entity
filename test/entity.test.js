@@ -807,6 +807,29 @@ describe('entity', function() {
 
     fin()
   })
+
+  it('entity-log-test', function(fin) {
+    var tmp = []
+    var si = Seneca({
+      internal: {
+        print: {
+          log: entry => {
+            tmp.push(entry)
+          }
+        }
+      }
+    })
+      .use(Entity)
+      .test('print')
+    var fooent = si.make$('foo')
+    fooent.log$('foo')
+
+    //console.log(tmp)
+    expect(tmp[0]).contains('make')
+    expect(tmp[1]).contains('foo')
+
+    fin()
+  })
 })
 
 function make_it(lab) {
