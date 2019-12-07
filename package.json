@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "5.2.0",
+  "version": "6.0.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -36,25 +36,26 @@
     "coverage": "lab -v -P test -t 80 -r html -I URL,URLSearchParams > coverage.html",
     "prettier": "prettier --write --no-semi --single-quote entity.js lib/*.js test/*.js",
     "api-docs": "doxdox '*/**/*.js' --layout markdown --output API.md",
-    "clean-npm": "rm -rf node_modules package-lock.json",
+    "reset": "npm run clean && npm i && npm test",
+    "clean": "rm -rf node_modules package-lock.json yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "npm run clean-npm && npm i --registry=http://registry.npmjs.org && npm run prettier && npm test && npm run repo-tag && npm publish --access public --registry=http://registry.npmjs.org"
+    "repo-publish": "npm run clean && npm i --registry=http://registry.npmjs.org && npm run prettier && npm test && npm run repo-tag && npm publish --access public --registry=http://registry.npmjs.org"
   },
   "dependencies": {
-    "eraro": "^1.1.0",
+    "eraro": "^2.0.0",
     "jsonic": "^0.3.1",
     "nid": "^0.3.2",
     "seneca-mem-store": "^1.6.0"
   },
   "devDependencies": {
-    "@hapi/code": "^6.0.0",
+    "@hapi/code": "^7.0.0",
     "@hapi/joi": "^15.1.1",
-    "@hapi/lab": "^20.3.2",
+    "@hapi/lab": "^21.0.0",
     "async": "^3.1.0",
-    "coveralls": "^3.0.6",
-    "gex": "^0.3.0",
-    "prettier": "^1.18.2",
-    "seneca": "^3.16.1",
-    "seneca-plugin-validator": "0.4.0"
+    "coveralls": "^3.0.9",
+    "gex": "^1.0.0",
+    "prettier": "^1.19.1",
+    "seneca": "^3.17.0",
+    "seneca-plugin-validator": "0.5.0"
   }
 }
