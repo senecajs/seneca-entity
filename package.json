@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "6.0.0",
+  "version": "7.0.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -42,20 +42,20 @@
     "repo-publish": "npm run clean && npm i --registry=http://registry.npmjs.org && npm run prettier && npm test && npm run repo-tag && npm publish --access public --registry=http://registry.npmjs.org"
   },
   "dependencies": {
-    "eraro": "^2.0.0",
+    "eraro": "^2.1.0",
     "jsonic": "^0.3.1",
     "nid": "^0.3.2",
     "seneca-mem-store": "^1.6.0"
   },
   "devDependencies": {
-    "@hapi/code": "^7.0.0",
-    "@hapi/joi": "^15.1.1",
-    "@hapi/lab": "^21.0.0",
-    "async": "^3.1.0",
+    "@hapi/code": "^8.0.1",
+    "@hapi/joi": "^17.1.0",
+    "@hapi/lab": "^22.0.3",
+    "async": "^3.1.1",
     "coveralls": "^3.0.9",
     "gex": "^1.0.0",
     "prettier": "^1.19.1",
-    "seneca": "^3.17.0",
-    "seneca-plugin-validator": "0.5.0"
+    "seneca": "^3.19.0",
+    "seneca-plugin-validator": "0.6.0"
   }
 }
