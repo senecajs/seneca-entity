@@ -44,14 +44,14 @@
   "dependencies": {
     "eraro": "^2.1.0",
     "jsonic": "^0.3.1",
-    "nid": "^0.3.2",
+    "nid": "^1.1.0",
     "seneca-mem-store": "^1.7.1"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.1",
     "@hapi/joi": "^17.1.0",
     "@hapi/lab": "^22.0.3",
-    "async": "^3.1.1",
+    "async": "^3.2.0",
     "coveralls": "^3.0.9",
     "gex": "^1.0.0",
     "prettier": "^1.19.1",
