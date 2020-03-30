@@ -45,17 +45,17 @@
     "eraro": "^2.1.0",
     "jsonic": "^0.3.1",
     "nid": "^1.1.0",
-    "seneca-mem-store": "^1.7.1"
+    "seneca-mem-store": "^2.0.0"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.1",
-    "@hapi/joi": "^17.1.0",
-    "@hapi/lab": "^22.0.3",
+    "@hapi/joi": "^17.1.1",
+    "@hapi/lab": "^22.0.4",
     "async": "^3.2.0",
-    "coveralls": "^3.0.9",
+    "coveralls": "^3.0.11",
     "gex": "^1.0.0",
-    "prettier": "^1.19.1",
-    "seneca": "^3.20.1",
+    "prettier": "^2.0.2",
+    "seneca": "^3.20.2",
     "seneca-plugin-validator": "0.6.1"
   }
 }
