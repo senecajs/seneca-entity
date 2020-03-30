@@ -19,22 +19,22 @@ var expect = Code.expect
 
 const PluginValidator = require('seneca-plugin-validator')
 
-var SenecaInstance = function() {
+var SenecaInstance = function () {
   var seneca = Seneca({
     log: 'silent',
     default_plugins: {
       entity: false,
-      'mem-store': false
+      'mem-store': false,
     },
-    plugins: [Entity]
+    plugins: [Entity],
   })
 
   return seneca
 }
 
 var si
-describe('entity', function() {
-  beforeEach({}, function(fin) {
+describe('entity', function () {
+  beforeEach({}, function (fin) {
     si = SenecaInstance()
     if (si.version >= '3.0.0') {
       si.ready(fin)
@@ -45,14 +45,14 @@ describe('entity', function() {
 
   lab.it('validate', PluginValidator(Entity, module))
 
-  it('happy-mem', function(fin) {
+  it('happy-mem', function (fin) {
     si.test(fin)
 
     var fooent = si.make$('foo')
     assert.ok(fooent.is$('foo'))
     assert.ok(!fooent.is$('bar'))
 
-    fooent.data$({ a: 1, b: 2 }).save$(function(err, out) {
+    fooent.data$({ a: 1, b: 2 }).save$(function (err, out) {
       assert.equal(err, null)
       assert.ok(out.id)
       assert.equal(1, out.a)
@@ -62,14 +62,14 @@ describe('entity', function() {
     })
   })
 
-  it('happy-mem-zone-base-name', function(fin) {
+  it('happy-mem-zone-base-name', function (fin) {
     si.test(fin)
 
     var z0b0n0ent = si.make$('z0/b0/n0')
     assert.ok(z0b0n0ent.is$('z0/b0/n0'))
     assert.ok(!z0b0n0ent.is$('z0/b0/n1'))
 
-    z0b0n0ent.data$({ a: 1, b: 2 }).save$(function(err, out) {
+    z0b0n0ent.data$({ a: 1, b: 2 }).save$(function (err, out) {
       assert.equal(err, null)
       assert.ok(out.id)
       assert.equal(1, out.a)
@@ -79,62 +79,55 @@ describe('entity', function() {
     })
   })
 
-  it('tag-load', function(fin) {
-    var s0 = Seneca()
-      .test(fin)
-      .use('../')
-      .use('../')
-      .use('../$a')
-      .use('../$b')
+  it('tag-load', function (fin) {
+    var s0 = Seneca().test(fin).use('../').use('../').use('../$a').use('../$b')
     fin()
   })
 
-  it('plain-messages', function(fin) {
-    var s0 = Seneca()
-      .test(fin)
-      .use(Entity)
+  it('plain-messages', function (fin) {
+    var s0 = Seneca().test(fin).use(Entity)
 
     s0.gate()
       .act(
         'role:entity,cmd:save,base:b0,name:n0',
         { ent: { id$: 'e0', f0: 1 } },
-        function(err, out) {
+        function (err, out) {
           expect(out.data$()).equals({
             entity$: { zone: undefined, base: 'b0', name: 'n0' },
             id: 'e0',
-            f0: 1
+            f0: 1,
           })
         }
       )
-      .act('role:entity,cmd:load,base:b0,name:n0', { id: 'e0' }, function(
+      .act('role:entity,cmd:load,base:b0,name:n0', { id: 'e0' }, function (
         err,
         out
       ) {
         expect(out.data$()).equals({
           entity$: { zone: undefined, base: 'b0', name: 'n0' },
           id: 'e0',
-          f0: 1
+          f0: 1,
         })
       })
       .act(
         'role:entity,cmd:load,base:b0,name:n0',
         { q: { id: 'e0' } },
-        function(err, out) {
+        function (err, out) {
           expect(out.data$()).equals({
             entity$: { zone: undefined, base: 'b0', name: 'n0' },
             id: 'e0',
-            f0: 1
+            f0: 1,
           })
         }
       )
-      .act('role:entity,cmd:list,base:b0,name:n0', { id: 'e0' }, function(
+      .act('role:entity,cmd:list,base:b0,name:n0', { id: 'e0' }, function (
         err,
         out
       ) {
         expect(out[0].data$()).equals({
           entity$: { zone: undefined, base: 'b0', name: 'n0' },
           id: 'e0',
-          f0: 1
+          f0: 1,
         })
       })
 
@@ -142,16 +135,16 @@ describe('entity', function() {
       .act(
         'role:entity,cmd:list,base:b0,name:n0',
         { q: { id: 'e0' }, id: 'e0x' },
-        function(err, out) {
+        function (err, out) {
           expect(out[0].data$()).equals({
             entity$: { zone: undefined, base: 'b0', name: 'n0' },
             id: 'e0',
-            f0: 1
+            f0: 1,
           })
         }
       )
       .act('role:entity,cmd:remove,base:b0,name:n0', { id: 'e0' })
-      .act('role:entity,cmd:load,base:b0,name:n0', { id: 'e0' }, function(
+      .act('role:entity,cmd:load,base:b0,name:n0', { id: 'e0' }, function (
         err,
         out
       ) {
@@ -160,7 +153,7 @@ describe('entity', function() {
       .act(
         'role:entity,cmd:list,base:b0,name:n0',
         { q: { id: 'e0' } },
-        function(err, out) {
+        function (err, out) {
           expect(out.length).equals(0)
         }
       )
@@ -168,8 +161,8 @@ describe('entity', function() {
       .ready(fin)
   })
 
-  it('reify_entity_wrap_without_ent', function(fin) {
-    var w0 = Entity.intern.store.reify_entity_wrap(function(msg, reply) {
+  it('reify_entity_wrap_without_ent', function (fin) {
+    var w0 = Entity.intern.store.reify_entity_wrap(function (msg, reply) {
       expect(msg.q).equal({})
       expect(msg.qent.entity$).equal('z0/b0/n0')
       reply()
@@ -178,8 +171,8 @@ describe('entity', function() {
     w0.call(si, { role: 'entity', zone: 'z0', base: 'b0', name: 'n0' }, fin)
   })
 
-  it('reify_entity_wrap_with_ent', function(fin) {
-    var w0 = Entity.intern.store.reify_entity_wrap(function(msg, reply) {
+  it('reify_entity_wrap_with_ent', function (fin) {
+    var w0 = Entity.intern.store.reify_entity_wrap(function (msg, reply) {
       expect(msg.q).not.exist()
       expect(msg.qent).not.exist()
       expect(msg.ent.entity$).equal('z0/b0/n0')
@@ -194,14 +187,14 @@ describe('entity', function() {
         base: 'b0',
         name: 'n0',
         cmd: 'save',
-        ent: { f0: 1 }
+        ent: { f0: 1 },
       },
       fin
     )
   })
 
-  it('cmd_wrap_list', function(fin) {
-    var w0 = Entity.intern.store.cmd_wrap.list(function(msg, reply) {
+  it('cmd_wrap_list', function (fin) {
+    var w0 = Entity.intern.store.cmd_wrap.list(function (msg, reply) {
       expect(msg.sort).equal({ foo: -1 })
       reply()
     })
@@ -209,7 +202,7 @@ describe('entity', function() {
     w0.call(si, { role: 'entity', cmd: 'list', name: 'n0', sort: '-foo' }, fin)
   })
 
-  it('common', function(fin) {
+  it('common', function (fin) {
     expect(Entity.intern.common.generate_id(3).length).equal(3)
     expect(Entity.intern.common.generate_id({ length: 1 }).length).equal(1)
     expect(Entity.intern.common.generate_id(66).length).equal(66)
@@ -218,27 +211,27 @@ describe('entity', function() {
     expect(Entity.intern.common.generate_id().length).equal(6)
     expect(Entity.intern.common.generate_id(0).length).equal(6)
 
-    Entity.intern.common.generate_id(null, function(n) {
+    Entity.intern.common.generate_id(null, function (n) {
       expect(n.length).equal(6)
       fin()
     })
   })
 
-  it('setid-mem', function(fin) {
+  it('setid-mem', function (fin) {
     var z0 = si.make('zed')
     z0.id$ = 0
     z0.z = 0
-    z0.save$(function(e, z) {
+    z0.save$(function (e, z) {
       assert.equal(0, z.id)
       assert.equal(0, z.z)
 
-      si.make('zed', { id$: 1, z: 1 }).save$(function(e, z) {
+      si.make('zed', { id$: 1, z: 1 }).save$(function (e, z) {
         assert.equal(1, z.id)
         assert.equal(1, z.z)
 
         si.make('zed')
           .data$({ id$: 2, z: 2 })
-          .save$(function(e, z) {
+          .save$(function (e, z) {
             assert.equal(2, z.id)
             assert.equal(2, z.z)
 
@@ -251,7 +244,7 @@ describe('entity', function() {
   // TODO: promisify in Seneca 4
   it('mem-ops', require('./mem-ops.js')(SenecaInstance()))
 
-  it('parsecanon', function(fin) {
+  it('parsecanon', function (fin) {
     function def(v, d) {
       return v == null ? d : v
     }
@@ -295,31 +288,31 @@ describe('entity', function() {
   })
 
   // TODO: a bit more please!
-  it('load', function(fin) {
+  it('load', function (fin) {
     var foo = si.make$('foo')
-    foo.load$(null, function() {
+    foo.load$(null, function () {
       expect(this.seneca).exists()
       fin()
     })
   })
 
   // TODO: a bit more please!
-  it('remove', function(fin) {
+  it('remove', function (fin) {
     var foo = si.make$('foo')
-    foo.remove$(null, function() {
+    foo.remove$(null, function () {
       expect(this.seneca).exists()
       fin()
     })
   })
 
-  it('fields-directive', function(fin) {
+  it('fields-directive', function (fin) {
     si.test(fin)
-    si.make$('fdent', { a: 1, b: 2 }).save$(function(err, out0) {
-      out0.load$({ id: out0.id, fields$: ['a'] }, function(err, out1) {
+    si.make$('fdent', { a: 1, b: 2 }).save$(function (err, out0) {
+      out0.load$({ id: out0.id, fields$: ['a'] }, function (err, out1) {
         expect(out1.a).equals(1)
         expect(out1.b).not.exists()
 
-        out0.list$({ id: out0.id, fields$: ['b'] }, function(err, list) {
+        out0.list$({ id: out0.id, fields$: ['b'] }, function (err, list) {
           expect(list[0].b).equals(2)
           expect(list[0].a).not.exists()
 
@@ -329,7 +322,7 @@ describe('entity', function() {
     })
   })
 
-  it('make', function(fin) {
+  it('make', function (fin) {
     var foo = si.make$('foo')
     assert.equal('-/-/foo', foo.entity$)
     assert.equal('-/-/foo', foo.canon$())
@@ -385,7 +378,7 @@ describe('entity', function() {
     fin()
   })
 
-  it('toString', function(fin) {
+  it('toString', function (fin) {
     var f1 = si.make$('foo')
     f1.a = 1
     assert.equal('$-/-/foo;id=;{a:1}', '' + f1)
@@ -401,7 +394,7 @@ describe('entity', function() {
     fin()
   })
 
-  it('isa', function(fin) {
+  it('isa', function (fin) {
     var f1 = si.make$('foo')
 
     assert.ok(f1.canon$({ isa: 'foo' }))
@@ -435,33 +428,33 @@ describe('entity', function() {
     fin()
   })
 
-  it('mem-store-import-export', function(fin) {
+  it('mem-store-import-export', function (fin) {
     // NOTE: zone is NOT saved! by design!
     var x1, x2, x3
 
     Async.series(
       [
-        function(next) {
-          si.make$('a', { x: 1 }).save$(function(e, o) {
+        function (next) {
+          si.make$('a', { x: 1 }).save$(function (e, o) {
             x1 = o
             next()
           })
         },
-        function(next) {
-          si.make$('b', 'a', { x: 2 }).save$(function(e, o) {
+        function (next) {
+          si.make$('b', 'a', { x: 2 }).save$(function (e, o) {
             x2 = o
             next()
           })
         },
-        function(next) {
-          si.make$('c', 'b', 'a', { x: 3 }).save$(function(e, o) {
+        function (next) {
+          si.make$('c', 'b', 'a', { x: 3 }).save$(function (e, o) {
             x3 = o
             next()
           })
         },
 
-        function(next) {
-          si.act('role:mem-store,cmd:dump', function(e, o) {
+        function (next) {
+          si.act('role:mem-store,cmd:dump', function (e, o) {
             var t = Gex(
               '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
             ).on(JSON.stringify(o))
@@ -470,18 +463,18 @@ describe('entity', function() {
           })
         },
 
-        function(next) {
-          si.act('role:mem-store,cmd:export', function(err, out) {
+        function (next) {
+          si.act('role:mem-store,cmd:export', function (err, out) {
             assert.equal(err, null)
 
             var si2 = SenecaInstance()
 
-            si2.act('role:mem-store,cmd:import', { json: out.json }, function(
+            si2.act('role:mem-store,cmd:import', { json: out.json }, function (
               err
             ) {
               assert.equal(err, null)
 
-              si2.act('role:mem-store,cmd:dump', function(err, o) {
+              si2.act('role:mem-store,cmd:dump', function (err, o) {
                 assert.equal(err, null)
                 assert.ok(
                   Gex(
@@ -489,21 +482,21 @@ describe('entity', function() {
                   ).on(JSON.stringify(o))
                 )
 
-                si2.make('a').load$({ x: 1 }, function(err, nx1) {
+                si2.make('a').load$({ x: 1 }, function (err, nx1) {
                   assert.equal(err, null)
                   assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
 
-                  si2.make('a').load$({ x: 1 }, function(err, nx1) {
+                  si2.make('a').load$({ x: 1 }, function (err, nx1) {
                     assert.equal(err, null)
                     assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
 
-                    si2.make('b', 'a').load$({ x: 2 }, function(err, nx2) {
+                    si2.make('b', 'a').load$({ x: 2 }, function (err, nx2) {
                       assert.equal(err, null)
                       assert.equal('$-/b/a;id=' + x2.id + ';{x:2}', '' + nx2)
 
                       si2
                         .make('c', 'b', 'a')
-                        .load$({ x: 3 }, function(err, nx3) {
+                        .load$({ x: 3 }, function (err, nx3) {
                           assert.equal(err, null)
                           assert.equal(
                             '$c/b/a;id=' + x3.id + ';{x:3}',
@@ -519,16 +512,16 @@ describe('entity', function() {
               })
             })
           })
-        }
+        },
       ],
-      function(err) {
+      function (err) {
         si.close()
         fin(err)
       }
     )
   })
 
-  it('close', function(fin) {
+  it('close', function (fin) {
     var tmp = { s0: 0, s1: 0, s2: 0 }
 
     function noopcb(args, cb) {
@@ -545,10 +538,10 @@ describe('entity', function() {
           list: noopcb,
           remove: noopcb,
           native: noopcb,
-          close: function(args, cb) {
+          close: function (args, cb) {
             tmp.s0++
             cb()
-          }
+          },
         }
       )
     })
@@ -564,10 +557,10 @@ describe('entity', function() {
           remove: noopcb,
           native: noopcb,
           nick: '11',
-          close: function(args, cb) {
+          close: function (args, cb) {
             tmp.s1++
             cb()
-          }
+          },
         }
       )
     })
@@ -583,15 +576,15 @@ describe('entity', function() {
           remove: noopcb,
           native: noopcb,
           nick: '22',
-          close: function(args, cb) {
+          close: function (args, cb) {
             tmp.s2++
             cb()
-          }
+          },
         }
       )
     })
 
-    si.close(function(err) {
+    si.close(function (err) {
       if (err) return fin(err)
 
       // close gets called on all of them
@@ -604,11 +597,11 @@ describe('entity', function() {
     })
   })
 
-  it('entity.mapping', function(fin) {
+  it('entity.mapping', function (fin) {
     si.use('mem-store', { map: { '-/-/foo': '*' } })
     si.use('mem-store', { map: { '-/-/bar': '*' } })
 
-    si.ready(function() {
+    si.ready(function () {
       var plugins = si.plugins()
 
       assert.ok(!plugins['mem-store$4'])
@@ -623,14 +616,14 @@ describe('entity', function() {
     })
   })
 
-  it('mem store disabled by user', function(fin) {
+  it('mem store disabled by user', function (fin) {
     assert.ok(!si.hasplugin('seneca-mem-store'))
     assert.ok(!si.plugins()['seneca-mem-store'])
 
     fin()
   })
 
-  it('exports', function(fin) {
+  it('exports', function (fin) {
     var generate_id = si.export('entity/generate_id')
 
     var id0 = generate_id(6)
@@ -638,35 +631,33 @@ describe('entity', function() {
     fin()
   })
 
-  it('client-server', function(fin) {
+  it('client-server', function (fin) {
     Seneca()
       .test(fin)
       .use(Entity, { server: true })
-      .ready(function() {
+      .ready(function () {
         var s0 = this
         expect(this.list('role:remote-entity')).length(4)
 
         Seneca()
           .test(fin)
           .use(Entity, { client: true })
-          .ready(function() {
+          .ready(function () {
             var c0 = this
 
-            this.add('role:remote-entity,cmd:load', function(msg, reply) {
+            this.add('role:remote-entity,cmd:load', function (msg, reply) {
               reply()
             })
               .make$('foo')
-              .load$(0, function(err, out) {
+              .load$(0, function (err, out) {
                 c0.close(s0.close.bind(s0, fin))
               })
           })
       })
   })
 
-  it('make-passes-through', function(fin) {
-    var si0 = Seneca()
-      .test(fin)
-      .use(Entity)
+  it('make-passes-through', function (fin) {
+    var si0 = Seneca().test(fin).use(Entity)
 
     var foo0 = si0.make('foo', { a: 1 })
     expect(foo0.data$()).contains({ a: 1 })
@@ -684,10 +675,10 @@ describe('entity', function() {
     expect(foo1c.x$).not.exists()
 
     var bar0 = si0.make('bar', { a: 1 })
-    bar0.save$(function(err, bar0a) {
+    bar0.save$(function (err, bar0a) {
       expect(bar0a.a).equal(1)
       bar0a.b = 2
-      bar0a.save$(function(err, bar0b) {
+      bar0a.save$(function (err, bar0b) {
         expect(bar0b.a).equal(1)
         expect(bar0b.b).equal(2)
         expect(bar0a.id).equal(bar0b.id)
@@ -696,23 +687,21 @@ describe('entity', function() {
     })
   })
 
-  it('id-handling', function(fin) {
-    var si0 = Seneca()
-      .test(fin)
-      .use(Entity)
+  it('id-handling', function (fin) {
+    var si0 = Seneca().test(fin).use(Entity)
 
     var foo0 = si0.make('foo', { a: 0 })
-    foo0.save$(function(err, foo0a) {
+    foo0.save$(function (err, foo0a) {
       // auto-generated
       expect(foo0a.id.length).equal(6)
 
       var foo1 = si0.make('foo', { id$: 'qaz', a: 1 })
-      foo1.save$(function(err, foo1a) {
+      foo1.save$(function (err, foo1a) {
         // manually specified
         expect(foo1a.id.length).equal(3)
 
         var foo2 = si0.make('foo', { id: 'wsx', a: 2 })
-        foo1.save$(function(err, foo2a) {
+        foo1.save$(function (err, foo2a) {
           // auto-generated - id ignored
           expect(foo2a.id.length).equal(6)
 
@@ -722,10 +711,8 @@ describe('entity', function() {
     })
   })
 
-  it('is-comparison', function(fin) {
-    var si0 = Seneca()
-      .test(fin)
-      .use(Entity)
+  it('is-comparison', function (fin) {
+    var si0 = Seneca().test(fin).use(Entity)
 
     var foo0 = si0.make('foo', { a: 0 })
     expect(foo0.is$('foo')).true()
@@ -766,7 +753,7 @@ describe('entity', function() {
     fin()
   })
 
-  it('multiple-instances', function(fin) {
+  it('multiple-instances', function (fin) {
     var si0 = Seneca()
       .test(fin)
       .use({ init: Entity, name: 'entity', tag: 'A' }, { client: true })
@@ -774,7 +761,7 @@ describe('entity', function() {
       .use({ init: Entity, name: 'entity', tag: 'C' }, { client: true })
       .use({ init: Entity, name: 'entity', tag: 'D' }, { client: false })
 
-    si0.ready(function() {
+    si0.ready(function () {
       var po = this.options().plugin
       expect(po.entity$A.client).true()
       expect(po.entity$B.client).false()
@@ -784,14 +771,12 @@ describe('entity', function() {
     })
   })
 
-  it('deep-clone', function(fin) {
-    var si0 = Seneca()
-      .test(fin)
-      .use(Entity)
+  it('deep-clone', function (fin) {
+    var si0 = Seneca().test(fin).use(Entity)
 
     var foo0 = si0.make('foo', {
       a: 0,
-      b: { c: 1, d: { e: [{ f: 1 }, { f: 2 }] } }
+      b: { c: 1, d: { e: [{ f: 1 }, { f: 2 }] } },
     })
     var foo1 = foo0.clone$()
     foo1.b.c = 2
@@ -808,16 +793,16 @@ describe('entity', function() {
     fin()
   })
 
-  it('entity-log-test', function(fin) {
+  it('entity-log-test', function (fin) {
     var tmp = []
     var si = Seneca({
       internal: {
         print: {
-          log: entry => {
+          log: (entry) => {
             tmp.push(entry)
-          }
-        }
-      }
+          },
+        },
+      },
     })
       .use(Entity)
       .test('print')
@@ -842,7 +827,7 @@ function make_it(lab) {
     lab.it(
       name,
       opts,
-      Util.promisify(function(x, fin) {
+      Util.promisify(function (x, fin) {
         func(fin)
       })
     )

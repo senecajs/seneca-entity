@@ -15,8 +15,8 @@ var default_opts = {
   jsonic: {
     depth: 7,
     maxitems: 33,
-    maxchars: 1111
-  }
+    maxchars: 1111,
+  },
 }
 
 module.exports = entity
@@ -24,13 +24,13 @@ module.exports = entity
 /** Define the `entity` plugin. */
 function entity() {
   return {
-    name: 'entity'
+    name: 'entity',
   }
 }
 
 module.exports.intern = {
   store: Store.intern,
-  common: Common
+  common: Common,
 }
 
 // All functionality should be loaded when defining plugin
@@ -102,7 +102,7 @@ module.exports.preload = function entity(context) {
   return {
     name: 'entity',
     exports: {
-      generate_id: opts.generate_id
-    }
+      generate_id: opts.generate_id,
+    },
   }
 }
