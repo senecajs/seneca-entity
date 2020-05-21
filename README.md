@@ -10,6 +10,7 @@
 [![Dependency Status][david-badge]][david-url]
 [![Coveralls][BadgeCoveralls]][Coveralls]
 [![Maintainability](https://api.codeclimate.com/v1/badges/a285dd6eeb3cbcf39f38/maintainability)](https://codeclimate.com/github/senecajs/seneca-entity/maintainability)
+[![DeepScan grade](https://deepscan.io/api/teams/5016/projects/11814/branches/175620/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=11814&bid=175620)
 [![Known Vulnerabilities](https://snyk.io/test/github/senecajs/seneca-entity/badge.svg?targetFile=package.json)](https://snyk.io/test/github/senecajs/seneca-entity?targetFile=package.json)
 [![Gitter][gitter-badge]][gitter-url]
 
