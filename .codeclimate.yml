@@ -3,4 +3,6 @@ checks:
   file-lines:
     config:
       threshold: 1111
-      
+  argument-count:
+    config:
+      threshold: 4      

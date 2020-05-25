@@ -817,9 +817,7 @@ describe('entity', function () {
   })
 
   it('data-null-undef', function (fin) {
-    var si = Seneca({legacy:false})
-        .test(fin)
-        .use(Entity)
+    var si = Seneca({ legacy: false }).test(fin).use(Entity)
 
     var foo = si.make$('foo')
     foo.a = 1
@@ -829,12 +827,11 @@ describe('entity', function () {
     // undefined is not present
     expect(foo.data$(false)).equals({
       a: 1,
-      n: null
+      n: null,
     })
 
     fin()
   })
-
 })
 
 function make_it(lab) {
