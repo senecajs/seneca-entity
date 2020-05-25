@@ -815,6 +815,26 @@ describe('entity', function () {
 
     fin()
   })
+
+  it('data-null-undef', function (fin) {
+    var si = Seneca({legacy:false})
+        .test(fin)
+        .use(Entity)
+
+    var foo = si.make$('foo')
+    foo.a = 1
+    foo.n = null
+    foo.d = void 0
+
+    // undefined is not present
+    expect(foo.data$(false)).equals({
+      a: 1,
+      n: null
+    })
+
+    fin()
+  })
+
 })
 
 function make_it(lab) {
