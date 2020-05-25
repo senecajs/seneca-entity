@@ -31,7 +31,7 @@
     "url": "https://github.com/senecajs/seneca-entity.git"
   },
   "scripts": {
-    "test": "lab -v -t 80",
+    "test": "lab -v -P test -L -t 80 -r console -o stdout -r html -o test/coverage.html",
     "coveralls": "lab -s -P test -r lcov | coveralls",
     "coverage": "lab -v -P test -t 80 -r html -I URL,URLSearchParams > coverage.html",
     "prettier": "prettier --write --no-semi --single-quote entity.js lib/*.js test/*.js",
@@ -53,7 +53,6 @@
     "@hapi/lab": "^22.0.4",
     "async": "^3.2.0",
     "coveralls": "^3.1.0",
-    "gex": "^1.0.0",
     "prettier": "^2.0.5",
     "seneca": "^3.21.0",
     "seneca-plugin-validator": "0.6.1"
