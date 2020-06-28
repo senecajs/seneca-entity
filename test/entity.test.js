@@ -62,6 +62,27 @@ describe('entity', function () {
     })
   })
 
+
+  lab.it('happy-mem-promise', async function () {
+    var si = Seneca({legacy:false}).use('promisify').use('..').test()
+
+    var fooent = si.entity('foo')
+    //console.dir(fooent)
+
+    assert.ok(fooent.is$('foo'))
+    assert.ok(!fooent.is$('bar'))
+    
+    var out = await fooent.data$({ a: 1, b: 2 }).save$()
+
+    assert.ok(out.id)
+    assert.equal(1, out.a)
+    assert.equal(2, out.b)
+    
+    await si.close()
+  })
+
+
+  
   it('happy-mem-zone-base-name', function (fin) {
     si.test(fin)
 
@@ -79,6 +100,53 @@ describe('entity', function () {
     })
   })
 
+
+  lab.it('entity-promise', async () => {
+    var si = Seneca({legacy:false}).use('promisify').use('..').test()
+
+
+    var bar0 = si.entity('bar').data$({ a: 1 })
+    expect('' + bar0).equal('$-/-/bar;id=;{a:1}')
+
+    var bar1 = si.entity('bar', { a: 2 })
+    expect('' + bar1).equal('$-/-/bar;id=;{a:2}')
+
+    var bar2 = si.entity('bar')
+    bar2.a = 3
+    expect('' + bar2).equal('$-/-/bar;id=;{a:3}')
+
+    var bar10 = si.make('bar').data$({ a: 1 })
+    expect('' + bar10).equal('$-/-/bar;id=;{a:1}')
+
+    var bar11 = si.make('bar', { a: 2 })
+    expect('' + bar11).equal('$-/-/bar;id=;{a:2}')
+
+    var bar12 = si.make('bar')
+    bar12.a = 3
+    expect('' + bar12).equal('$-/-/bar;id=;{a:3}')
+
+    var foo0 = await si.entity('foo').data$({ a: 1 }).save$()
+
+    var foo1 = await si.entity('foo').load$(foo0.id)
+    expect('' + foo0).equal('' + foo1)
+
+    var foo2 = await si.entity('foo').data$({ a: 1 }).save$()
+    var list = await si.entity('foo').list$({ a: 1 })
+    expect(list.length).equal(2)
+
+    await foo0.remove$()
+    list = await si.entity('foo').list$({ a: 1 })
+    expect(list.length).equal(1)
+
+    var foo3 = list[0].clone$()
+    foo3.a = 2
+    await foo3.save$()
+
+    var foo4 = await list[0].load$()
+    expect(foo4.a).equal(2)
+  })
+
+  
   it('tag-load', function (fin) {
     var s0 = Seneca().test(fin).use('../').use('../').use('../$a').use('../$b')
     fin()

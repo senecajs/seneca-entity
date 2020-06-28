@@ -45,7 +45,7 @@
     "eraro": "^2.1.0",
     "jsonic": "^0.3.1",
     "nid": "^1.1.0",
-    "seneca-mem-store": "^2.1.0"
+    "seneca-mem-store": "^3.0.1"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.1",
@@ -54,7 +54,8 @@
     "async": "^3.2.0",
     "coveralls": "^3.1.0",
     "prettier": "^2.0.5",
-    "seneca": "^3.21.0",
-    "seneca-plugin-validator": "0.6.1"
+    "seneca": "^3.21.2",
+    "seneca-plugin-validator": "0.6.1",
+    "seneca-promisify": "^1.4.0"
   }
 }
