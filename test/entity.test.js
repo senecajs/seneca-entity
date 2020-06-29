@@ -139,6 +139,15 @@ describe('entity', function () {
 
     var foo4 = await list[0].load$()
     expect(foo4.a).equal(2)
+
+    var zed0 = await si.entity('core/zed').data$({ z: 0 }).save$()
+    var zed1 = await si.entity('core/zed').data$({ z: 1 }).save$()
+    var zeds = await si.entity('core/zed').list$()
+    expect(zeds.length).equal(2)
+
+    await si.entity('core/zed').remove$({ z: 1 })
+    zeds = await si.entity('core/zed').list$()
+    expect(zeds.length).equal(1)
   })
 
   it('tag-load', function (fin) {
