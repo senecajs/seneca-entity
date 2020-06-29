@@ -71,13 +71,10 @@ module.exports.preload = function entity(context) {
     seneca.decorate('make', api_make)
   }
 
-
   if (!seneca.entity) {
     seneca.decorate('entity', api_make)
   }
 
-  
-  
   // Handle old versions of seneca were the
   // store init was already included by default.
   if (!seneca.store || !seneca.store.init) {

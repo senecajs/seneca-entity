@@ -62,27 +62,24 @@ describe('entity', function () {
     })
   })
 
-
   lab.it('happy-mem-promise', async function () {
-    var si = Seneca({legacy:false}).use('promisify').use('..').test()
+    var si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
     var fooent = si.entity('foo')
     //console.dir(fooent)
 
     assert.ok(fooent.is$('foo'))
     assert.ok(!fooent.is$('bar'))
-    
+
     var out = await fooent.data$({ a: 1, b: 2 }).save$()
 
     assert.ok(out.id)
     assert.equal(1, out.a)
     assert.equal(2, out.b)
-    
+
     await si.close()
   })
 
-
-  
   it('happy-mem-zone-base-name', function (fin) {
     si.test(fin)
 
@@ -100,10 +97,8 @@ describe('entity', function () {
     })
   })
 
-
   lab.it('entity-promise', async () => {
-    var si = Seneca({legacy:false}).use('promisify').use('..').test()
-
+    var si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
     var bar0 = si.entity('bar').data$({ a: 1 })
     expect('' + bar0).equal('$-/-/bar;id=;{a:1}')
@@ -146,7 +141,6 @@ describe('entity', function () {
     expect(foo4.a).equal(2)
   })
 
-  
   it('tag-load', function (fin) {
     var s0 = Seneca().test(fin).use('../').use('../').use('../$a').use('../$b')
     fin()
