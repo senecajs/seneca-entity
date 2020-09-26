@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2017 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 var Common = require('./lib/common')
@@ -39,6 +39,8 @@ module.exports.preload = function entity(context) {
 
   var opts = seneca.util.deepextend({}, default_opts, context.options)
 
+  var store = Store()
+  
   // Removes dependency on seneca-basic
   // TODO: deprecate this
   seneca.add('role:basic,cmd:generate_id', Common.generate_id)
@@ -75,10 +77,10 @@ module.exports.preload = function entity(context) {
     seneca.decorate('entity', api_make)
   }
 
-  // Handle old versions of seneca were the
+  // Handle old versions of seneca where the
   // store init was already included by default.
   if (!seneca.store || !seneca.store.init) {
-    seneca.decorate('store', Store())
+    seneca.decorate('store', store)
   }
 
   // Ensures legacy versions of seneca that load mem-store do not
@@ -106,6 +108,8 @@ module.exports.preload = function entity(context) {
   return {
     name: 'entity',
     exports: {
+      store: store,
+      init: store.init,
       generate_id: opts.generate_id,
     },
   }
