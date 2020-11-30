@@ -91,15 +91,15 @@ module.exports = function make_test(si) {
                                           Assert.equal(err, null)
                                           Assert.equal(2, list.length)
 
-                                          fooent.list$({ b: 1 }, function (
-                                            err,
-                                            list
-                                          ) {
-                                            Assert.equal(err, null)
-                                            Assert.equal(1, list.length)
+                                          fooent.list$(
+                                            { b: 1 },
+                                            function (err, list) {
+                                              Assert.equal(err, null)
+                                              Assert.equal(1, list.length)
 
-                                            si.close(fin)
-                                          })
+                                              si.close(fin)
+                                            }
+                                          )
                                         })
                                       })
                                     })

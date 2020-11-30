@@ -169,16 +169,17 @@ describe('entity', function () {
           })
         }
       )
-      .act('role:entity,cmd:load,base:b0,name:n0', { id: 'e0' }, function (
-        err,
-        out
-      ) {
-        expect(out.data$()).equals({
-          entity$: { zone: undefined, base: 'b0', name: 'n0' },
-          id: 'e0',
-          f0: 1,
-        })
-      })
+      .act(
+        'role:entity,cmd:load,base:b0,name:n0',
+        { id: 'e0' },
+        function (err, out) {
+          expect(out.data$()).equals({
+            entity$: { zone: undefined, base: 'b0', name: 'n0' },
+            id: 'e0',
+            f0: 1,
+          })
+        }
+      )
       .act(
         'role:entity,cmd:load,base:b0,name:n0',
         { q: { id: 'e0' } },
@@ -190,16 +191,17 @@ describe('entity', function () {
           })
         }
       )
-      .act('role:entity,cmd:list,base:b0,name:n0', { id: 'e0' }, function (
-        err,
-        out
-      ) {
-        expect(out[0].data$()).equals({
-          entity$: { zone: undefined, base: 'b0', name: 'n0' },
-          id: 'e0',
-          f0: 1,
-        })
-      })
+      .act(
+        'role:entity,cmd:list,base:b0,name:n0',
+        { id: 'e0' },
+        function (err, out) {
+          expect(out[0].data$()).equals({
+            entity$: { zone: undefined, base: 'b0', name: 'n0' },
+            id: 'e0',
+            f0: 1,
+          })
+        }
+      )
 
       // q wins over id
       .act(
@@ -214,12 +216,13 @@ describe('entity', function () {
         }
       )
       .act('role:entity,cmd:remove,base:b0,name:n0', { id: 'e0' })
-      .act('role:entity,cmd:load,base:b0,name:n0', { id: 'e0' }, function (
-        err,
-        out
-      ) {
-        expect(out).not.exist()
-      })
+      .act(
+        'role:entity,cmd:load,base:b0,name:n0',
+        { id: 'e0' },
+        function (err, out) {
+          expect(out).not.exist()
+        }
+      )
       .act(
         'role:entity,cmd:list,base:b0,name:n0',
         { q: { id: 'e0' } },
@@ -499,7 +502,7 @@ describe('entity', function () {
   })
 
   it('mem-store-import-export', function (fin) {
-    let si = Seneca({legacy:false}).use('promisify').use('..').test()
+    let si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
     // NOTE: zone is NOT saved! by design!
     var x1, x2, x3
@@ -541,48 +544,50 @@ describe('entity', function () {
 
             var si2 = SenecaInstance()
 
-            si2.act('role:mem-store,cmd:import', { json: out.json }, function (
-              err
-            ) {
-              assert.equal(err, null)
-
-              si2.act('role:mem-store,cmd:dump', function (err, o) {
+            si2.act(
+              'role:mem-store,cmd:import',
+              { json: out.json },
+              function (err) {
                 assert.equal(err, null)
-                assert.ok(
-                  Gex(
-                    '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
-                  ).on(JSON.stringify(o))
-                )
 
-                si2.make('a').load$({ x: 1 }, function (err, nx1) {
+                si2.act('role:mem-store,cmd:dump', function (err, o) {
                   assert.equal(err, null)
-                  assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
+                  assert.ok(
+                    Gex(
+                      '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
+                    ).on(JSON.stringify(o))
+                  )
 
                   si2.make('a').load$({ x: 1 }, function (err, nx1) {
                     assert.equal(err, null)
                     assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
 
-                    si2.make('b', 'a').load$({ x: 2 }, function (err, nx2) {
+                    si2.make('a').load$({ x: 1 }, function (err, nx1) {
                       assert.equal(err, null)
-                      assert.equal('$-/b/a;id=' + x2.id + ';{x:2}', '' + nx2)
+                      assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
 
-                      si2
-                        .make('c', 'b', 'a')
-                        .load$({ x: 3 }, function (err, nx3) {
-                          assert.equal(err, null)
-                          assert.equal(
-                            '$c/b/a;id=' + x3.id + ';{x:3}',
-                            '' + nx3
-                          )
-                          si2.close()
+                      si2.make('b', 'a').load$({ x: 2 }, function (err, nx2) {
+                        assert.equal(err, null)
+                        assert.equal('$-/b/a;id=' + x2.id + ';{x:2}', '' + nx2)
 
-                          next()
-                        })
+                        si2
+                          .make('c', 'b', 'a')
+                          .load$({ x: 3 }, function (err, nx3) {
+                            assert.equal(err, null)
+                            assert.equal(
+                              '$c/b/a;id=' + x3.id + ';{x:3}',
+                              '' + nx3
+                            )
+                            si2.close()
+
+                            next()
+                          })
+                      })
                     })
                   })
                 })
-              })
-            })
+              }
+            )
           })
         },
       ],
@@ -904,18 +909,16 @@ describe('entity', function () {
     fin()
   })
 
-
-  lab.it('direct', async ()=>{
-    var si = Seneca({ legacy: false })
-        .test()
-        .use('promisify')
-        .use(Entity)
+  lab.it('direct', async () => {
+    var si = Seneca({ legacy: false }).test().use('promisify').use(Entity)
 
     let out = await si.post('sys:entity,cmd:save,name:foo,ent:{id$:a,x:1}')
-    expect(out).equals({id:'a',x:1,entity$:'-/-/foo'})
+    expect(out).equals({ id: 'a', x: 1, entity$: '-/-/foo' })
     expect(out.toString()).equals('$-/-/foo;id=a;{x:1}')
-    expect(''+out).equals('$-/-/foo;id=a;{x:1}')
-    expect(Util.inspect(out)).equals('Entity { \'entity$\': \'-/-/foo\', x: 1, id: \'a\' }')
+    expect('' + out).equals('$-/-/foo;id=a;{x:1}')
+    expect(Util.inspect(out)).equals(
+      "Entity { 'entity$': '-/-/foo', x: 1, id: 'a' }"
+    )
   })
 })
 

@@ -93,14 +93,12 @@ module.exports.preload = function entity(context) {
     seneca.root.use(require('seneca-mem-store'))
   }
 
-
   // Prepare transition from role: to sys:
   this.translate('sys:entity,cmd:load', 'role:entity')
     .translate('sys:entity,cmd:save', 'role:entity')
     .translate('sys:entity,cmd:list', 'role:entity')
     .translate('sys:entity,cmd:remove', 'role:entity')
 
-  
   if (opts.client) {
     this.translate('role:entity,cmd:load', 'role:remote-entity')
       .translate('role:entity,cmd:save', 'role:remote-entity')
@@ -111,7 +109,6 @@ module.exports.preload = function entity(context) {
       .translate('sys:entity,cmd:save', 'sys:remote-entity')
       .translate('sys:entity,cmd:list', 'sys:remote-entity')
       .translate('sys:entity,cmd:remove', 'sys:remote-entity')
-
   } else if (opts.server) {
     this.translate('role:remote-entity,cmd:load', 'role:entity')
       .translate('role:remote-entity,cmd:save', 'role:entity')
