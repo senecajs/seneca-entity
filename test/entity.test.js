@@ -4,7 +4,7 @@ var Util = require('util')
 var Assert = require('assert')
 
 var Async = require('async')
-var Gex = require('gex')
+var { Gex } = require('gex')
 var Lab = require('@hapi/lab')
 var Code = require('@hapi/code')
 var Seneca = require('seneca')
@@ -66,7 +66,6 @@ describe('entity', function () {
     var si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
     var fooent = si.entity('foo')
-    //console.dir(fooent)
 
     assert.ok(fooent.is$('foo'))
     assert.ok(!fooent.is$('bar'))
@@ -500,6 +499,8 @@ describe('entity', function () {
   })
 
   it('mem-store-import-export', function (fin) {
+    let si = Seneca({legacy:false}).use('promisify').use('..').test()
+
     // NOTE: zone is NOT saved! by design!
     var x1, x2, x3
 
@@ -880,7 +881,6 @@ describe('entity', function () {
     var fooent = si.make$('foo')
     fooent.log$('foo')
 
-    //console.log(tmp)
     expect(tmp[0]).contains('make')
     expect(tmp[1]).contains('foo')
 
@@ -902,6 +902,20 @@ describe('entity', function () {
     })
 
     fin()
+  })
+
+
+  lab.it('direct', async ()=>{
+    var si = Seneca({ legacy: false })
+        .test()
+        .use('promisify')
+        .use(Entity)
+
+    let out = await si.post('sys:entity,cmd:save,name:foo,ent:{id$:a,x:1}')
+    expect(out).equals({id:'a',x:1,entity$:'-/-/foo'})
+    expect(out.toString()).equals('$-/-/foo;id=a;{x:1}')
+    expect(''+out).equals('$-/-/foo;id=a;{x:1}')
+    expect(Util.inspect(out)).equals('Entity { \'entity$\': \'-/-/foo\', x: 1, id: \'a\' }')
   })
 })
 
