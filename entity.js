@@ -93,6 +93,9 @@ module.exports.preload = function entity(context) {
     seneca.root.use(require('seneca-mem-store'))
   }
 
+  // FIX: does not work! need to invert this so
+  // older stuff hits role then sys
+
   // Prepare transition from role: to sys:
   this.translate('sys:entity,cmd:load', 'role:entity')
     .translate('sys:entity,cmd:save', 'role:entity')

@@ -6,7 +6,7 @@
     "entity",
     "plugin"
   ],
-  "version": "11.0.0",
+  "version": "12.0.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -46,7 +46,7 @@
     "eraro": "^2.1.0",
     "jsonic": "^1.0.1",
     "nid": "^1.3.3",
-    "seneca-mem-store": "^4.0.1"
+    "seneca-mem-store": "^5.0.0"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.2",
