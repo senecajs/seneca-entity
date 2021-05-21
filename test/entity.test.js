@@ -867,6 +867,24 @@ describe('entity', function () {
     expect(foo0.b.d.e).equal([{ f: 1 }, { f: 2 }])
     expect(foo1.b.d.e).equal([{ f: 1 }, { f: 22 }, { f: 3 }])
 
+
+    var b0 = si0.make('bar').data$({x:1,custom$:{n:2}})
+    expect(b0.custom$).equal({n:2})
+    expect(b0.data$()).equal({
+      x:1,
+      'entity$': { zone: undefined, base: undefined, name: 'bar' },
+      custom$:{n:2}
+    })
+
+    var b1 = b0.clone$()
+    expect(b1.custom$).equal({n:2})
+    expect(b1.data$()).equal({
+      x:1,
+      'entity$': { zone: undefined, base: undefined, name: 'bar' },
+      custom$:{n:2}
+    })
+    
+    
     fin()
   })
 
