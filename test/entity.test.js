@@ -936,6 +936,43 @@ describe('entity', function () {
       "Entity { 'entity$': '-/-/foo', x: 1, id: 'a' }"
     )
   })
+
+
+  it('custom-directive', function (fin) {
+    let si0 = Seneca().test(fin).use(Entity)
+    let tmp = {saves:{a:[],b:[]}}
+
+    si0.ready(function() {
+
+      // Define a prior operation driven by the entity custom$ directive
+      si0.add('role:entity,cmd:save', function save_what(msg, done) {
+        let what = msg.ent.custom$ && msg.ent.custom$.what || 'a'
+        tmp.saves[what].push(msg.ent.x)
+        return this.prior(msg, done)
+      })
+
+      // The save_what entity prior is not triggered as no ent.custom$
+      si0.entity('foo').data$({x:1}).save$(function(err, foo1) {
+        if(err) return done(err)
+
+        // The save_what entity prior *is* triggered as ent.custom$ defined
+        this.entity('foo').data$({x:2,custom$:{what:'b'}})
+          .save$(function(err, foo2) {
+            if(err) return done(err)
+
+            // The entity custom$ directive does not survive beyond a
+            // single operation.
+            this.entity('foo').data$({x:3}).save$(function(err, foo3) {
+              if(err) return done(err)
+
+              expect(tmp).equals({ saves: { a: [ 1, 3 ], b: [ 2 ] } })
+              return fin()
+            })
+          })
+      })
+    })
+  })
+
 })
 
 function make_it(lab) {
