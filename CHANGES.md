@@ -1,3 +1,9 @@
+## 15.0.0 2021-09-28
+
+* Make special log$ optional to improve performance.
+* Update deps.
+
+
 ## 14.0.0 2021-05-23
 
 * Ensure custom$ value is preserved and accessible to stores.

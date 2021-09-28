@@ -56,12 +56,12 @@ module.exports.preload = function entity(context) {
 
   // Template entity that makes all others.
   seneca.private$.entity = seneca.private$.entity || MakeEntity({}, sd, opts)
-  
+
   // Expose the Entity object so third-parties can do interesting things with it
   seneca.private$.exports.Entity =
     seneca.private$.exports.Entity || MakeEntity.Entity
 
-  if(opts.log.active) {
+  if (opts.log.active) {
     seneca.private$.exports.Entity.prototype.log$ = function () {
       // Use this, as make$ will have changed seneca ref.
       var seneca = this.private$.get_instance()
@@ -69,7 +69,6 @@ module.exports.preload = function entity(context) {
     }
   }
 
-  
   // all optional
   function api_make() {
     // var self = this
@@ -79,7 +78,6 @@ module.exports.preload = function entity(context) {
     return seneca.private$.entity.make$(this, ...arguments)
   }
 
-  
   if (!seneca.make$) {
     seneca.decorate('make$', api_make)
   }
