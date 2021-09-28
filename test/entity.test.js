@@ -897,7 +897,7 @@ describe('entity', function () {
         },
       },
     })
-      .use(Entity)
+        .use(Entity, {log:{active:true}})
       .test('print')
     var fooent = si.make$('foo')
     fooent.log$('foo')

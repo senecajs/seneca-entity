@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2020 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2010-2021 Richard Rodger and other contributors, MIT License */
 'use strict'
 
 var Common = require('./lib/common')
@@ -14,8 +14,12 @@ var default_opts = {
   // Control stringification of entities
   jsonic: {
     depth: 7,
-    maxitems: 33,
-    maxchars: 1111,
+    maxitems: 11,
+    maxchars: 111,
+  },
+
+  log: {
+    active: false,
   },
 }
 
@@ -52,19 +56,30 @@ module.exports.preload = function entity(context) {
 
   // Template entity that makes all others.
   seneca.private$.entity = seneca.private$.entity || MakeEntity({}, sd, opts)
-
+  
   // Expose the Entity object so third-parties can do interesting things with it
   seneca.private$.exports.Entity =
     seneca.private$.exports.Entity || MakeEntity.Entity
 
-  // all optional
-  function api_make() {
-    var self = this
-    var args = Common.arrayify(arguments)
-    args.unshift(self)
-    return seneca.private$.entity.make$.apply(seneca.private$.entity, args)
+  if(opts.log.active) {
+    seneca.private$.exports.Entity.prototype.log$ = function () {
+      // Use this, as make$ will have changed seneca ref.
+      var seneca = this.private$.get_instance()
+      seneca.log.apply(seneca, arguments)
+    }
   }
 
+  
+  // all optional
+  function api_make() {
+    // var self = this
+    // var args = Common.arrayify(arguments)
+    // args.unshift(self)
+    // return seneca.private$.entity.make$.apply(seneca.private$.entity, args)
+    return seneca.private$.entity.make$(this, ...arguments)
+  }
+
+  
   if (!seneca.make$) {
     seneca.decorate('make$', api_make)
   }
