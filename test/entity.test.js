@@ -976,6 +976,48 @@ describe('entity', function () {
         })
     })
   })
+
+  it('drop-callback-meta', function (fin) {
+    let s0 = Seneca().test(fin).use(Entity)
+    s0.make$('bar').data$({ y: 0 }).save$()
+
+    s0.make$('foo')
+      .data$({ x: 0 })
+      .save$(function (err, foo0, meta) {
+        expect(err).not.exists()
+        expect(foo0.x).equal(0)
+        expect(meta.pattern).equal('cmd:save,role:entity')
+        expect(this.id).equal(s0.id)
+
+        let s1 = Seneca()
+          .test(fin)
+          .use(Entity, { meta: { provide: true } })
+        s1.make$('foo')
+          .data$({ x: 1 })
+          .save$(function (err, foo1, meta) {
+            expect(err).not.exists()
+            expect(foo1.x).equal(1)
+            expect(meta.pattern).equal('cmd:save,role:entity')
+            expect(this.id).equal(s1.id)
+
+            let s2 = Seneca()
+              .test(fin)
+              .use(Entity, { meta: { provide: false } })
+            s2.make$('foo')
+              .data$({ x: 2 })
+              .save$(function (err, foo2, meta) {
+                expect(err).not.exists()
+                expect(foo2.x).equal(2)
+                expect(meta).not.exists()
+                expect(this.id).equal(s2.id)
+
+                s2.make$('bar').data$({ y: 2 }).save$()
+
+                fin()
+              })
+          })
+      })
+  })
 })
 
 function make_it(lab) {

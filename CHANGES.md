@@ -1,3 +1,8 @@
+## 16.0.0 2020-10-12
+
+* Option `meta.provide` to control delivery of meta argument to callbacks.
+
+
 ## 15.0.0 2021-09-28
 
 * Make special log$ optional to improve performance.

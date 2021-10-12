@@ -21,6 +21,11 @@ var default_opts = {
   log: {
     active: false,
   },
+
+  meta: {
+    // Provide action meta object as third argument to callbacks.
+    provide: true,
+  },
 }
 
 module.exports = entity
