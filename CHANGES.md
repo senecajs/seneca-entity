@@ -1,4 +1,4 @@
-## 16.0.0 2020-10-12
+## 16.0.2 2020-10-12
 
 * Option `meta.provide` to control delivery of meta argument to callbacks.
 
