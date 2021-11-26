@@ -50,14 +50,14 @@
     "seneca-mem-store": "^6.2.0"
   },
   "devDependencies": {
-    "@hapi/code": "^8.0.3",
+    "@hapi/code": "^8.0.5",
     "@hapi/joi": "^17.1.1",
-    "@hapi/lab": "^24.3.2",
-    "async": "^3.2.1",
+    "@hapi/lab": "^24.4.0",
+    "async": "^3.2.2",
     "coveralls": "^3.1.1",
     "gex": "^3.1.0",
-    "prettier": "^2.4.1",
-    "seneca": "^3.24.0",
+    "prettier": "^2.5.0",
+    "seneca": "^3.25.0",
     "seneca-plugin-validator": "^0.6.1",
     "seneca-promisify": "^2.0.0"
   }
