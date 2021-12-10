@@ -14,6 +14,8 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/senecajs/seneca-entity/badge.svg?targetFile=package.json)](https://snyk.io/test/github/senecajs/seneca-entity?targetFile=package.json)
 [![Gitter][gitter-badge]][gitter-url]
 
+| ![Voxgig](https://www.voxgig.com/res/img/vgt01r.png) | This open source module is sponsored and supported by [Voxgig](https://www.voxgig.com). |
+|---|---|
 
 The best place to start is
 the [Data Entities tutorial](http://senecajs.org/docs/tutorials/understanding-data-entities.html)
