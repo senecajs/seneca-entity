@@ -868,7 +868,7 @@ describe('entity', function () {
     expect(foo1.b.d.e).equal([{ f: 1 }, { f: 22 }, { f: 3 }])
 
     var b0 = si0.make('bar').data$({ x: 1, custom$: { n: 2 } })
-    expect({...b0.custom$}).equal({ n: 2 })
+    expect({ ...b0.custom$ }).equal({ n: 2 })
     expect(b0.data$()).equal({
       x: 1,
       entity$: { zone: undefined, base: undefined, name: 'bar' },
@@ -876,7 +876,7 @@ describe('entity', function () {
     })
 
     var b1 = b0.clone$()
-    expect({...b1.custom$}).equal({ n: 2 })
+    expect({ ...b1.custom$ }).equal({ n: 2 })
     expect(b1.data$()).equal({
       x: 1,
       entity$: { zone: undefined, base: undefined, name: 'bar' },
@@ -937,67 +937,62 @@ describe('entity', function () {
     )
   })
 
-
-
   it('custom-basic', function (fin) {
     let si0 = Seneca().test(fin).use(Entity)
-    let foo0 = si0.make$('foo').data$({a:1,b:2})
+    let foo0 = si0.make$('foo').data$({ a: 1, b: 2 })
 
     // No custom$ properties yet.
     expect(foo0.data$()).equals({
-      a:1,
-      b:2,
-      entity$:{zone: undefined, base: undefined, name: 'foo'},
+      a: 1,
+      b: 2,
+      entity$: { zone: undefined, base: undefined, name: 'foo' },
     })
     expect(foo0.data$(false)).equals({
-      a:1,
-      b:2,
+      a: 1,
+      b: 2,
     })
-    expect({...foo0.custom$}).equals({})
-    
+    expect({ ...foo0.custom$ }).equals({})
 
-    foo0.custom$.x=99
+    foo0.custom$.x = 99
     expect(foo0.custom$.x).equals(99)
     expect(foo0.data$()).equals({
-      a:1,
-      b:2,
-      entity$:{zone: undefined, base: undefined, name: 'foo'},
-      custom$:{x:99}
+      a: 1,
+      b: 2,
+      entity$: { zone: undefined, base: undefined, name: 'foo' },
+      custom$: { x: 99 },
     })
     expect(foo0.data$(false)).equals({
-      a:1,
-      b:2,
+      a: 1,
+      b: 2,
     })
     expect(JSON.stringify(foo0)).equals('{"entity$":"-/-/foo","a":1,"b":2}')
     expect(Object.keys(foo0)).equals(['entity$', 'a', 'b'])
 
-
-    let y = {z:88}
-    foo0.custom$({y}) // NOTE: clones y
+    let y = { z: 88 }
+    foo0.custom$({ y }) // NOTE: clones y
     expect(foo0.custom$.x).equals(99)
-    expect(foo0.custom$.y).equals({z:88})
+    expect(foo0.custom$.y).equals({ z: 88 })
 
     y.z = 77
     expect(foo0.custom$.x).equals(99)
-    expect(foo0.custom$.y).equals({z:88})
-    
+    expect(foo0.custom$.y).equals({ z: 88 })
+
     expect(foo0.data$()).equals({
-      a:1,
-      b:2,
-      entity$:{zone: undefined, base: undefined, name: 'foo'},
-      custom$:{x:99,y:{z:88}}
+      a: 1,
+      b: 2,
+      entity$: { zone: undefined, base: undefined, name: 'foo' },
+      custom$: { x: 99, y: { z: 88 } },
     })
     expect(foo0.data$(false)).equals({
-      a:1,
-      b:2,
+      a: 1,
+      b: 2,
     })
     expect(JSON.stringify(foo0)).equals('{"entity$":"-/-/foo","a":1,"b":2}')
     expect(Object.keys(foo0)).equals(['entity$', 'a', 'b'])
-    
+
     fin()
   })
 
-  
   it('custom-directive', function (fin) {
     let si0 = Seneca().test(fin).use(Entity)
     let tmp = { saves: { a: [], b: [] } }
