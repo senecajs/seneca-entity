@@ -36,3 +36,8 @@ docs/annotated
 docs/coverage.html
 
 *~
+package-lock.json
+yarn.log
+test/coverage.html
+
+
