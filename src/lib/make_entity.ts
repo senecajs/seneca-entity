@@ -1,10 +1,8 @@
 /* Copyright (c) 2012-2022 Richard Rodger and other contributors, MIT License */
 
-
 import Util from 'util'
 const Eraro = require('eraro')
 const Jsonic = require('jsonic')
-
 
 const error = Eraro({
   package: 'seneca',
@@ -13,7 +11,7 @@ const error = Eraro({
 })
 
 const toString_map: any = {
-  '': make_toString()
+  '': make_toString(),
 }
 
 function entargs(this: any, ent: Entity, args: any) {
@@ -33,20 +31,16 @@ function entargs(this: any, ent: Entity, args: any) {
   return args
 }
 
-
 class Entity {
-
   entity$: string
   private$: any
 
   #private$: any = {}
 
-
   constructor(canon: any, seneca: any) {
-
     const private$: any = this.#private$
 
-    private$.get_instance = function() {
+    private$.get_instance = function () {
       return seneca
     }
 
@@ -60,7 +54,6 @@ class Entity {
 
     this.private$ = this.#private$
   }
-
 
   // Properties without '$' suffix are persisted
   // id property is special: created if not present when saving
@@ -84,7 +77,7 @@ class Entity {
     // Set seneca instance, if provided as first arg.
     if (first && first.seneca) {
       const seneca = first
-      self.#private$.get_instance = function() {
+      self.#private$.get_instance = function () {
         return seneca
       }
       first = args[1]
@@ -155,8 +148,7 @@ class Entity {
       entity.id$ = props.id$
     }
 
-
-    (self as any).log$ &&
+    ;(self as any).log$ &&
       (self as any).log$('make', entity.canon$({ string: true }), entity)
 
     return entity
@@ -184,19 +176,21 @@ class Entity {
     const async = is_async(si, done)
     const entmsg = self.#private$.entargs(self, { cmd: 'save', q: q })
 
-    let done$ = null == done ? undefined :
-      (this as any).done$ ? (this as any).done$(done) : done
+    let done$ =
+      null == done
+        ? undefined
+        : (this as any).done$
+        ? (this as any).done$(done)
+        : done
     let saved = async ? si.post(entmsg) : (si.act(entmsg, done$), self)
     return saved
   }
-
 
   /** Callback for Entity.save$.
    *  @callback callback~save$
    *  @param {error} error - Error object, if any.
    *  @param {Entity} entity - Saved Entity object containing updated data fields (in particular, `id`, if auto-generated).
    */
-
 
   // provide native database driver
   native$(done?: any) {
@@ -206,11 +200,14 @@ class Entity {
     const async = is_async(si, done)
     const entmsg = self.#private$.entargs(self, { cmd: 'native' })
 
-    let done$ = null == done ? undefined :
-      (this as any).done$ ? (this as any).done$(done) : done
+    let done$ =
+      null == done
+        ? undefined
+        : (this as any).done$
+        ? (this as any).done$(done)
+        : done
     return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
-
 
   // load one
   // TODO: qin can be an entity, in which case, grab the id and reload
@@ -238,10 +235,18 @@ class Entity {
       return async ? null : (done && done.call(si), self)
     }
 
-    const entmsg = self.#private$.entargs(self, { qent: qent, q: q, cmd: 'load' })
+    const entmsg = self.#private$.entargs(self, {
+      qent: qent,
+      q: q,
+      cmd: 'load',
+    })
 
-    let done$ = null == done ? undefined :
-      (this as any).done$ ? (this as any).done$(done) : done
+    let done$ =
+      null == done
+        ? undefined
+        : (this as any).done$
+        ? (this as any).done$(done)
+        : done
     return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
 
@@ -274,13 +279,20 @@ class Entity {
     q = normalize_query(q, self)
 
     const async = is_async(si, done)
-    const entmsg = self.#private$.entargs(self, { qent: qent, q: q, cmd: 'list' })
+    const entmsg = self.#private$.entargs(self, {
+      qent: qent,
+      q: q,
+      cmd: 'list',
+    })
 
-    let done$ = null == done ? undefined :
-      (this as any).done$ ? (this as any).done$(done) : done
+    let done$ =
+      null == done
+        ? undefined
+        : (this as any).done$
+        ? (this as any).done$(done)
+        : done
     return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
-
 
   /** Callback for Entity.list$.
    *  @callback callback~list$
@@ -310,14 +322,24 @@ class Entity {
       return async ? null : (done && done.call(si), self)
     }
 
-    const entmsg = self.#private$.entargs(self, { qent: self, q: q, cmd: 'remove' })
+    const entmsg = self.#private$.entargs(self, {
+      qent: self,
+      q: q,
+      cmd: 'remove',
+    })
 
-    let done$ = null == done ? undefined :
-      (this as any).done$ ? (this as any).done$(done) : done
+    let done$ =
+      null == done
+        ? undefined
+        : (this as any).done$
+        ? (this as any).done$(done)
+        : done
     return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
 
-  delete$(query: any, done?: any) { return this.remove$(query, done) }
+  delete$(query: any, done?: any) {
+    return this.remove$(query, done)
+  }
 
   /** Callback for Entity.remove$.
    *  @callback callback~remove$
@@ -340,7 +362,6 @@ class Entity {
     return fields
   }
 
-
   close$(done?: any) {
     const self = this
     const si = self.#private$.get_instance()
@@ -348,13 +369,16 @@ class Entity {
     const async = is_async(si, done)
     const entmsg = self.#private$.entargs(self, { cmd: 'close' })
 
-      ; (self as any).log$ && (self as any).log$('close')
+    ;(self as any).log$ && (self as any).log$('close')
 
-    let done$ = null == done ? undefined :
-      (this as any).done$ ? (this as any).done$(done) : done
+    let done$ =
+      null == done
+        ? undefined
+        : (this as any).done$
+        ? (this as any).done$(done)
+        : done
     return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
-
 
   is$(canonspec: any) {
     const self = this
@@ -369,7 +393,6 @@ class Entity {
 
     return Util.inspect(self.canon$({ object: true })) === Util.inspect(canon)
   }
-
 
   canon$(opt?: any) {
     const self = this
@@ -406,22 +429,21 @@ class Entity {
 
     return null == opt || opt.string || opt.string$
       ? [
-        (opt && opt.string$ ? '$' : '') +
-        (null == canon.zone ? '-' : canon.zone),
-        null == canon.base ? '-' : canon.base,
-        null == canon.name ? '-' : canon.name,
-      ].join('/') // TODO: make joiner an option
+          (opt && opt.string$ ? '$' : '') +
+            (null == canon.zone ? '-' : canon.zone),
+          null == canon.base ? '-' : canon.base,
+          null == canon.name ? '-' : canon.name,
+        ].join('/') // TODO: make joiner an option
       : opt.array
-        ? [canon.zone, canon.base, canon.name]
-        : opt.array$
-          ? [canon.zone, canon.base, canon.name]
-          : opt.object
-            ? { zone: canon.zone, base: canon.base, name: canon.name }
-            : opt.object$
-              ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
-              : [canon.zone, canon.base, canon.name]
+      ? [canon.zone, canon.base, canon.name]
+      : opt.array$
+      ? [canon.zone, canon.base, canon.name]
+      : opt.object
+      ? { zone: canon.zone, base: canon.base, name: canon.name }
+      : opt.object$
+      ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
+      : [canon.zone, canon.base, canon.name]
   }
-
 
   // data = object, or true|undef = include $, false = exclude $
   data$(data?: any, canonkind?: any) {
@@ -507,8 +529,6 @@ class Entity {
   }
 }
 
-
-
 function normalize_query(qin: any, ent: any) {
   let q = qin
 
@@ -591,17 +611,21 @@ function handle_options(entopts: any) {
 
   if (false === entopts.meta.provide) {
     // Drop meta argument from callback
-    (Entity.prototype as any).done$ = (done: any) => {
+    ;(Entity.prototype as any).done$ = (done: any) => {
       return null == done
         ? undefined
-        : function(this: any, err: any, out: any) {
-          done.call(this, err, out)
-        }
+        : function (this: any, err: any, out: any) {
+            done.call(this, err, out)
+          }
     }
   }
 }
 
-function make_toString(canon_str?: string, hidden_fields_spec?: any, opts?: any) {
+function make_toString(
+  canon_str?: string,
+  hidden_fields_spec?: any,
+  opts?: any
+) {
   opts = opts || { jsonic: {} }
 
   let hidden_fields: any[] = []
@@ -616,7 +640,7 @@ function make_toString(canon_str?: string, hidden_fields_spec?: any, opts?: any)
 
   hidden_fields.push('id')
 
-  return function(this: any) {
+  return function (this: any) {
     return [
       '$',
       canon_str || this.canon$({ string: true }),
@@ -642,9 +666,7 @@ function is_async(seneca: any, done: any) {
   return promisify_loaded && !has_callback
 }
 
-
 type CustomProps = { custom$: (props: any) => any }
-
 
 function MakeEntity(canon: any, seneca: any, opts?: any): Entity & CustomProps {
   opts && handle_options(opts)
@@ -655,7 +677,7 @@ function MakeEntity(canon: any, seneca: any, opts?: any): Entity & CustomProps {
 
   let toString = (toString_map[canon_str] || toString_map['']).bind(ent)
 
-  let custom$ = function(this: any, props: any) {
+  let custom$ = function (this: any, props: any) {
     if (
       null != props &&
       ('object' === typeof props || 'function' === typeof props)
@@ -679,13 +701,9 @@ function MakeEntity(canon: any, seneca: any, opts?: any): Entity & CustomProps {
 
   delete ent.private$
 
-  return (ent as Entity & CustomProps)
+  return ent as Entity & CustomProps
 }
-
 
 MakeEntity.parsecanon = parsecanon
 
-export {
-  MakeEntity,
-  Entity,
-}
+export { MakeEntity, Entity }

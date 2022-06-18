@@ -1,6 +1,5 @@
 /* Copyright (c) 2011-2022 Richard Rodger and other contributors, MIT License. */
 
-
 import Nid from 'nid'
 
 // function arrayify() {
@@ -29,7 +28,4 @@ function generate_id(msg: any, reply: any) {
   return reply ? reply(actnid()) : actnid()
 }
 
-
-export {
-  generate_id,
-}
+export { generate_id }

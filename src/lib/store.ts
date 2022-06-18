@@ -1,6 +1,5 @@
 /* Copyright (c) 2012-2020 Richard Rodger and other contributors, MIT License */
 
-
 const allcmds = ['save', 'load', 'list', 'remove', 'close', 'native']
 
 function Store() {
@@ -17,7 +16,7 @@ function Store() {
 
     // opts.map = { canon: [cmds] }
     // canon is in string format zone/base/name, with empty or - indicating undefined
-    init: function(instance: any, opts: any, store: any, cb: any) {
+    init: function (instance: any, opts: any, store: any, cb: any) {
       const entspecs = []
 
       if (opts.map) {
@@ -74,7 +73,7 @@ function Store() {
         if (void 0 !== base) entargs.base = base
         if (void 0 !== zone) entargs.zone = zone
 
-        entspec.cmds.forEach(function(cmd: string) {
+        entspec.cmds.forEach(function (cmd: string) {
           const args = Object.assign({ role: 'entity', cmd: cmd }, entargs)
           const orig_cmdfunc = store[cmd]
           let cmdfunc = orig_cmdfunc
@@ -101,11 +100,11 @@ function Store() {
           } else if (cmd === 'close') {
             instance.add(
               'role:seneca,cmd:close',
-              function(this: any, close_args: any, done: any) {
+              function (this: any, close_args: any, done: any) {
                 const closer = this
 
                 if (!store.closed$) {
-                  cmdfunc.call(closer, close_args, function(err: any) {
+                  cmdfunc.call(closer, close_args, function (err: any) {
                     if (err) closer.log.error('close-error', close_args, err)
 
                     store.closed$ = true
@@ -114,7 +113,8 @@ function Store() {
                 } else {
                   return closer.prior(close_args, done)
                 }
-              })
+              }
+            )
           }
         })
       }
@@ -134,11 +134,10 @@ function Store() {
   return store
 }
 
-
 const Intern: any = {
   // Ensure entity objects are instantiated
-  reify_entity_wrap: function(cmdfunc: any) {
-    const outfunc = function(this: any, msg: any, reply: any, meta: any) {
+  reify_entity_wrap: function (cmdfunc: any) {
+    const outfunc = function (this: any, msg: any, reply: any, meta: any) {
       if ('save' !== msg.cmd) {
         if (null == msg.q) {
           msg.q = {}
@@ -177,8 +176,8 @@ const Intern: any = {
   },
 
   cmd_wrap: {
-    list: function(cmdfunc: any) {
-      const outfunc = function(this: any, msg: any, done: any) {
+    list: function (cmdfunc: any) {
+      const outfunc = function (this: any, msg: any, done: any) {
         if ('string' === typeof msg.sort) {
           let sort: any = {}
           if (msg.sort[0] === '-') {
@@ -197,8 +196,4 @@ const Intern: any = {
   },
 }
 
-
-export {
-  Intern,
-  Store,
-}
+export { Intern, Store }
