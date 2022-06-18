@@ -49,7 +49,7 @@ module.exports.preload = function entity(context) {
   var opts = seneca.util.deepextend({}, default_opts, context.options)
 
   var store = Store()
-
+  
   // Removes dependency on seneca-basic
   // TODO: deprecate this
   seneca.add('role:basic,cmd:generate_id', Common.generate_id)
