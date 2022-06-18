@@ -1,12 +1,15 @@
 {
   "name": "seneca-entity",
+  "main": "dist/entity.js",
+  "version": "16.4.0",
+  "type": "commonjs",
+  "types": "dist/gateway.d.ts",
   "description": "Entity plugin for seneca",
   "keywords": [
     "seneca",
     "entity",
     "plugin"
   ],
-  "version": "16.4.0",
   "license": "MIT",
   "homepage": "http://senecajs.org",
   "author": "Richard Rodger (http://richardrodger.com/)",
@@ -19,12 +22,12 @@
     "Emer Rutherford (https://github.com/eeswr)",
     "Nicolás Fantone (https://github.com/nfantone)"
   ],
-  "main": "entity.js",
   "files": [
     "LICENSE",
     "README.md",
     "lib",
-    "entity.js"
+    "entity.ts",
+    "dist"
   ],
   "repository": {
     "type": "git",

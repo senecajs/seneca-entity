@@ -1,15 +1,16 @@
-/* Copyright (c) 2010-2021 Richard Rodger and other contributors, MIT License */
-'use strict'
+/* Copyright (c) 2010-2022 Richard Rodger and other contributors, MIT License */
 
-var Common = require('./lib/common')
-var MakeEntity = require('./lib/make_entity')
-var Store = require('./lib/store')
 
-var default_opts = {
+import { generate_id } from './lib/common'
+import { MakeEntity, Entity } from './lib/make_entity'
+import { Store } from './lib/store'
+
+
+const default_opts: any = {
   mem_store: true,
   server: false,
   client: false,
-  generate_id: Common.generate_id,
+  generate_id,
 
   // Control stringification of entities
   jsonic: {
@@ -28,8 +29,6 @@ var default_opts = {
   },
 }
 
-module.exports = entity
-
 /** Define the `entity` plugin. */
 function entity() {
   return {
@@ -37,47 +36,52 @@ function entity() {
   }
 }
 
-module.exports.intern = {
-  store: Store.intern,
-  common: Common,
-}
+// const Intern = {
+//   store: StoreIntern,
+//   common: {
+//     arrayify,
+//     generate_id,
+//   }
+// }
+
+
 
 // All functionality should be loaded when defining plugin
-module.exports.preload = function entity(context) {
-  var seneca = this
+function preload(this: any, context: any) {
+  const seneca = this
 
-  var opts = seneca.util.deepextend({}, default_opts, context.options)
+  const opts = seneca.util.deepextend({}, default_opts, context.options)
 
-  var store = Store()
-  
+  const store = Store()
+
   // Removes dependency on seneca-basic
   // TODO: deprecate this
-  seneca.add('role:basic,cmd:generate_id', Common.generate_id)
+  seneca.add('role:basic,cmd:generate_id', generate_id)
 
   seneca.util.parsecanon = seneca.util.parsecanon || MakeEntity.parsecanon
 
   // Create entity delegate.
-  var sd = seneca.delegate()
+  const sd = seneca.delegate()
 
   // Template entity that makes all others.
   seneca.private$.entity = seneca.private$.entity || MakeEntity({}, sd, opts)
 
   // Expose the Entity object so third-parties can do interesting things with it
   seneca.private$.exports.Entity =
-    seneca.private$.exports.Entity || MakeEntity.Entity
+    seneca.private$.exports.Entity || Entity
 
   if (opts.log.active) {
-    seneca.private$.exports.Entity.prototype.log$ = function () {
+    seneca.private$.exports.Entity.prototype.log$ = function(this: any) {
       // Use this, as make$ will have changed seneca ref.
-      var seneca = this.private$.get_instance()
+      const seneca = this.private$.get_instance()
       seneca.log.apply(seneca, arguments)
     }
   }
 
   // all optional
-  function api_make() {
-    // var self = this
-    // var args = Common.arrayify(arguments)
+  function api_make(this: any) {
+    // const self = this
+    // const args = Common.arrayify(arguments)
     // args.unshift(self)
     // return seneca.private$.entity.make$.apply(seneca.private$.entity, args)
     return seneca.private$.entity.make$(this, ...arguments)
@@ -151,3 +155,14 @@ module.exports.preload = function entity(context) {
     },
   }
 }
+
+
+entity.preload = preload
+
+
+export default entity
+
+if ('undefined' !== typeof (module)) {
+  module.exports = entity
+}
+

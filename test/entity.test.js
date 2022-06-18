@@ -4,6 +4,10 @@ const Util = require('util')
 
 const Seneca = require('seneca')
 const Entity = require('../')
+const Store = require('../dist/lib/store')
+const { generate_id } = require('../dist/lib/common')
+
+const StoreIntern = Store.Intern
 
 
 // TODO: update when Seneca.util.Gex is available
@@ -227,7 +231,7 @@ describe('entity', function () {
   
   test('reify_entity_wrap_without_ent', function (fin) {
     const si = SenecaInstance()
-    const w0 = Entity.intern.store.reify_entity_wrap(function (msg, reply) {
+    const w0 = StoreIntern.reify_entity_wrap(function (msg, reply) {
       expect(msg.q).toEqual({})
       expect(msg.qent.entity$).toEqual('z0/b0/n0')
       reply()
@@ -239,7 +243,7 @@ describe('entity', function () {
   
   test('reify_entity_wrap_with_ent', function (fin) {
     const si = SenecaInstance()
-    const w0 = Entity.intern.store.reify_entity_wrap(function (msg, reply) {
+    const w0 = StoreIntern.reify_entity_wrap(function (msg, reply) {
       expect(msg.q).toBeUndefined()
       expect(msg.qent).toBeUndefined()
       expect(msg.ent.entity$).toEqual('z0/b0/n0')
@@ -263,7 +267,7 @@ describe('entity', function () {
   
   test('cmd_wrap_list', function (fin) {
     const si = SenecaInstance()
-    const w0 = Entity.intern.store.cmd_wrap.list(function (msg, reply) {
+    const w0 = StoreIntern.cmd_wrap.list(function (msg, reply) {
       expect(msg.sort).toEqual({ foo: -1 })
       reply()
     })
@@ -273,15 +277,15 @@ describe('entity', function () {
 
 
   test('common', function (fin) {
-    expect(Entity.intern.common.generate_id(3).length).toEqual(3)
-    expect(Entity.intern.common.generate_id({ length: 1 }).length).toEqual(1)
-    expect(Entity.intern.common.generate_id(66).length).toEqual(66)
+    expect(generate_id(3).length).toEqual(3)
+    expect(generate_id({ length: 1 }).length).toEqual(1)
+    expect(generate_id(66).length).toEqual(66)
 
     // default length
-    expect(Entity.intern.common.generate_id().length).toEqual(6)
-    expect(Entity.intern.common.generate_id(0).length).toEqual(6)
+    expect(generate_id().length).toEqual(6)
+    expect(generate_id(0).length).toEqual(6)
 
-    Entity.intern.common.generate_id(null, function (n) {
+    generate_id(null, function (n) {
       expect(n.length).toEqual(6)
       fin()
     })
@@ -969,6 +973,17 @@ describe('entity', function () {
     expect(JSON.stringify(foo0)).toEqual('{"entity$":"-/-/foo","a":1,"b":2}')
     expect(Object.keys(foo0)).toEqual(['entity$', 'a', 'b'])
 
+
+    let foo11 = si0.make$('foo').data$({ a: 11, b: 22 })
+
+    // No custom$ properties yet.
+    expect(foo11.data$()).toEqual({
+      a: 11,
+      b: 22,
+      entity$: { zone: undefined, base: undefined, name: 'foo' },
+    })
+
+    
     fin()
   })
 

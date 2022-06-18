@@ -1,29 +1,28 @@
 /* Copyright (c) 2012-2020 Richard Rodger and other contributors, MIT License */
-'use strict'
 
-var allcmds = ['save', 'load', 'list', 'remove', 'close', 'native']
 
-module.exports = function () {
-  var tag_count_map = {}
+const allcmds = ['save', 'load', 'list', 'remove', 'close', 'native']
 
-  function make_tag(store_name) {
+function Store() {
+  const tag_count_map: any = {}
+
+  function make_tag(store_name: any) {
     tag_count_map[store_name] = (tag_count_map[store_name] || 0) + 1
     return tag_count_map[store_name]
   }
 
   // TODO: expose via seneca.export, and deprecate seneca.store
-  var store = {
+  const store = {
     cmds: allcmds.slice(0),
 
-    /* opts.map = { canon: [cmds] }
-     *   canon is in string format zone/base/name, with empty or - indicating undefined
-     */
-    init: function (instance, opts, store, cb) {
-      var entspecs = []
+    // opts.map = { canon: [cmds] }
+    // canon is in string format zone/base/name, with empty or - indicating undefined
+    init: function(instance: any, opts: any, store: any, cb: any) {
+      const entspecs = []
 
       if (opts.map) {
-        for (var canon in opts.map) {
-          var cmds = opts.map[canon]
+        for (const canon in opts.map) {
+          let cmds = opts.map[canon]
           if (cmds === '*') {
             cmds = allcmds
           }
@@ -34,27 +33,27 @@ module.exports = function () {
       }
 
       // TODO: messy!
-      var plugin_tag =
+      const plugin_tag =
         instance.fixedargs &&
         instance.fixedargs.plugin$ &&
         instance.fixedargs.plugin$.tag
       // plugin_tag cannot be a strict null equal
-      var tag =
+      const tag =
         plugin_tag == null || plugin_tag === '-'
           ? make_tag(store.name)
           : plugin_tag
 
-      var storedesc = [store.name, tag]
+      const storedesc = [store.name, tag]
 
-      for (var esI = 0; esI < entspecs.length; esI++) {
-        var entspec = entspecs[esI]
+      for (let esI = 0; esI < entspecs.length; esI++) {
+        const entspec = entspecs[esI]
 
         storedesc.push(entspec.canon)
-        var zone, base, name
+        let zone, base, name
 
         // FIX: should use parsecanon
 
-        var m = /^(\w*|-)\/(\w*|-)\/(\w*|-)$/.exec(entspec.canon)
+        let m = /^(\w*|-)\/(\w*|-)\/(\w*|-)$/.exec(entspec.canon)
         if (m) {
           zone = m[1]
           base = m[2]
@@ -70,15 +69,15 @@ module.exports = function () {
         base = base === '-' ? void 0 : base
         name = name === '-' ? void 0 : name
 
-        var entargs = {}
+        const entargs: any = {}
         if (void 0 !== name) entargs.name = name
         if (void 0 !== base) entargs.base = base
         if (void 0 !== zone) entargs.zone = zone
 
-        entspec.cmds.forEach(function (cmd) {
-          var args = Object.assign({ role: 'entity', cmd: cmd }, entargs)
-          var orig_cmdfunc = store[cmd]
-          var cmdfunc = orig_cmdfunc
+        entspec.cmds.forEach(function(cmd: string) {
+          const args = Object.assign({ role: 'entity', cmd: cmd }, entargs)
+          const orig_cmdfunc = store[cmd]
+          let cmdfunc = orig_cmdfunc
 
           if (null == cmdfunc) {
             return instance.die('store_cmd_missing', {
@@ -87,33 +86,35 @@ module.exports = function () {
             })
           }
 
-          cmdfunc = intern.reify_entity_wrap(cmdfunc)
+          cmdfunc = Intern.reify_entity_wrap(cmdfunc)
 
-          if (intern.cmd_wrap[cmd]) {
-            cmdfunc = intern.cmd_wrap[cmd](cmdfunc)
+          if (Intern.cmd_wrap[cmd]) {
+            cmdfunc = Intern.cmd_wrap[cmd](cmdfunc)
           }
 
-          for (var p in orig_cmdfunc) {
+          for (const p in orig_cmdfunc) {
             cmdfunc[p] = orig_cmdfunc[p]
           }
 
           if (cmd !== 'close') {
             instance.add(args, cmdfunc)
           } else if (cmd === 'close') {
-            instance.add('role:seneca,cmd:close', function (close_args, done) {
-              var closer = this
+            instance.add(
+              'role:seneca,cmd:close',
+              function(this: any, close_args: any, done: any) {
+                const closer = this
 
-              if (!store.closed$) {
-                cmdfunc.call(closer, close_args, function (err) {
-                  if (err) closer.log.error('close-error', close_args, err)
+                if (!store.closed$) {
+                  cmdfunc.call(closer, close_args, function(err: any) {
+                    if (err) closer.log.error('close-error', close_args, err)
 
-                  store.closed$ = true
-                  closer.prior(close_args, done)
-                })
-              } else {
-                return closer.prior(close_args, done)
-              }
-            })
+                    store.closed$ = true
+                    closer.prior(close_args, done)
+                  })
+                } else {
+                  return closer.prior(close_args, done)
+                }
+              })
           }
         })
       }
@@ -133,10 +134,11 @@ module.exports = function () {
   return store
 }
 
-var intern = (module.exports.intern = {
+
+const Intern: any = {
   // Ensure entity objects are instantiated
-  reify_entity_wrap: function (cmdfunc) {
-    var outfunc = function (msg, reply, meta) {
+  reify_entity_wrap: function(cmdfunc: any) {
+    const outfunc = function(this: any, msg: any, reply: any, meta: any) {
       if ('save' !== msg.cmd) {
         if (null == msg.q) {
           msg.q = {}
@@ -175,10 +177,10 @@ var intern = (module.exports.intern = {
   },
 
   cmd_wrap: {
-    list: function (cmdfunc) {
-      var outfunc = function (msg, done) {
+    list: function(cmdfunc: any) {
+      const outfunc = function(this: any, msg: any, done: any) {
         if ('string' === typeof msg.sort) {
-          var sort = {}
+          let sort: any = {}
           if (msg.sort[0] === '-') {
             sort[msg.sort.substring(1)] = -1
           } else {
@@ -193,4 +195,10 @@ var intern = (module.exports.intern = {
       return outfunc
     },
   },
-})
+}
+
+
+export {
+  Intern,
+  Store,
+}

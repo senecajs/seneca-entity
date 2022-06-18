@@ -1,16 +1,16 @@
-/* Copyright (c) 2011-2020 Richard Rodger and other contributors, MIT License. */
-'use strict'
+/* Copyright (c) 2011-2022 Richard Rodger and other contributors, MIT License. */
 
-var Nid = require('nid')
 
-exports.arrayify = function () {
-  return Array.prototype.slice.call(arguments[0], arguments[1])
-}
+import Nid from 'nid'
+
+// function arrayify() {
+//   return Array.prototype.slice.call(arguments[0], arguments[1])
+// }
 
 // cache nid funcs up to length 64
-var nids = []
+var nids: any = []
 
-exports.generate_id = function (msg, reply) {
+function generate_id(msg: any, reply: any) {
   var actnid = null == msg ? Nid({}) : null
 
   if (null == actnid) {
@@ -27,4 +27,9 @@ exports.generate_id = function (msg, reply) {
   }
 
   return reply ? reply(actnid()) : actnid()
+}
+
+
+export {
+  generate_id,
 }
