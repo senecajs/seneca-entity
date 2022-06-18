@@ -31,11 +31,12 @@
     "url": "https://github.com/senecajs/seneca-entity.git"
   },
   "scripts": {
-    "test": "lab -v -P test -L -t 80 -r console -o stdout -r html -o test/coverage.html",
-    "test-some": "lab -v -P test -L -g",
-    "coverage": "lab -v -P test -t 80 -r html -I URL,URLSearchParams > coverage.html",
-    "prettier": "prettier --write --no-semi --single-quote entity.js lib/*.js test/*.js",
-    "api-docs": "doxdox '*/**/*.js' --layout markdown --output API.md",
+    "test": "jest --coverage",
+    "test-some": "jest -t",
+    "test-watch": "jest --coverage --watchAll",
+    "watch": "tsc -w -d",
+    "build": "tsc -d",
+    "prettier": "prettier --write --no-semi --single-quote *.ts lib/*.ts test/*.js",
     "reset": "npm run clean && npm i && npm test",
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
@@ -50,8 +51,6 @@
     "seneca-promisify": ">=2"
   },
   "devDependencies": {
-    "@hapi/code": "^9.0.1",
-    "@hapi/lab": "^25.0.1",
     "@seneca/maintain": "^0.0.22",
     "@types/jest": "^27.5.1",
     "esbuild": "^0.14.39",
