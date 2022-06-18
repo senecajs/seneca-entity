@@ -3,7 +3,6 @@
 var Util = require('util')
 var Assert = require('assert')
 
-var Async = require('async')
 var { Gex } = require('gex')
 var Lab = require('@hapi/lab')
 var Code = require('@hapi/code')
@@ -16,8 +15,6 @@ var it = make_it(lab)
 var beforeEach = lab.beforeEach
 var assert = Assert
 var expect = Code.expect
-
-const PluginValidator = require('seneca-plugin-validator')
 
 var SenecaInstance = function () {
   var seneca = Seneca({
@@ -42,8 +39,6 @@ describe('entity', function () {
       fin()
     }
   })
-
-  lab.it('validate', PluginValidator(Entity, module))
 
   it('happy-mem', function (fin) {
     si.test(fin)
@@ -501,103 +496,53 @@ describe('entity', function () {
     fin()
   })
 
-  it('mem-store-import-export', function (fin) {
+  it('mem-store-import-export', async function (fin) {
     let si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
     // NOTE: zone is NOT saved! by design!
-    var x1, x2, x3
+    let x1 = await si.make$('a', { x: 1 }).save$()
+    let x2 = await si.make$('b', 'a', { x: 2 }).save$()
+    let x3 = await si.make$('c', 'b', 'a', { x: 3 }).save$()
 
-    Async.series(
-      [
-        function (next) {
-          si.make$('a', { x: 1 }).save$(function (e, o) {
-            x1 = o
-            next()
-          })
-        },
-        function (next) {
-          si.make$('b', 'a', { x: 2 }).save$(function (e, o) {
-            x2 = o
-            next()
-          })
-        },
-        function (next) {
-          si.make$('c', 'b', 'a', { x: 3 }).save$(function (e, o) {
-            x3 = o
-            next()
-          })
-        },
+    let db = await si.post('role:mem-store,cmd:dump')
+    let t = Gex(
+      '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
+    ).on(JSON.stringify(db))
+    assert.ok(t)
 
-        function (next) {
-          si.act('role:mem-store,cmd:dump', function (e, o) {
-            var t = Gex(
-              '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
-            ).on(JSON.stringify(o))
-            assert.ok(t)
-            next(e)
-          })
-        },
+    let out = await si.post('role:mem-store,cmd:export')
+    let si2 = SenecaInstance().use('promisify')
 
-        function (next) {
-          si.act('role:mem-store,cmd:export', function (err, out) {
-            assert.equal(err, null)
-
-            var si2 = SenecaInstance()
-
-            si2.act(
-              'role:mem-store,cmd:import',
-              { json: out.json },
-              function (err) {
-                assert.equal(err, null)
-
-                si2.act('role:mem-store,cmd:dump', function (err, o) {
-                  assert.equal(err, null)
-                  assert.ok(
-                    Gex(
-                      '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
-                    ).on(JSON.stringify(o))
-                  )
-
-                  si2.make('a').load$({ x: 1 }, function (err, nx1) {
-                    assert.equal(err, null)
-                    assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
-
-                    si2.make('a').load$({ x: 1 }, function (err, nx1) {
-                      assert.equal(err, null)
-                      assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
-
-                      si2.make('b', 'a').load$({ x: 2 }, function (err, nx2) {
-                        assert.equal(err, null)
-                        assert.equal('$-/b/a;id=' + x2.id + ';{x:2}', '' + nx2)
-
-                        si2
-                          .make('c', 'b', 'a')
-                          .load$({ x: 3 }, function (err, nx3) {
-                            assert.equal(err, null)
-                            assert.equal(
-                              '$c/b/a;id=' + x3.id + ';{x:3}',
-                              '' + nx3
-                            )
-                            si2.close()
-
-                            next()
-                          })
-                      })
-                    })
-                  })
-                })
-              }
-            )
-          })
-        },
-      ],
-      function (err) {
-        si.close()
-        fin(err)
-      }
+    await si2.post('role:mem-store,cmd:import', { json: out.json })
+    db = await si2.post('role:mem-store,cmd:dump')
+    assert.ok(
+      Gex(
+        '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
+      ).on(JSON.stringify(db))
     )
+
+    let nx1 = await si2.make('a').load$({ x: 1 })
+    assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
+
+    nx1 = await si2.make('a').load$({ x: 1 })
+    assert.equal('$-/-/a;id=' + x1.id + ';{x:1}', '' + nx1)
+
+    let nx2 = await si2.make('b', 'a').load$({ x: 2 })
+    assert.equal('$-/b/a;id=' + x2.id + ';{x:2}', '' + nx2)
+
+    let nx3 = await si2.make('c', 'b', 'a').load$({ x: 3 })
+    assert.equal(
+      '$c/b/a;id=' + x3.id + ';{x:3}',
+      '' + nx3
+    )
+
+    await si2.close()
+    await si.close()
+
+    fin()
   })
 
+  
   it('close', function (fin) {
     var tmp = { s0: 0, s1: 0, s2: 0 }
 
