@@ -1,7 +1,7 @@
 {
   "name": "seneca-entity",
   "main": "dist/entity.js",
-  "version": "17.0.0",
+  "version": "17.0.1",
   "type": "commonjs",
   "types": "dist/gateway.d.ts",
   "description": "Entity plugin for seneca",
@@ -44,7 +44,7 @@
     "clean": "rm -rf node_modules package-lock.json yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
     "repo-publish": "npm run clean && npm i --registry=https://registry.npmjs.org && npm run repo-publish-quick",
-    "repo-publish-quick": "npm run prettier && npm test && npm run repo-tag && npm publish --access public --registry=https://registry.npmjs.org"
+    "repo-publish-quick": "npm run prettier && npm run build && npm test && npm run repo-tag && npm publish --access public --registry=https://registry.npmjs.org"
   },
   "dependencies": {
     "seneca-mem-store": "^6.3.1"

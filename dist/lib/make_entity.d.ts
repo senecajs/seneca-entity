@@ -59,4 +59,4 @@ declare function MakeEntity(canon: any, seneca: any, opts?: any): Entity & Custo
 declare namespace MakeEntity {
     var parsecanon: (str: string) => any;
 }
-export { MakeEntity, Entity, };
+export { MakeEntity, Entity };

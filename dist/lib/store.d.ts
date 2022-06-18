@@ -6,4 +6,4 @@ declare function Store(): {
     } | undefined;
 };
 declare const Intern: any;
-export { Intern, Store, };
+export { Intern, Store };

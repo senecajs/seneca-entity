@@ -20,7 +20,7 @@ const error = Eraro({
     override: true,
 });
 const toString_map = {
-    '': make_toString()
+    '': make_toString(),
 };
 function entargs(ent, args) {
     args.role = 'entity';
@@ -133,6 +133,7 @@ class Entity {
         if (Object.prototype.hasOwnProperty.call(props, 'id$')) {
             entity.id$ = props.id$;
         }
+        ;
         self.log$ &&
             self.log$('make', entity.canon$({ string: true }), entity);
         return entity;
@@ -156,8 +157,11 @@ class Entity {
         }
         const async = is_async(si, done);
         const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { cmd: 'save', q: q });
-        let done$ = null == done ? undefined :
-            this.done$ ? this.done$(done) : done;
+        let done$ = null == done
+            ? undefined
+            : this.done$
+                ? this.done$(done)
+                : done;
         let saved = async ? si.post(entmsg) : (si.act(entmsg, done$), self);
         return saved;
     }
@@ -172,8 +176,11 @@ class Entity {
         const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
         const async = is_async(si, done);
         const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { cmd: 'native' });
-        let done$ = null == done ? undefined :
-            this.done$ ? this.done$(done) : done;
+        let done$ = null == done
+            ? undefined
+            : this.done$
+                ? this.done$(done)
+                : done;
         return async ? si.post(entmsg) : (si.act(entmsg, done$), self);
     }
     // load one
@@ -195,9 +202,16 @@ class Entity {
         if (q == null || 0 === Object.keys(q).length) {
             return async ? null : (done && done.call(si), self);
         }
-        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { qent: qent, q: q, cmd: 'load' });
-        let done$ = null == done ? undefined :
-            this.done$ ? this.done$(done) : done;
+        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, {
+            qent: qent,
+            q: q,
+            cmd: 'load',
+        });
+        let done$ = null == done
+            ? undefined
+            : this.done$
+                ? this.done$(done)
+                : done;
         return async ? si.post(entmsg) : (si.act(entmsg, done$), self);
     }
     /** Callback for Entity.load$.
@@ -223,9 +237,16 @@ class Entity {
         }
         q = normalize_query(q, self);
         const async = is_async(si, done);
-        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { qent: qent, q: q, cmd: 'list' });
-        let done$ = null == done ? undefined :
-            this.done$ ? this.done$(done) : done;
+        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, {
+            qent: qent,
+            q: q,
+            cmd: 'list',
+        });
+        let done$ = null == done
+            ? undefined
+            : this.done$
+                ? this.done$(done)
+                : done;
         return async ? si.post(entmsg) : (si.act(entmsg, done$), self);
     }
     /** Callback for Entity.list$.
@@ -249,12 +270,21 @@ class Entity {
         if (q == null) {
             return async ? null : (done && done.call(si), self);
         }
-        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { qent: self, q: q, cmd: 'remove' });
-        let done$ = null == done ? undefined :
-            this.done$ ? this.done$(done) : done;
+        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, {
+            qent: self,
+            q: q,
+            cmd: 'remove',
+        });
+        let done$ = null == done
+            ? undefined
+            : this.done$
+                ? this.done$(done)
+                : done;
         return async ? si.post(entmsg) : (si.act(entmsg, done$), self);
     }
-    delete$(query, done) { return this.remove$(query, done); }
+    delete$(query, done) {
+        return this.remove$(query, done);
+    }
     /** Callback for Entity.remove$.
      *  @callback callback~remove$
      *  @param {error} error - Error object, if any.
@@ -277,8 +307,11 @@ class Entity {
         const async = is_async(si, done);
         const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { cmd: 'close' });
         self.log$ && self.log$('close');
-        let done$ = null == done ? undefined :
-            this.done$ ? this.done$(done) : done;
+        let done$ = null == done
+            ? undefined
+            : this.done$
+                ? this.done$(done)
+                : done;
         return async ? si.post(entmsg) : (si.act(entmsg, done$), self);
     }
     is$(canonspec) {
@@ -482,6 +515,7 @@ function handle_options(entopts) {
     }
     if (false === entopts.meta.provide) {
         // Drop meta argument from callback
+        ;
         Entity.prototype.done$ = (done) => {
             return null == done
                 ? undefined
