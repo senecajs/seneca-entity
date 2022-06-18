@@ -3,7 +3,6 @@
 var Util = require('util')
 var Assert = require('assert')
 
-var { Gex } = require('gex')
 var Lab = require('@hapi/lab')
 var Code = require('@hapi/code')
 var Seneca = require('seneca')
@@ -15,6 +14,12 @@ var it = make_it(lab)
 var beforeEach = lab.beforeEach
 var assert = Assert
 var expect = Code.expect
+
+
+// TODO: update when Seneca.util.Gex is available
+const GexModule = require('Gex') || require('Gex').default
+const Gex = Seneca.util.Gex || GexModule.Gex
+
 
 var SenecaInstance = function () {
   var seneca = Seneca({
