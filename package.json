@@ -1,7 +1,7 @@
 {
   "name": "seneca-entity",
   "main": "dist/entity.js",
-  "version": "17.0.2",
+  "version": "17.1.0",
   "type": "commonjs",
   "types": "dist/gateway.d.ts",
   "description": "Entity plugin for seneca",
@@ -46,7 +46,7 @@
     "repo-publish-quick": "npm run prettier && npm run build && npm test && npm run repo-tag && npm publish --access public --registry=https://registry.npmjs.org"
   },
   "dependencies": {
-    "seneca-mem-store": "^6.3.1"
+    "seneca-mem-store": "^6.4.0"
   },
   "peerDependencies": {
     "seneca": ">=3",
