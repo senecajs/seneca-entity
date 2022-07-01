@@ -889,6 +889,52 @@ describe('entity', function () {
     )
   })
 
+  
+  test('prior-entity-save', (fin) => {
+    const si = Seneca({ legacy: false }).test(fin).use(Entity)
+
+    si.make('foo').data$({x:1}).save$(function(err, foo) {
+      expect(err).toBeNull()
+      expect(foo.id).toBeDefined()
+      expect(foo.x).toEqual(1)
+      expect(foo.entity$).toEqual('-/-/foo')
+
+      si.add('role:entity,cmd:save', function(msg, reply) {
+        msg.ent.y=2
+        return this.prior(msg, reply)
+      })
+
+      si.make('foo').data$({x:1}).save$(function(err, foo) {
+        expect(err).toBeNull()
+        expect(foo.id).toBeDefined()
+        expect(foo.x).toEqual(1)
+        expect(foo.y).toEqual(2)
+        expect(foo.entity$).toEqual('-/-/foo')
+      
+        async_prior(si)
+      })
+    })
+    
+    async function async_prior(si) {
+      let bar = si.entity('bar').data$({z:3})
+      // console.log(bar)
+      expect(bar.id).toBeUndefined()
+      expect(bar.z).toEqual(3)
+      expect(bar.y).toBeUndefined()
+      expect(bar.entity$).toEqual('-/-/bar')
+
+      let barS = await bar.save$()
+      // console.log(barS)
+      expect(barS.id).toBeDefined()
+      expect(barS.z).toEqual(3)
+      expect(barS.y).toEqual(2)
+      expect(barS.entity$).toEqual('-/-/bar')
+
+      return fin()
+    }
+  })
+
+  
   test('custom-basic', function (fin) {
     let si0 = Seneca().test(fin).use(Entity)
     let foo0 = si0.make$('foo').data$({ a: 1, b: 2 })
@@ -954,18 +1000,20 @@ describe('entity', function () {
     fin()
   })
 
+  
   test('custom-directive', function (fin) {
     let si0 = Seneca().test(fin).use(Entity)
     let tmp = { saves: { a: [], b: [] } }
 
     si0.ready(function () {
+
       // Define a prior operation driven by the entity custom$ directive
       si0.add('role:entity,cmd:save', function save_what(msg, done) {
         let what = (msg.ent.custom$ && msg.ent.custom$.what) || 'a'
         tmp.saves[what].push(msg.ent.x)
-        return this.prior(msg, done)
+        this.prior(msg, done)
       })
-
+      
       // The save_what entity prior is not triggered as no ent.custom$
       si0
         .entity('foo')

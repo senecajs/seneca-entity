@@ -176,7 +176,8 @@ class Entity implements Record<string, any> {
     let done$ = prepareCmd(self, data, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
-    let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self)
+    let res = async && !done$ ? entityPromise(si, entmsg) :
+      (si.act(entmsg, done$), self)
     return res // Sync: self, Async: Entity Promise
   }
 

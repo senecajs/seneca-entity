@@ -154,7 +154,8 @@ class Entity {
         let entmsg = { cmd: 'save', q: {} };
         let done$ = prepareCmd(self, data, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
-        let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self);
+        let res = async && !done$ ? entityPromise(si, entmsg) :
+            (si.act(entmsg, done$), self);
         return res; // Sync: self, Async: Entity Promise
     }
     /** Callback for Entity.save$.
