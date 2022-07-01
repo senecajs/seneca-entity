@@ -45,7 +45,9 @@ describe('entity', function () {
   })
 
   test('happy-mem-promise', async function () {
-    const si = Seneca({ legacy: false }).use('promisify').use('..').test()
+    const si = Seneca({ legacy: false })
+          .use('promisify')
+          .use('..').test()
 
     const fooent = si.entity('foo')
 
@@ -507,9 +509,9 @@ describe('entity', function () {
     let si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
     // NOTE: zone is NOT saved! by design!
-    let x1 = await si.make$('a', { x: 1 }).save$()
-    let x2 = await si.make$('b', 'a', { x: 2 }).save$()
-    let x3 = await si.make$('c', 'b', 'a', { x: 3 }).save$()
+    let x1 = await si.entity('a', { x: 1 }).save$()
+    let x2 = await si.entity('b', 'a', { x: 2 }).save$()
+    let x3 = await si.entity('c', 'b', 'a', { x: 3 }).save$()
 
     let db = await si.post('role:mem-store,cmd:dump')
     let t = Gex(
@@ -528,16 +530,16 @@ describe('entity', function () {
       ).on(JSON.stringify(db))
     ).toBeTruthy()
 
-    let nx1 = await si2.make('a').load$({ x: 1 })
+    let nx1 = await si2.entity('a').load$({ x: 1 })
     expect('$-/-/a;id=' + x1.id + ';{x:1}').toEqual('' + nx1)
 
-    nx1 = await si2.make('a').load$({ x: 1 })
+    nx1 = await si2.entity('a').load$({ x: 1 })
     expect('$-/-/a;id=' + x1.id + ';{x:1}').toEqual('' + nx1)
 
-    let nx2 = await si2.make('b', 'a').load$({ x: 2 })
+    let nx2 = await si2.entity('b', 'a').load$({ x: 2 })
     expect('$-/b/a;id=' + x2.id + ';{x:2}').toEqual('' + nx2)
 
-    let nx3 = await si2.make('c', 'b', 'a').load$({ x: 3 })
+    let nx3 = await si2.entity('c', 'b', 'a').load$({ x: 3 })
     expect('$c/b/a;id=' + x3.id + ';{x:3}').toEqual('' + nx3)
 
     await si2.close()

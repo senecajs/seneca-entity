@@ -29,13 +29,6 @@ function entity() {
         name: 'entity',
     };
 }
-// const Intern = {
-//   store: StoreIntern,
-//   common: {
-//     arrayify,
-//     generate_id,
-//   }
-// }
 // All functionality should be loaded when defining plugin
 function preload(context) {
     const seneca = this;
@@ -60,21 +53,25 @@ function preload(context) {
         };
     }
     // all optional
-    function api_make() {
-        // const self = this
-        // const args = Common.arrayify(arguments)
-        // args.unshift(self)
-        // return seneca.private$.entity.make$.apply(seneca.private$.entity, args)
-        return seneca.private$.entity.make$(this, ...arguments);
+    function build_api_make(async) {
+        return function () {
+            return seneca.private$.entity.make$(this, ...[...arguments, async]);
+        };
     }
+    let make = build_api_make(false);
+    let entity = build_api_make(true);
     if (!seneca.make$) {
-        seneca.decorate('make$', api_make);
+        seneca.decorate('make$', make);
     }
     if (!seneca.make) {
-        seneca.decorate('make', api_make);
+        seneca.decorate('make', make);
     }
+    // TODO: make this work
+    // if (!seneca.entity$) {
+    //   seneca.decorate('entity$', entity)
+    // }
     if (!seneca.entity) {
-        seneca.decorate('entity', api_make);
+        seneca.decorate('entity', entity);
     }
     // Handle old versions of seneca where the
     // store init was already included by default.

@@ -1,6 +1,7 @@
-declare class Entity {
+declare class Entity implements Record<string, any> {
     #private;
     entity$: string;
+    async$?: boolean;
     private$: any;
     constructor(canon: any, seneca: any);
     make$(...args: any[]): any;
@@ -8,18 +9,18 @@ declare class Entity {
      *  param {object} [data] - Subset of entity field values.
      *  param {callback~save$} done - Callback function providing saved entity.
      */
-    save$(data: any, done?: any): Promise<any>;
+    save$(data: any, done?: any): this | Promise<unknown>;
     /** Callback for Entity.save$.
      *  @callback callback~save$
      *  @param {error} error - Error object, if any.
      *  @param {Entity} entity - Saved Entity object containing updated data fields (in particular, `id`, if auto-generated).
      */
-    native$(done?: any): any;
+    native$(done?: any): this | Promise<unknown>;
     /** Load the entity.
      *  param {object|string|number} [query] - Either a entity id, or a query object with field values that must match.
      *  param {callback~load$} done - Callback function providing loaded entity, if found.
      */
-    load$(query: any, done?: any): any;
+    load$(query: any, done?: any): this | Promise<unknown> | null;
     /** Callback for Entity.load$.
      *  @callback callback~load$
      *  @param {error} error - Error object, if any.
@@ -51,11 +52,9 @@ declare class Entity {
     canon$(opt?: any): any;
     data$(data?: any, canonkind?: any): any;
     clone$(): any;
+    custom$(_props: any): any;
 }
-declare type CustomProps = {
-    custom$: (props: any) => any;
-};
-declare function MakeEntity(canon: any, seneca: any, opts?: any): Entity & CustomProps;
+declare function MakeEntity(canon: any, seneca: any, opts?: any): Entity;
 declare namespace MakeEntity {
     var parsecanon: (str: string) => any;
 }

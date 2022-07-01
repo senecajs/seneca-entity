@@ -40,7 +40,9 @@ function Store() {
             for (let esI = 0; esI < entspecs.length; esI++) {
                 const entspec = entspecs[esI];
                 storedesc.push(entspec.canon);
-                let zone, base, name;
+                let zone;
+                let base;
+                let name;
                 // FIX: should use parsecanon
                 let m = /^(\w*|-)\/(\w*|-)\/(\w*|-)$/.exec(entspec.canon);
                 if (m) {
@@ -75,7 +77,7 @@ function Store() {
                             store: storedesc,
                         });
                     }
-                    cmdfunc = Intern.reify_entity_wrap(cmdfunc);
+                    cmdfunc = Intern.reify_entity_wrap(cmdfunc, cmd, zone, base, name);
                     if (Intern.cmd_wrap[cmd]) {
                         cmdfunc = Intern.cmd_wrap[cmd](cmdfunc);
                     }
@@ -120,7 +122,7 @@ function Store() {
 exports.Store = Store;
 const Intern = {
     // Ensure entity objects are instantiated
-    reify_entity_wrap: function (cmdfunc) {
+    reify_entity_wrap: function (cmdfunc, cmd, zone, base, name) {
         const outfunc = function (msg, reply, meta) {
             if ('save' !== msg.cmd) {
                 if (null == msg.q) {
@@ -151,6 +153,12 @@ const Intern = {
             }
             return cmdfunc.call(this, msg, reply, meta);
         };
+        Object.defineProperty(outfunc, 'name', {
+            value: 'entity_' + cmd +
+                (null == zone ? '' : zone + '_') +
+                (null == base ? '' : base + '_') +
+                (null == name ? '' : name)
+        });
         return outfunc;
     },
     cmd_wrap: {

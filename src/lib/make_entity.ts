@@ -4,6 +4,8 @@ import Util from 'util'
 const Eraro = require('eraro')
 const Jsonic = require('jsonic')
 
+const proto = Object.getPrototypeOf
+
 const error = Eraro({
   package: 'seneca',
   msgmap: ERRMSGMAP(),
@@ -31,8 +33,10 @@ function entargs(this: any, ent: Entity, args: any) {
   return args
 }
 
-class Entity {
+
+class Entity implements Record<string, any> {
   entity$: string
+  async$?: boolean
   private$: any
 
   #private$: any = {}
@@ -40,19 +44,19 @@ class Entity {
   constructor(canon: any, seneca: any) {
     const private$: any = this.#private$
 
-    private$.get_instance = function () {
+    private$.get_instance = function() {
       return seneca
     }
-
     private$.canon = canon
-
     private$.entargs = entargs
+
+    this.private$ = this.#private$
 
     // use as a quick test to identify Entity objects
     // returns compact string zone/base/name
     this.entity$ = this.canon$()
 
-    this.private$ = this.#private$
+    this.async$ = false
   }
 
   // Properties without '$' suffix are persisted
@@ -71,13 +75,19 @@ class Entity {
   // escaped names: foo_$ is converted to foo
   make$(...args: any[]) {
     const self = this
-    // const args = Common.arrayify(arguments)
     let first = args[0]
+    let last = args[args.length - 1]
+    let async = self.async$
+
+    if ('boolean' === typeof last) {
+      async = last
+      args = args.slice(0, args.length - 1)
+    }
 
     // Set seneca instance, if provided as first arg.
     if (first && first.seneca) {
       const seneca = first
-      self.#private$.get_instance = function () {
+      self.#private$.get_instance = function() {
         return seneca
       }
       first = args[1]
@@ -130,25 +140,24 @@ class Entity {
     new_canon.base = base == null ? self.#private$.canon.base : base
     new_canon.zone = zone == null ? self.#private$.canon.zone : zone
 
-    // const entity = new Entity(new_canon, self.#private$.get_instance())
-    // const entity: any = new Entity(new_canon, self.#private$.get_instance())
-    const entity: any = MakeEntity(new_canon, self.#private$.get_instance())
+    const entity: Entity =
+      MakeEntity(new_canon, self.#private$.get_instance(), { async })
 
     for (const p in props) {
       if (Object.prototype.hasOwnProperty.call(props, p)) {
         if (!~p.indexOf('$')) {
-          entity[p] = props[p]
+          (entity as any)[p] = props[p]
         } else if (p.length > 2 && p.slice(-2) === '_$') {
-          entity[p.slice(0, -2)] = props[p]
+          (entity as any)[p.slice(0, -2)] = props[p]
         }
       }
     }
 
     if (Object.prototype.hasOwnProperty.call(props, 'id$')) {
-      entity.id$ = props.id$
+      (entity as any).id$ = props.id$
     }
 
-    ;(self as any).log$ &&
+    ; (self as any).log$ &&
       (self as any).log$('make', entity.canon$({ string: true }), entity)
 
     return entity
@@ -158,32 +167,17 @@ class Entity {
    *  param {object} [data] - Subset of entity field values.
    *  param {callback~save$} done - Callback function providing saved entity.
    */
-  async save$(data: any, done?: any) {
+  save$(data: any, done?: any) {
     const self = this
     const si = self.#private$.get_instance()
-    let q = {}
+    const async = self.async$
 
-    if ('function' === typeof data) {
-      done = data
-    } else if (data && 'object' === typeof data) {
-      // TODO: this needs to be deprecated as first param needed for
-      // directives, not data - that's already in entity object
-      self.data$(data)
+    let entmsg = { cmd: 'save', q: {} }
+    let done$ = prepareCmd(self, data, entmsg, done)
+    entmsg = self.#private$.entargs(self, entmsg)
 
-      q = data
-    }
-
-    const async = is_async(si, done)
-    const entmsg = self.#private$.entargs(self, { cmd: 'save', q: q })
-
-    let done$ =
-      null == done
-        ? undefined
-        : (this as any).done$
-        ? (this as any).done$(done)
-        : done
-    let saved = async ? si.post(entmsg) : (si.act(entmsg, done$), self)
-    return saved
+    let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self)
+    return res // Sync: self, Async: Entity Promise
   }
 
   /** Callback for Entity.save$.
@@ -192,22 +186,21 @@ class Entity {
    *  @param {Entity} entity - Saved Entity object containing updated data fields (in particular, `id`, if auto-generated).
    */
 
+
   // provide native database driver
   native$(done?: any) {
     const self = this
     const si = self.#private$.get_instance()
+    const async = self.async$
 
-    const async = is_async(si, done)
-    const entmsg = self.#private$.entargs(self, { cmd: 'native' })
+    let entmsg = { cmd: 'native' }
+    let done$ = prepareCmd(self, undefined, entmsg, done)
+    entmsg = self.#private$.entargs(self, entmsg)
 
-    let done$ =
-      null == done
-        ? undefined
-        : (this as any).done$
-        ? (this as any).done$(done)
-        : done
-    return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
+    let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self)
+    return res // Sync: self, Async: Entity Promise
   }
+
 
   // load one
   // TODO: qin can be an entity, in which case, grab the id and reload
@@ -220,14 +213,13 @@ class Entity {
   load$(query: any, done?: any) {
     const self = this
     const si = self.#private$.get_instance()
-
+    const async = self.async$
     const qent = self
 
     const q = normalize_query(query, self)
+    let entmsg = { cmd: 'load', q, qent }
 
     done = 'function' === typeof query ? query : done
-
-    const async = is_async(si, done)
 
     // TODO: test needed
     // Empty query gives empty result.
@@ -235,20 +227,13 @@ class Entity {
       return async ? null : (done && done.call(si), self)
     }
 
-    const entmsg = self.#private$.entargs(self, {
-      qent: qent,
-      q: q,
-      cmd: 'load',
-    })
+    let done$ = prepareCmd(self, undefined, entmsg, done)
+    entmsg = self.#private$.entargs(self, entmsg)
 
-    let done$ =
-      null == done
-        ? undefined
-        : (this as any).done$
-        ? (this as any).done$(done)
-        : done
-    return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
+    let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self)
+    return res // Sync: self, Async: Entity Promise
   }
+
 
   /** Callback for Entity.load$.
    *  @callback callback~load$
@@ -289,8 +274,8 @@ class Entity {
       null == done
         ? undefined
         : (this as any).done$
-        ? (this as any).done$(done)
-        : done
+          ? (this as any).done$(done)
+          : done
     return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
 
@@ -332,8 +317,8 @@ class Entity {
       null == done
         ? undefined
         : (this as any).done$
-        ? (this as any).done$(done)
-        : done
+          ? (this as any).done$(done)
+          : done
     return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
 
@@ -369,14 +354,14 @@ class Entity {
     const async = is_async(si, done)
     const entmsg = self.#private$.entargs(self, { cmd: 'close' })
 
-    ;(self as any).log$ && (self as any).log$('close')
+      ; (self as any).log$ && (self as any).log$('close')
 
     let done$ =
       null == done
         ? undefined
         : (this as any).done$
-        ? (this as any).done$(done)
-        : done
+          ? (this as any).done$(done)
+          : done
     return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
 
@@ -429,20 +414,20 @@ class Entity {
 
     return null == opt || opt.string || opt.string$
       ? [
-          (opt && opt.string$ ? '$' : '') +
-            (null == canon.zone ? '-' : canon.zone),
-          null == canon.base ? '-' : canon.base,
-          null == canon.name ? '-' : canon.name,
-        ].join('/') // TODO: make joiner an option
+        (opt && opt.string$ ? '$' : '') +
+        (null == canon.zone ? '-' : canon.zone),
+        null == canon.base ? '-' : canon.base,
+        null == canon.name ? '-' : canon.name,
+      ].join('/') // TODO: make joiner an option
       : opt.array
-      ? [canon.zone, canon.base, canon.name]
-      : opt.array$
-      ? [canon.zone, canon.base, canon.name]
-      : opt.object
-      ? { zone: canon.zone, base: canon.base, name: canon.name }
-      : opt.object$
-      ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
-      : [canon.zone, canon.base, canon.name]
+        ? [canon.zone, canon.base, canon.name]
+        : opt.array$
+          ? [canon.zone, canon.base, canon.name]
+          : opt.object
+            ? { zone: canon.zone, base: canon.base, name: canon.name }
+            : opt.object$
+              ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
+              : [canon.zone, canon.base, canon.name]
   }
 
   // data = object, or true|undef = include $, false = exclude $
@@ -527,7 +512,36 @@ class Entity {
 
     return clone
   }
+
+  custom$(_props: any): any {
+    return {}
+  }
 }
+
+function entityPromise(si: any, entmsg: any) {
+  return new Promise((res, rej) => si.act(entmsg, (...args: any[]) => args[0] ? rej(args[0]) :
+    res((proto(args[1]).meta$ = args[2], args[1]))))
+}
+
+
+function prepareCmd(ent: any, data: any, entmsg: any, done: any) {
+  if ('function' === typeof data) {
+    done = data
+  } else if (data && 'object' === typeof data) {
+    // TODO: this needs to be deprecated as first param needed for
+    // directives, not data - that's already in entity object
+    ent.data$(data)
+
+    entmsg.q = data
+  }
+
+  return null == done
+    ? undefined
+    : ent.done$
+      ? ent.done$(done)
+      : done
+}
+
 
 function normalize_query(qin: any, ent: any) {
   let q = qin
@@ -591,7 +605,9 @@ function ERRMSGMAP() {
   }
 }
 
-function handle_options(entopts: any) {
+function handle_options(entopts: any): any {
+  entopts = entopts || Object.create(null)
+
   if (entopts.hide) {
     //_.each(entopts.hide, function (hidden_fields, canon_in) {
     Object.keys(entopts.hide).forEach((hidden_fields) => {
@@ -609,17 +625,20 @@ function handle_options(entopts: any) {
     })
   }
 
-  if (false === entopts.meta.provide) {
+  if (false === entopts.meta?.provide) {
     // Drop meta argument from callback
-    ;(Entity.prototype as any).done$ = (done: any) => {
+    ; (Entity.prototype as any).done$ = (done: any) => {
       return null == done
         ? undefined
-        : function (this: any, err: any, out: any) {
-            done.call(this, err, out)
-          }
+        : function(this: any, err: any, out: any) {
+          done.call(this, err, out)
+        }
     }
   }
+
+  return entopts
 }
+
 
 function make_toString(
   canon_str?: string,
@@ -640,7 +659,7 @@ function make_toString(
 
   hidden_fields.push('id')
 
-  return function (this: any) {
+  return function(this: any) {
     return [
       '$',
       canon_str || this.canon$({ string: true }),
@@ -666,10 +685,12 @@ function is_async(seneca: any, done: any) {
   return promisify_loaded && !has_callback
 }
 
-type CustomProps = { custom$: (props: any) => any }
 
-function MakeEntity(canon: any, seneca: any, opts?: any): Entity & CustomProps {
-  opts && handle_options(opts)
+// type CustomProps = { custom$: (props: any) => any }
+
+
+function MakeEntity(canon: any, seneca: any, opts?: any): Entity {
+  opts = handle_options(opts)
   const deep = seneca.util.deep
 
   const ent = new Entity(canon, seneca)
@@ -677,7 +698,7 @@ function MakeEntity(canon: any, seneca: any, opts?: any): Entity & CustomProps {
 
   let toString = (toString_map[canon_str] || toString_map['']).bind(ent)
 
-  let custom$ = function (this: any, props: any) {
+  let custom$ = function(this: any, props: any) {
     if (
       null != props &&
       ('object' === typeof props || 'function' === typeof props)
@@ -692,16 +713,19 @@ function MakeEntity(canon: any, seneca: any, opts?: any): Entity & CustomProps {
 
   let hidden = Object.create(Object.getPrototypeOf(ent))
 
-  hidden.promisify$$ = true
+  // hidden.promisify$$ = true
+
   hidden.toString = toString
   hidden.custom$ = custom$
+  hidden.async$ = opts.async
   hidden.private$ = ent.private$
 
   Object.setPrototypeOf(ent, hidden)
 
   delete ent.private$
+  delete ent.async$
 
-  return ent as Entity & CustomProps
+  return ent as Entity
 }
 
 MakeEntity.parsecanon = parsecanon

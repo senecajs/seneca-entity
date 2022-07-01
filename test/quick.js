@@ -7,6 +7,8 @@ let seneca = Seneca({ legacy: false })
   .test()
   .use(Entity)
   .ready(function () {
+
+    /*
     let foo0 = seneca.make$('foo').data$({ x: 1 })
     let foo11 = seneca.make$('foo').data$({ x: 11 })
 
@@ -44,4 +46,24 @@ let seneca = Seneca({ legacy: false })
       console.log('' + foo2, foo2, foo2.custom$)
       console.log(foo0.custom$, foo11.custom$, foo12.custom$)
     })
+    */
+
+
+    let foo = this.make('foo').data$({x:1})
+    console.log('S-A', foo, foo.async$)
+
+    let fooSave = foo.save$((err, fooS)=>{
+      console.log('S-B', err, fooS)
+    })
+    console.log(fooSave, fooSave.entity$)
+    
+    setImmediate(async ()=>{
+      let bar = this.entity('bar').data$({y:1})
+      console.log('A-A', bar, bar.async$)
+
+      let barS = await bar.save$()
+      console.log('A-B', barS, barS.async$, barS.meta$.pattern, barS.meta$.action)
+    })
+    
+
   })

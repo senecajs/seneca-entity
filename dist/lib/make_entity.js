@@ -14,6 +14,7 @@ exports.Entity = exports.MakeEntity = void 0;
 const util_1 = __importDefault(require("util"));
 const Eraro = require('eraro');
 const Jsonic = require('jsonic');
+const proto = Object.getPrototypeOf;
 const error = Eraro({
     package: 'seneca',
     msgmap: ERRMSGMAP(),
@@ -45,10 +46,11 @@ class Entity {
         };
         private$.canon = canon;
         private$.entargs = entargs;
+        this.private$ = __classPrivateFieldGet(this, _Entity_private$, "f");
         // use as a quick test to identify Entity objects
         // returns compact string zone/base/name
         this.entity$ = this.canon$();
-        this.private$ = __classPrivateFieldGet(this, _Entity_private$, "f");
+        this.async$ = false;
     }
     // Properties without '$' suffix are persisted
     // id property is special: created if not present when saving
@@ -66,8 +68,13 @@ class Entity {
     // escaped names: foo_$ is converted to foo
     make$(...args) {
         const self = this;
-        // const args = Common.arrayify(arguments)
         let first = args[0];
+        let last = args[args.length - 1];
+        let async = self.async$;
+        if ('boolean' === typeof last) {
+            async = last;
+            args = args.slice(0, args.length - 1);
+        }
         // Set seneca instance, if provided as first arg.
         if (first && first.seneca) {
             const seneca = first;
@@ -117,9 +124,7 @@ class Entity {
         new_canon.name = name == null ? __classPrivateFieldGet(self, _Entity_private$, "f").canon.name : name;
         new_canon.base = base == null ? __classPrivateFieldGet(self, _Entity_private$, "f").canon.base : base;
         new_canon.zone = zone == null ? __classPrivateFieldGet(self, _Entity_private$, "f").canon.zone : zone;
-        // const entity = new Entity(new_canon, self.#private$.get_instance())
-        // const entity: any = new Entity(new_canon, self.#private$.get_instance())
-        const entity = MakeEntity(new_canon, __classPrivateFieldGet(self, _Entity_private$, "f").get_instance());
+        const entity = MakeEntity(new_canon, __classPrivateFieldGet(self, _Entity_private$, "f").get_instance(), { async });
         for (const p in props) {
             if (Object.prototype.hasOwnProperty.call(props, p)) {
                 if (!~p.indexOf('$')) {
@@ -142,28 +147,15 @@ class Entity {
      *  param {object} [data] - Subset of entity field values.
      *  param {callback~save$} done - Callback function providing saved entity.
      */
-    async save$(data, done) {
+    save$(data, done) {
         const self = this;
         const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
-        let q = {};
-        if ('function' === typeof data) {
-            done = data;
-        }
-        else if (data && 'object' === typeof data) {
-            // TODO: this needs to be deprecated as first param needed for
-            // directives, not data - that's already in entity object
-            self.data$(data);
-            q = data;
-        }
-        const async = is_async(si, done);
-        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { cmd: 'save', q: q });
-        let done$ = null == done
-            ? undefined
-            : this.done$
-                ? this.done$(done)
-                : done;
-        let saved = async ? si.post(entmsg) : (si.act(entmsg, done$), self);
-        return saved;
+        const async = self.async$;
+        let entmsg = { cmd: 'save', q: {} };
+        let done$ = prepareCmd(self, data, entmsg, done);
+        entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
+        let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self);
+        return res; // Sync: self, Async: Entity Promise
     }
     /** Callback for Entity.save$.
      *  @callback callback~save$
@@ -174,14 +166,12 @@ class Entity {
     native$(done) {
         const self = this;
         const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
-        const async = is_async(si, done);
-        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { cmd: 'native' });
-        let done$ = null == done
-            ? undefined
-            : this.done$
-                ? this.done$(done)
-                : done;
-        return async ? si.post(entmsg) : (si.act(entmsg, done$), self);
+        const async = self.async$;
+        let entmsg = { cmd: 'native' };
+        let done$ = prepareCmd(self, undefined, entmsg, done);
+        entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
+        let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self);
+        return res; // Sync: self, Async: Entity Promise
     }
     // load one
     // TODO: qin can be an entity, in which case, grab the id and reload
@@ -193,26 +183,20 @@ class Entity {
     load$(query, done) {
         const self = this;
         const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
+        const async = self.async$;
         const qent = self;
         const q = normalize_query(query, self);
+        let entmsg = { cmd: 'load', q, qent };
         done = 'function' === typeof query ? query : done;
-        const async = is_async(si, done);
         // TODO: test needed
         // Empty query gives empty result.
         if (q == null || 0 === Object.keys(q).length) {
             return async ? null : (done && done.call(si), self);
         }
-        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, {
-            qent: qent,
-            q: q,
-            cmd: 'load',
-        });
-        let done$ = null == done
-            ? undefined
-            : this.done$
-                ? this.done$(done)
-                : done;
-        return async ? si.post(entmsg) : (si.act(entmsg, done$), self);
+        let done$ = prepareCmd(self, undefined, entmsg, done);
+        entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
+        let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self);
+        return res; // Sync: self, Async: Entity Promise
     }
     /** Callback for Entity.load$.
      *  @callback callback~load$
@@ -440,9 +424,32 @@ class Entity {
         }
         return clone;
     }
+    custom$(_props) {
+        return {};
+    }
 }
 exports.Entity = Entity;
 _Entity_private$ = new WeakMap();
+function entityPromise(si, entmsg) {
+    return new Promise((res, rej) => si.act(entmsg, (...args) => args[0] ? rej(args[0]) :
+        res((proto(args[1]).meta$ = args[2], args[1]))));
+}
+function prepareCmd(ent, data, entmsg, done) {
+    if ('function' === typeof data) {
+        done = data;
+    }
+    else if (data && 'object' === typeof data) {
+        // TODO: this needs to be deprecated as first param needed for
+        // directives, not data - that's already in entity object
+        ent.data$(data);
+        entmsg.q = data;
+    }
+    return null == done
+        ? undefined
+        : ent.done$
+            ? ent.done$(done)
+            : done;
+}
 function normalize_query(qin, ent) {
     let q = qin;
     if ((null == qin || 'function' === typeof qin) && ent.id != null) {
@@ -499,6 +506,8 @@ function ERRMSGMAP() {
     };
 }
 function handle_options(entopts) {
+    var _a;
+    entopts = entopts || Object.create(null);
     if (entopts.hide) {
         //_.each(entopts.hide, function (hidden_fields, canon_in) {
         Object.keys(entopts.hide).forEach((hidden_fields) => {
@@ -513,7 +522,7 @@ function handle_options(entopts) {
             toString_map[canon_str] = make_toString(canon_str, hidden_fields, entopts);
         });
     }
-    if (false === entopts.meta.provide) {
+    if (false === ((_a = entopts.meta) === null || _a === void 0 ? void 0 : _a.provide)) {
         // Drop meta argument from callback
         ;
         Entity.prototype.done$ = (done) => {
@@ -524,6 +533,7 @@ function handle_options(entopts) {
                 };
         };
     }
+    return entopts;
 }
 function make_toString(canon_str, hidden_fields_spec, opts) {
     opts = opts || { jsonic: {} };
@@ -558,8 +568,9 @@ function is_async(seneca, done) {
     const has_callback = 'function' === typeof done;
     return promisify_loaded && !has_callback;
 }
+// type CustomProps = { custom$: (props: any) => any }
 function MakeEntity(canon, seneca, opts) {
-    opts && handle_options(opts);
+    opts = handle_options(opts);
     const deep = seneca.util.deep;
     const ent = new Entity(canon, seneca);
     let canon_str = ent.canon$({ string: true });
@@ -574,12 +585,14 @@ function MakeEntity(canon, seneca, opts) {
     // Place instance specific properties into a per-instance prototype,
     // replacing Entity.prototype.prototype
     let hidden = Object.create(Object.getPrototypeOf(ent));
-    hidden.promisify$$ = true;
+    // hidden.promisify$$ = true
     hidden.toString = toString;
     hidden.custom$ = custom$;
+    hidden.async$ = opts.async;
     hidden.private$ = ent.private$;
     Object.setPrototypeOf(ent, hidden);
     delete ent.private$;
+    delete ent.async$;
     return ent;
 }
 exports.MakeEntity = MakeEntity;
