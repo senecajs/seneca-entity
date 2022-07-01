@@ -155,8 +155,8 @@ class Entity {
         let done$ = prepareCmd(self, data, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
         let res = async && !done$ ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$), self);
-        return res; // Sync: self, Async: Entity Promise
+            (si.act(entmsg, done$), async ? null : self);
+        return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
     /** Callback for Entity.save$.
      *  @callback callback~save$
@@ -171,8 +171,9 @@ class Entity {
         let entmsg = { cmd: 'native' };
         let done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
-        let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self);
-        return res; // Sync: self, Async: Entity Promise
+        let res = async ? entityPromise(si, entmsg) :
+            (si.act(entmsg, done$), async ? null : self);
+        return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
     // load one
     // TODO: qin can be an entity, in which case, grab the id and reload
@@ -196,8 +197,9 @@ class Entity {
         }
         let done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
-        let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self);
-        return res; // Sync: self, Async: Entity Promise
+        let res = async ? entityPromise(si, entmsg) :
+            (si.act(entmsg, done$), async ? null : self);
+        return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
     /** Callback for Entity.load$.
      *  @callback callback~load$

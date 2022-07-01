@@ -177,8 +177,8 @@ class Entity implements Record<string, any> {
     entmsg = self.#private$.entargs(self, entmsg)
 
     let res = async && !done$ ? entityPromise(si, entmsg) :
-      (si.act(entmsg, done$), self)
-    return res // Sync: self, Async: Entity Promise
+      (si.act(entmsg, done$), async ? null : self)
+    return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
 
   /** Callback for Entity.save$.
@@ -198,8 +198,9 @@ class Entity implements Record<string, any> {
     let done$ = prepareCmd(self, undefined, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
-    let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self)
-    return res // Sync: self, Async: Entity Promise
+    let res = async ? entityPromise(si, entmsg) :
+      (si.act(entmsg, done$), async ? null : self)
+    return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
 
 
@@ -231,8 +232,9 @@ class Entity implements Record<string, any> {
     let done$ = prepareCmd(self, undefined, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
-    let res = async ? entityPromise(si, entmsg) : (si.act(entmsg, done$), self)
-    return res // Sync: self, Async: Entity Promise
+    let res = async ? entityPromise(si, entmsg) :
+      (si.act(entmsg, done$), async ? null : self)
+    return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
 
 

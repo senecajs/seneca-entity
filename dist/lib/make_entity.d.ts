@@ -9,13 +9,13 @@ declare class Entity implements Record<string, any> {
      *  param {object} [data] - Subset of entity field values.
      *  param {callback~save$} done - Callback function providing saved entity.
      */
-    save$(data: any, done?: any): this | Promise<unknown>;
+    save$(data: any, done?: any): this | Promise<unknown> | null;
     /** Callback for Entity.save$.
      *  @callback callback~save$
      *  @param {error} error - Error object, if any.
      *  @param {Entity} entity - Saved Entity object containing updated data fields (in particular, `id`, if auto-generated).
      */
-    native$(done?: any): this | Promise<unknown>;
+    native$(done?: any): this | Promise<unknown> | null;
     /** Load the entity.
      *  param {object|string|number} [query] - Either a entity id, or a query object with field values that must match.
      *  param {callback~load$} done - Callback function providing loaded entity, if found.

@@ -934,6 +934,59 @@ describe('entity', function () {
     }
   })
 
+
+  test('prior-entity-error-save', (fin) => {
+    const si = Seneca({
+      legacy: false,
+      log: 'silent',
+    }).use(Entity)
+
+    let errCount = 0
+    
+    si.error((err)=>{
+      expect(err.message).toContain('save-fail')
+      errCount++
+      if(3 === errCount) {
+        return fin()
+      }
+    })
+
+    si.ready(function() {
+      si.add('role:entity,cmd:save', function save_fail(msg, reply) {
+        throw new Error('save-fail')
+      })
+
+      // errCount=1
+      si.make('foo').data$({x:1}).save$(function(err, foo) {
+        expect(err.message).toContain('save-fail')
+
+        // NOT: cannot throw - actions are async!!!
+        // errCount=2
+        si.make('foo').data$({x:2}).save$()
+
+        async_error(si)
+      })
+    })
+           
+    async function async_error(si) {
+      try {
+        await si.entity('bar').data$({z:3}).save$()
+        throw new Error('should-fail')
+      }
+      catch(e) {
+        expect(e.message).toContain('save-fail')
+      }
+
+      // NOTE: becomes like .make
+      // errCount=3
+      let out = si.entity('bar').data$({z:3}).save$(function (err, out) {
+        expect(err.message).toContain('save-fail')
+      })
+
+      expect(out).toEqual(null)
+    }
+  })
+
   
   test('custom-basic', function (fin) {
     let si0 = Seneca().test(fin).use(Entity)
