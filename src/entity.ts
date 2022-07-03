@@ -70,9 +70,9 @@ function preload(this: any, context: any) {
   }
 
   // all optional
-  function build_api_make(async: boolean) {
+  function build_api_make(promise: boolean) {
     return function(this: any) {
-      return seneca.private$.entity.make$(this, ...[...arguments, async])
+      return seneca.private$.entity.make$(this, ...[...arguments, promise])
     }
   }
 

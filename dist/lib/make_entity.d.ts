@@ -1,7 +1,6 @@
 declare class Entity implements Record<string, any> {
     #private;
     entity$: string;
-    async$?: boolean;
     private$: any;
     constructor(canon: any, seneca: any);
     make$(...args: any[]): any;
@@ -30,7 +29,7 @@ declare class Entity implements Record<string, any> {
      *  param {object|string|number} [query] - A query object with field values that must match, can be empty.
      *  param {callback~list$} done - Callback function providing list of matching `Entity` objects, if any.
      */
-    list$(query: any, done?: any): any;
+    list$(query: any, done?: any): this | Promise<unknown> | null;
     /** Callback for Entity.list$.
      *  @callback callback~list$
      *  @param {error} error - Error object, if any.

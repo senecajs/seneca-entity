@@ -36,7 +36,8 @@ function entargs(this: any, ent: Entity, args: any) {
 
 class Entity implements Record<string, any> {
   entity$: string
-  async$?: boolean
+
+  // NOTE: this will be moved to a per-instance prototype
   private$: any
 
   #private$: any = {}
@@ -49,14 +50,13 @@ class Entity implements Record<string, any> {
     }
     private$.canon = canon
     private$.entargs = entargs
+    private$.promise = false
 
     this.private$ = this.#private$
 
     // use as a quick test to identify Entity objects
     // returns compact string zone/base/name
     this.entity$ = this.canon$()
-
-    this.async$ = false
   }
 
   // Properties without '$' suffix are persisted
@@ -77,10 +77,10 @@ class Entity implements Record<string, any> {
     const self = this
     let first = args[0]
     let last = args[args.length - 1]
-    let async = self.async$
+    let promise = self.#private$.promise
 
     if ('boolean' === typeof last) {
-      async = last
+      promise = last
       args = args.slice(0, args.length - 1)
     }
 
@@ -141,7 +141,7 @@ class Entity implements Record<string, any> {
     new_canon.zone = zone == null ? self.#private$.canon.zone : zone
 
     const entity: Entity =
-      MakeEntity(new_canon, self.#private$.get_instance(), { async })
+      MakeEntity(new_canon, self.#private$.get_instance(), { promise })
 
     for (const p in props) {
       if (Object.prototype.hasOwnProperty.call(props, p)) {
@@ -163,6 +163,7 @@ class Entity implements Record<string, any> {
     return entity
   }
 
+
   /** Save the entity.
    *  param {object} [data] - Subset of entity field values.
    *  param {callback~save$} done - Callback function providing saved entity.
@@ -170,14 +171,14 @@ class Entity implements Record<string, any> {
   save$(data: any, done?: any) {
     const self = this
     const si = self.#private$.get_instance()
-    const async = self.async$
+    const promise = self.#private$.promise
 
     let entmsg = { cmd: 'save', q: {} }
     let done$ = prepareCmd(self, data, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
-    let res = async && !done$ ? entityPromise(si, entmsg) :
-      (si.act(entmsg, done$), async ? null : self)
+    let res = promise && !done$ ? entityPromise(si, entmsg) :
+      (si.act(entmsg, done$), promise ? null : self)
     return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
 
@@ -192,14 +193,14 @@ class Entity implements Record<string, any> {
   native$(done?: any) {
     const self = this
     const si = self.#private$.get_instance()
-    const async = self.async$
+    const promise = self.#private$.promise
 
     let entmsg = { cmd: 'native' }
     let done$ = prepareCmd(self, undefined, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
-    let res = async ? entityPromise(si, entmsg) :
-      (si.act(entmsg, done$), async ? null : self)
+    let res = promise ? entityPromise(si, entmsg) :
+      (si.act(entmsg, done$), promise ? null : self)
     return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
 
@@ -215,7 +216,7 @@ class Entity implements Record<string, any> {
   load$(query: any, done?: any) {
     const self = this
     const si = self.#private$.get_instance()
-    const async = self.async$
+    const promise = self.#private$.promise
     const qent = self
 
     const q = normalize_query(query, self)
@@ -225,15 +226,15 @@ class Entity implements Record<string, any> {
 
     // TODO: test needed
     // Empty query gives empty result.
-    if (q == null || 0 === Object.keys(q).length) {
-      return async ? null : (done && done.call(si), self)
+    if (null == q || 0 === Object.keys(q).length) {
+      return promise ? null : (done && done.call(si), self)
     }
 
     let done$ = prepareCmd(self, undefined, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
-    let res = async ? entityPromise(si, entmsg) :
-      (si.act(entmsg, done$), async ? null : self)
+    let res = promise ? entityPromise(si, entmsg) :
+      (si.act(entmsg, done$), promise ? null : self)
     return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
 
@@ -253,33 +254,28 @@ class Entity implements Record<string, any> {
    *  param {object|string|number} [query] - A query object with field values that must match, can be empty.
    *  param {callback~list$} done - Callback function providing list of matching `Entity` objects, if any.
    */
+
+  // TODO: refactor list, remove, etc, as per save, load
   list$(query: any, done?: any) {
     const self = this
-    const si = self.#private$.get_instance()
 
-    const qent = self
-    let q = query
     if ('function' === typeof query) {
-      q = {}
       done = query
+      query = null
     }
 
-    q = normalize_query(q, self)
+    const si = self.#private$.get_instance()
+    const promise = self.#private$.promise
 
-    const async = is_async(si, done)
-    const entmsg = self.#private$.entargs(self, {
-      qent: qent,
-      q: q,
-      cmd: 'list',
-    })
+    const q = normalize_query(query, self)
+    let entmsg = { cmd: 'list', q, qent: self }
 
-    let done$ =
-      null == done
-        ? undefined
-        : (this as any).done$
-          ? (this as any).done$(done)
-          : done
-    return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
+    const done$ = prepareCmd(self, undefined, entmsg, done)
+    entmsg = self.#private$.entargs(self, entmsg)
+
+    let res = promise ? entityPromise(si, entmsg) :
+      (si.act(entmsg, done$), promise ? null : self)
+    return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
 
   /** Callback for Entity.list$.
@@ -382,6 +378,7 @@ class Entity implements Record<string, any> {
     return Util.inspect(self.canon$({ object: true })) === Util.inspect(canon)
   }
 
+
   canon$(opt?: any) {
     const self = this
 
@@ -432,6 +429,7 @@ class Entity implements Record<string, any> {
               ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
               : [canon.zone, canon.base, canon.name]
   }
+
 
   // data = object, or true|undef = include $, false = exclude $
   data$(data?: any, canonkind?: any) {
@@ -504,6 +502,7 @@ class Entity implements Record<string, any> {
     }
   }
 
+
   clone$() {
     const self: any = this
     let deep = this.#private$.get_instance().util.deep
@@ -516,14 +515,23 @@ class Entity implements Record<string, any> {
     return clone
   }
 
+
   custom$(_props: any): any {
     return {}
   }
 }
 
+
+// Return an entity operation result as a promise,
+// attaching the meta callback argument to the result object for easier access.
 function entityPromise(si: any, entmsg: any) {
-  return new Promise((res, rej) => si.act(entmsg, (...args: any[]) => args[0] ? rej(args[0]) :
-    res((proto(args[1]).meta$ = args[2], args[1]))))
+  return new Promise((res, rej) => {
+    si.act(entmsg, (err: any, out: any, meta: any) => {
+      err ?
+        rej((err.meta$ = meta, err)) :
+        res(((out.entity$ ? proto(out) : out).meta$ = meta, out))
+    })
+  })
 }
 
 
@@ -716,18 +724,15 @@ function MakeEntity(canon: any, seneca: any, opts?: any): Entity {
 
   let hidden = Object.create(Object.getPrototypeOf(ent))
 
-  // hidden.promisify$$ = true
-
   hidden.toString = toString
   hidden.custom$ = custom$
-  hidden.async$ = opts.async
+
   hidden.private$ = ent.private$
+  hidden.private$.promise = !!opts.promise
 
   Object.setPrototypeOf(ent, hidden)
 
   delete ent.private$
-  delete ent.async$
-
   return ent as Entity
 }
 

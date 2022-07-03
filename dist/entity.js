@@ -53,9 +53,9 @@ function preload(context) {
         };
     }
     // all optional
-    function build_api_make(async) {
+    function build_api_make(promise) {
         return function () {
-            return seneca.private$.entity.make$(this, ...[...arguments, async]);
+            return seneca.private$.entity.make$(this, ...[...arguments, promise]);
         };
     }
     let make = build_api_make(false);

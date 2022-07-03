@@ -356,26 +356,48 @@ describe('entity', function () {
     si.close(fin)
   })
 
-  // TODO: a bit more please!
-  test('load', function (fin) {
-    const si = SenecaInstance()
+  test('load-callback', function (fin) {
+    const si = SenecaInstance().test(fin)
     const foo = si.make$('foo')
-    foo.load$(null, function () {
+    foo.load$(function (err, out) {
       expect(this.seneca).toBeDefined()
+      expect(err).toBeUndefined()
       fin()
     })
   })
 
   // TODO: a bit more please!
-  test('remove', function (fin) {
-    const si = SenecaInstance()
+  test('remove-callback', function (fin) {
+    const si = SenecaInstance().test(fin)
     const foo = si.make$('foo')
-    foo.remove$(null, function () {
+    foo.remove$(function (err, out) {
       expect(this.seneca).toBeDefined()
+      expect(err).toBeUndefined()
+      expect(out).toBeUndefined()
       fin()
     })
   })
 
+
+  // TODO: a bit more please!
+  test('list-callback', function (fin) {
+    const si = SenecaInstance().test(fin)
+    const foo = si.make$('foo')
+    foo.save$(function (err, fooS) {
+      expect(this.seneca).toBeDefined()
+      expect(err).toBeNull()
+      expect(fooS).toBeDefined()
+
+      foo.list$(function(err, list) {
+        expect(this.seneca).toBeDefined()
+        expect(err).toBeNull()
+        expect(list[0].id).toEqual(fooS.id)
+        fin()
+      })
+    })
+  })
+
+  
   test('fields-directive', function (fin) {
     const si = SenecaInstance()
     si.test(fin)
