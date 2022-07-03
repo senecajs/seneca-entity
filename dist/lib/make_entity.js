@@ -133,14 +133,17 @@ class Entity {
         for (const p in props) {
             if (Object.prototype.hasOwnProperty.call(props, p)) {
                 if (!~p.indexOf('$')) {
+                    ;
                     entity[p] = props[p];
                 }
                 else if (p.length > 2 && p.slice(-2) === '_$') {
+                    ;
                     entity[p.slice(0, -2)] = props[p];
                 }
             }
         }
         if (Object.prototype.hasOwnProperty.call(props, 'id$')) {
+            ;
             entity.id$ = props.id$;
         }
         ;
@@ -159,8 +162,9 @@ class Entity {
         let done$ = prepareCmd(self, data, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
         const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
-        let res = promise ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$), promise ? NO_ENTITY : self);
+        let res = promise
+            ? entityPromise(si, entmsg)
+            : (si.act(entmsg, done$), promise ? NO_ENTITY : self);
         return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
     /** Callback for Entity.save$.
@@ -176,8 +180,9 @@ class Entity {
         let entmsg = { cmd: 'native' };
         let done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
-        let res = promise && !done ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$), promise ? NO_ENTITY : self);
+        let res = promise && !done
+            ? entityPromise(si, entmsg)
+            : (si.act(entmsg, done$), promise ? NO_ENTITY : self);
         return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
     // load one
@@ -201,10 +206,13 @@ class Entity {
         const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
         // Empty query gives empty result.
         if (emptyQuery(q)) {
-            return promise ? NO_ENTITY : (done && done.call(si, NO_ERROR, NO_ENTITY), self);
+            return promise
+                ? NO_ENTITY
+                : (done && done.call(si, NO_ERROR, NO_ENTITY), self);
         }
-        let res = promise ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$), promise ? NO_ENTITY : self);
+        let res = promise
+            ? entityPromise(si, entmsg)
+            : (si.act(entmsg, done$), promise ? NO_ENTITY : self);
         // Sync: Enity self, Async: Entity Promise, Async+Callback: null
         return res;
     }
@@ -233,10 +241,12 @@ class Entity {
         const done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
         const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
-        let res = promise ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$),
-                promise ? NO_ENTITY : // NOTE: [] is *not* valid here, as result is async
-                    self);
+        let res = promise
+            ? entityPromise(si, entmsg)
+            : (si.act(entmsg, done$),
+                promise
+                    ? NO_ENTITY // NOTE: [] is *not* valid here, as result is async
+                    : self);
         // Sync: Enity self, Async: Entity Promise, Async+Callback: null
         return res;
     }
@@ -264,11 +274,13 @@ class Entity {
         const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
         // empty query means take no action
         if (emptyQuery(q)) {
-            return promise ? NO_ENTITY :
-                (done$ && done$.call(si, NO_ERROR, NO_ENTITY), self);
+            return promise
+                ? NO_ENTITY
+                : (done$ && done$.call(si, NO_ERROR, NO_ENTITY), self);
         }
-        let res = promise ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$), promise ? NO_ENTITY : self);
+        let res = promise
+            ? entityPromise(si, entmsg)
+            : (si.act(entmsg, done$), promise ? NO_ENTITY : self);
         return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
     // DEPRECATE: legacy
@@ -444,11 +456,13 @@ function entityPromise(si, entmsg) {
     let attachMeta = true === ((_a = entmsg.q) === null || _a === void 0 ? void 0 : _a.meta$);
     return new Promise((res, rej) => {
         si.act(entmsg, (err, out, meta) => {
-            err ?
-                rej((attachMeta ? err.meta$ = meta : null, err)) :
-                res((attachMeta ?
-                    ((out === null || out === void 0 ? void 0 : out.entity$) ? proto(out) :
-                        (out || (out = { entity$: null }))).meta$ = meta : null,
+            err
+                ? rej((attachMeta ? (err.meta$ = meta) : null, err))
+                : res((attachMeta
+                    ? (((out === null || out === void 0 ? void 0 : out.entity$)
+                        ? proto(out)
+                        : out || (out = { entity$: null })).meta$ = meta)
+                    : null,
                     out));
         });
     });
@@ -463,11 +477,7 @@ function prepareCmd(ent, data, entmsg, done) {
         ent.data$(data);
         entmsg.q = data;
     }
-    return null == done
-        ? undefined
-        : ent.done$
-            ? ent.done$(done)
-            : done;
+    return null == done ? undefined : ent.done$ ? ent.done$(done) : done;
 }
 function emptyQuery(q) {
     return null == q || 0 === Object.keys(q).length;

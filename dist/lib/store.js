@@ -154,10 +154,11 @@ const Intern = {
             return cmdfunc.call(this, msg, reply, meta);
         };
         Object.defineProperty(outfunc, 'name', {
-            value: 'entity_' + cmd +
+            value: 'entity_' +
+                cmd +
                 (null == zone ? '' : zone + '_') +
                 (null == base ? '' : base + '_') +
-                (null == name ? '' : name)
+                (null == name ? '' : name),
         });
         return outfunc;
     },

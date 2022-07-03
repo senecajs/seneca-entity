@@ -1,7 +1,7 @@
 {
   "name": "seneca-entity",
   "main": "dist/entity.js",
-  "version": "17.1.0",
+  "version": "18.0.0",
   "type": "commonjs",
   "types": "dist/gateway.d.ts",
   "description": "Entity plugin for seneca",

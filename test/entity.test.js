@@ -45,9 +45,7 @@ describe('entity', function () {
   })
 
   test('happy-mem-promise', async function () {
-    const si = Seneca({ legacy: false })
-          .use('promisify')
-          .use('..').test()
+    const si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
     const fooent = si.entity('foo')
 
@@ -141,8 +139,8 @@ describe('entity', function () {
 
     zeds = await si.entity('core/zed').list$([zed0.id, zed1.id])
     expect(zeds.length).toEqual(2)
-    
-    zeds = await si.entity('core/zed').list$({id:[zed0.id, zed1.id]})
+
+    zeds = await si.entity('core/zed').list$({ id: [zed0.id, zed1.id] })
     expect(zeds.length).toEqual(2)
 
     await si.entity('core/zed').remove$({ z: 1 })
@@ -150,7 +148,6 @@ describe('entity', function () {
     expect(zeds.length).toEqual(1)
   })
 
-  
   test('tag-load', function (fin) {
     const s0 = Seneca()
       .test(fin)
@@ -161,7 +158,6 @@ describe('entity', function () {
     fin()
   })
 
-  
   test('plain-messages', function (fin) {
     const s0 = Seneca().test(fin).use(Entity)
 
@@ -287,7 +283,7 @@ describe('entity', function () {
     w0.call(si, { role: 'entity', cmd: 'list', name: 'n0', sort: '-foo' }, fin)
   })
   */
-  
+
   test('common', function (fin) {
     expect(generate_id(3).length).toEqual(3)
     expect(generate_id({ length: 1 }).length).toEqual(1)
@@ -354,14 +350,13 @@ describe('entity', function () {
     expect('-/0/0').toEqual(fmt(si.util.parsecanon('0/0')))
     expect('0/0/0').toEqual(fmt(si.util.parsecanon('0/0/0')))
 
-    expect(()=>si.util.parsecanon('')).toThrow('Invalid entity canon')
-    expect(()=>si.util.parsecanon('?')).toThrow('Invalid entity canon')
+    expect(() => si.util.parsecanon('')).toThrow('Invalid entity canon')
+    expect(() => si.util.parsecanon('?')).toThrow('Invalid entity canon')
 
     const foo = si.make$('foo')
     expect('a/b/c').toEqual(fmt(foo.canon$({ parse: 'a/b/c' })))
     si.close(fin)
   })
-
 
   test('load-callback', function (fin) {
     const si = SenecaInstance().test(fin)
@@ -374,7 +369,6 @@ describe('entity', function () {
     })
   })
 
-
   test('remove-callback', function (fin) {
     const si = SenecaInstance().test(fin)
     const foo = si.make$('foo')
@@ -385,8 +379,6 @@ describe('entity', function () {
       fin()
     })
   })
-
-
 
   test('save-callback', function (fin) {
     const si = SenecaInstance().test(fin)
@@ -405,7 +397,6 @@ describe('entity', function () {
     expect(out.entity$).toEqual('-/-/foo')
   })
 
-
   test('list-callback', function (fin) {
     const si = SenecaInstance().test(fin)
     const foo = si.make$('foo')
@@ -416,7 +407,7 @@ describe('entity', function () {
       expect(err).toBeNull()
       expect(fooS).toBeDefined()
 
-      foo.list$(function(err, list) {
+      foo.list$(function (err, list) {
         expect(this.seneca).toBeDefined()
 
         // TODO: fix mem-store - should be undefined
@@ -427,22 +418,20 @@ describe('entity', function () {
     })
   })
 
-  
   test('load-promise', async () => {
     const si = SenecaInstance().test()
     const foo = si.entity('foo')
     const out0 = await foo.load$()
     expect(out0).toEqual(null)
 
-    const out0m = await foo.load$({meta$:true})
+    const out0m = await foo.load$({ meta$: true })
     expect(out0m.entity$).toBeNull()
     expect(out0m.meta$).toBeDefined()
     expect(out0m.meta$.action).toMatch(/^entity_load/)
 
-    
-    await new Promise((res,rej)=>{
-      const out1 = foo.load$(function(err, out2) {
-        if(err) rej(err);
+    await new Promise((res, rej) => {
+      const out1 = foo.load$(function (err, out2) {
+        if (err) rej(err)
         expect(err).toBeNull()
         expect(out2).toBeNull()
         res()
@@ -452,9 +441,8 @@ describe('entity', function () {
       expect(out1).toBeDefined()
       expect(out1.id).toBeUndefined()
       expect(out1.entity$).toEqual('-/-/foo')
-    })    
+    })
   })
-
 
   test('save-promise', async () => {
     const si = SenecaInstance().test()
@@ -463,15 +451,15 @@ describe('entity', function () {
     expect(out0).toBeDefined()
     expect(out0.id).toBeDefined()
 
-    const out0m = await foo.save$({meta$:true})
+    const out0m = await foo.save$({ meta$: true })
     expect(out0m).toBeDefined()
     expect(out0m.id).toBeDefined()
     expect(out0m.meta$).toBeDefined()
     expect(out0m.meta$.action).toMatch(/^entity_save/)
 
-    await new Promise((res,rej)=>{
-      const out1 = foo.save$(function(err, out2) {
-        if(err) rej(err);
+    await new Promise((res, rej) => {
+      const out1 = foo.save$(function (err, out2) {
+        if (err) rej(err)
         expect(err).toBeNull()
         expect(out2).toBeDefined()
         expect(out2.id).toBeDefined()
@@ -482,9 +470,8 @@ describe('entity', function () {
       expect(out1).toBeDefined()
       expect(out1.id).toBeUndefined()
       expect(out1.entity$).toEqual('-/-/foo')
-    })    
+    })
   })
-
 
   test('list-promise', async () => {
     const si = SenecaInstance().test()
@@ -492,15 +479,14 @@ describe('entity', function () {
     const out0 = await foo.list$()
     expect(out0).toEqual([])
 
-    const out0m = await foo.list$({meta$:true})
+    const out0m = await foo.list$({ meta$: true })
     expect(out0m.meta$).toBeDefined()
     expect(out0m.meta$.action).toMatch(/^entity_list/)
     expect(jj(out0m)).toEqual([])
 
-    
-    await new Promise((res,rej)=>{
-      const out1 = foo.list$(function(err, out2) {
-        if(err) rej(err);
+    await new Promise((res, rej) => {
+      const out1 = foo.list$(function (err, out2) {
+        if (err) rej(err)
         expect(err).toBeNull()
         expect(out2).toEqual([])
         res()
@@ -510,9 +496,8 @@ describe('entity', function () {
       expect(out1).toBeDefined()
       expect(!Array.isArray(out1)).toBeTruthy()
       expect(out1.entity$).toEqual('-/-/foo')
-    })    
+    })
   })
-
 
   test('remove-promise', async () => {
     const si = SenecaInstance().test()
@@ -520,15 +505,14 @@ describe('entity', function () {
     const out0 = await foo.remove$()
     expect(out0).toEqual(null)
 
-    const out0m = await foo.remove$({meta$:true})
+    const out0m = await foo.remove$({ meta$: true })
     expect(out0m.entity$).toBeNull()
     expect(out0m.meta$).toBeDefined()
     expect(out0m.meta$.action).toMatch(/^entity_remove/)
 
-    
-    await new Promise((res,rej)=>{
-      const out1 = foo.remove$(function(err, out2) {
-        if(err) rej(err);
+    await new Promise((res, rej) => {
+      const out1 = foo.remove$(function (err, out2) {
+        if (err) rej(err)
         expect(err).toBeNull()
         expect(out2).toBeNull()
         res()
@@ -537,9 +521,8 @@ describe('entity', function () {
       expect(out1).toBeDefined()
       expect(out1.id).toBeUndefined()
       expect(out1.entity$).toEqual('-/-/foo')
-    })    
+    })
   })
-
 
   test('fields-directive', function (fin) {
     const si = SenecaInstance()
@@ -1054,34 +1037,37 @@ describe('entity', function () {
     )
   })
 
-  
   test('prior-entity-save', (fin) => {
     const si = Seneca({ legacy: false }).test(fin).use(Entity)
 
-    si.make('foo').data$({x:1}).save$(function(err, foo) {
-      expect(err).toBeNull()
-      expect(foo.id).toBeDefined()
-      expect(foo.x).toEqual(1)
-      expect(foo.entity$).toEqual('-/-/foo')
-
-      si.add('role:entity,cmd:save', function(msg, reply) {
-        msg.ent.y=2
-        return this.prior(msg, reply)
-      })
-
-      si.make('foo').data$({x:1}).save$(function(err, foo) {
+    si.make('foo')
+      .data$({ x: 1 })
+      .save$(function (err, foo) {
         expect(err).toBeNull()
         expect(foo.id).toBeDefined()
         expect(foo.x).toEqual(1)
-        expect(foo.y).toEqual(2)
         expect(foo.entity$).toEqual('-/-/foo')
-      
-        async_prior(si)
+
+        si.add('role:entity,cmd:save', function (msg, reply) {
+          msg.ent.y = 2
+          return this.prior(msg, reply)
+        })
+
+        si.make('foo')
+          .data$({ x: 1 })
+          .save$(function (err, foo) {
+            expect(err).toBeNull()
+            expect(foo.id).toBeDefined()
+            expect(foo.x).toEqual(1)
+            expect(foo.y).toEqual(2)
+            expect(foo.entity$).toEqual('-/-/foo')
+
+            async_prior(si)
+          })
       })
-    })
-    
+
     async function async_prior(si) {
-      let bar = si.entity('bar').data$({z:3})
+      let bar = si.entity('bar').data$({ z: 3 })
       expect(bar.id).toBeUndefined()
       expect(bar.z).toEqual(3)
       expect(bar.y).toBeUndefined()
@@ -1097,7 +1083,6 @@ describe('entity', function () {
     }
   })
 
-
   test('prior-entity-error-save', (fin) => {
     const si = Seneca({
       legacy: false,
@@ -1105,53 +1090,56 @@ describe('entity', function () {
     }).use(Entity)
 
     let errCount = 0
-    
-    si.error((err)=>{
+
+    si.error((err) => {
       expect(err.message).toContain('save-fail')
       errCount++
-      if(3 === errCount) {
+      if (3 === errCount) {
         return fin()
       }
     })
 
-    si.ready(function() {
+    si.ready(function () {
       si.add('role:entity,cmd:save', function save_fail(msg, reply) {
         throw new Error('save-fail')
       })
 
       // errCount=1
-      si.make('foo').data$({x:1}).save$(function(err, foo) {
-        expect(err.message).toContain('save-fail')
+      si.make('foo')
+        .data$({ x: 1 })
+        .save$(function (err, foo) {
+          expect(err.message).toContain('save-fail')
 
-        // NOT: cannot throw - actions are async!!!
-        // errCount=2
-        si.make('foo').data$({x:2}).save$()
+          // NOT: cannot throw - actions are async!!!
+          // errCount=2
+          si.make('foo').data$({ x: 2 }).save$()
 
-        async_error(si)
-      })
+          async_error(si)
+        })
     })
-           
+
     async function async_error(si) {
       try {
-        await si.entity('bar').data$({z:3}).save$()
+        await si.entity('bar').data$({ z: 3 }).save$()
         throw new Error('should-fail')
-      }
-      catch(e) {
+      } catch (e) {
         expect(e.message).toContain('save-fail')
       }
 
       // NOTE: becomes like .make
       // errCount=3
-      let out = si.entity('bar').data$({z:3}).save$(function (err, out) {
-        expect(err.message).toContain('save-fail')
-      })
+      let out = si
+        .entity('bar')
+        .data$({ z: 3 })
+        .save$(function (err, out) {
+          expect(err.message).toContain('save-fail')
+        })
 
       expect(out.id).toBeUndefined()
       expect(out.entity$).toEqual('-/-/bar')
     }
   })
 
-  
   test('custom-basic', function (fin) {
     let si0 = Seneca().test(fin).use(Entity)
     let foo0 = si0.make$('foo').data$({ a: 1, b: 2 })
@@ -1217,20 +1205,18 @@ describe('entity', function () {
     fin()
   })
 
-  
   test('custom-directive', function (fin) {
     let si0 = Seneca().test(fin).use(Entity)
     let tmp = { saves: { a: [], b: [] } }
 
     si0.ready(function () {
-
       // Define a prior operation driven by the entity custom$ directive
       si0.add('role:entity,cmd:save', function save_what(msg, done) {
         let what = (msg.ent.custom$ && msg.ent.custom$.what) || 'a'
         tmp.saves[what].push(msg.ent.x)
         this.prior(msg, done)
       })
-      
+
       // The save_what entity prior is not triggered as no ent.custom$
       si0
         .entity('foo')
@@ -1301,8 +1287,6 @@ describe('entity', function () {
       })
   })
 })
-
-
 
 function jj(x) {
   return JSON.parse(JSON.stringify(x))

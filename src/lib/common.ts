@@ -3,7 +3,6 @@
 // TODO: get this from current Seneca instance
 import Nid from 'nid'
 
-
 // cache nid funcs up to length 64
 const nids: any = []
 

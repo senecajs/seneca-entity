@@ -22,7 +22,6 @@ const NO_ENTITY = null
 // `null` represents no error.
 const NO_ERROR = null
 
-
 function entargs(this: any, ent: Entity, args: any) {
   args.role = 'entity'
   args.ent = ent
@@ -42,7 +41,6 @@ function entargs(this: any, ent: Entity, args: any) {
   return args
 }
 
-
 class Entity implements Record<string, any> {
   entity$: string
 
@@ -54,7 +52,7 @@ class Entity implements Record<string, any> {
   constructor(canon: any, seneca: any) {
     const private$: any = this.#private$
 
-    private$.get_instance = function() {
+    private$.get_instance = function () {
       return seneca
     }
     private$.canon = canon
@@ -96,7 +94,7 @@ class Entity implements Record<string, any> {
     // Set seneca instance, if provided as first arg.
     if (first && first.seneca) {
       const seneca = first
-      self.#private$.get_instance = function() {
+      self.#private$.get_instance = function () {
         return seneca
       }
       first = args[1]
@@ -149,29 +147,31 @@ class Entity implements Record<string, any> {
     new_canon.base = base == null ? self.#private$.canon.base : base
     new_canon.zone = zone == null ? self.#private$.canon.zone : zone
 
-    const entity: Entity =
-      MakeEntity(new_canon, self.#private$.get_instance(), { promise })
+    const entity: Entity = MakeEntity(
+      new_canon,
+      self.#private$.get_instance(),
+      { promise }
+    )
 
     for (const p in props) {
       if (Object.prototype.hasOwnProperty.call(props, p)) {
         if (!~p.indexOf('$')) {
-          (entity as any)[p] = props[p]
+          ;(entity as any)[p] = props[p]
         } else if (p.length > 2 && p.slice(-2) === '_$') {
-          (entity as any)[p.slice(0, -2)] = props[p]
+          ;(entity as any)[p.slice(0, -2)] = props[p]
         }
       }
     }
 
     if (Object.prototype.hasOwnProperty.call(props, 'id$')) {
-      (entity as any).id$ = props.id$
+      ;(entity as any).id$ = props.id$
     }
 
-    ; (self as any).log$ &&
+    ;(self as any).log$ &&
       (self as any).log$('make', entity.canon$({ string: true }), entity)
 
     return entity
   }
-
 
   /** Save the entity.
    *  param {object} [data] - Subset of entity field values.
@@ -187,8 +187,9 @@ class Entity implements Record<string, any> {
 
     const promise = self.#private$.promise && !done$
 
-    let res = promise ? entityPromise(si, entmsg) :
-      (si.act(entmsg, done$), promise ? NO_ENTITY : self)
+    let res = promise
+      ? entityPromise(si, entmsg)
+      : (si.act(entmsg, done$), promise ? NO_ENTITY : self)
     return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
 
@@ -197,7 +198,6 @@ class Entity implements Record<string, any> {
    *  @param {error} error - Error object, if any.
    *  @param {Entity} entity - Saved Entity object containing updated data fields (in particular, `id`, if auto-generated).
    */
-
 
   // provide native database driver
   native$(done?: any) {
@@ -209,11 +209,12 @@ class Entity implements Record<string, any> {
     let done$ = prepareCmd(self, undefined, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
-    let res = promise && !done ? entityPromise(si, entmsg) :
-      (si.act(entmsg, done$), promise ? NO_ENTITY : self)
+    let res =
+      promise && !done
+        ? entityPromise(si, entmsg)
+        : (si.act(entmsg, done$), promise ? NO_ENTITY : self)
     return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
-
 
   // load one
   // TODO: qin can be an entity, in which case, grab the id and reload
@@ -243,16 +244,18 @@ class Entity implements Record<string, any> {
 
     // Empty query gives empty result.
     if (emptyQuery(q)) {
-      return promise ? NO_ENTITY : (done && done.call(si, NO_ERROR, NO_ENTITY), self)
+      return promise
+        ? NO_ENTITY
+        : (done && done.call(si, NO_ERROR, NO_ENTITY), self)
     }
 
-    let res = promise ? entityPromise(si, entmsg) :
-      (si.act(entmsg, done$), promise ? NO_ENTITY : self)
+    let res = promise
+      ? entityPromise(si, entmsg)
+      : (si.act(entmsg, done$), promise ? NO_ENTITY : self)
 
     // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     return res
   }
-
 
   /** Callback for Entity.load$.
    *  @callback callback~load$
@@ -289,10 +292,12 @@ class Entity implements Record<string, any> {
 
     const promise = self.#private$.promise && !done$
 
-    let res = promise ? entityPromise(si, entmsg) :
-      (si.act(entmsg, done$),
-        promise ? NO_ENTITY : // NOTE: [] is *not* valid here, as result is async
-          self)
+    let res = promise
+      ? entityPromise(si, entmsg)
+      : (si.act(entmsg, done$),
+        promise
+          ? NO_ENTITY // NOTE: [] is *not* valid here, as result is async
+          : self)
 
     // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     return res
@@ -303,7 +308,6 @@ class Entity implements Record<string, any> {
    *  @param {error} error - Error object, if any.
    *  @param {Entity} entity - Array of `Entity` objects matching query.
    */
-
 
   // remove one or more
   // TODO: make qin optional, in which case, use id
@@ -330,15 +334,16 @@ class Entity implements Record<string, any> {
 
     // empty query means take no action
     if (emptyQuery(q)) {
-      return promise ? NO_ENTITY :
-        (done$ && done$.call(si, NO_ERROR, NO_ENTITY), self)
+      return promise
+        ? NO_ENTITY
+        : (done$ && done$.call(si, NO_ERROR, NO_ENTITY), self)
     }
 
-    let res = promise ? entityPromise(si, entmsg) :
-      (si.act(entmsg, done$), promise ? NO_ENTITY : self)
+    let res = promise
+      ? entityPromise(si, entmsg)
+      : (si.act(entmsg, done$), promise ? NO_ENTITY : self)
     return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
-
 
   // DEPRECATE: legacy
   delete$(query: any, done?: any) {
@@ -349,7 +354,6 @@ class Entity implements Record<string, any> {
    *  @callback callback~remove$
    *  @param {error} error - Error object, if any.
    */
-
 
   fields$() {
     const self = this
@@ -375,14 +379,14 @@ class Entity implements Record<string, any> {
     const async = is_async(si, done)
     const entmsg = self.#private$.entargs(self, { cmd: 'close' })
 
-      ; (self as any).log$ && (self as any).log$('close')
+    ;(self as any).log$ && (self as any).log$('close')
 
     let done$ =
       null == done
         ? undefined
         : (this as any).done$
-          ? (this as any).done$(done)
-          : done
+        ? (this as any).done$(done)
+        : done
     return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
 
@@ -399,7 +403,6 @@ class Entity implements Record<string, any> {
 
     return Util.inspect(self.canon$({ object: true })) === Util.inspect(canon)
   }
-
 
   canon$(opt?: any) {
     const self = this
@@ -436,22 +439,21 @@ class Entity implements Record<string, any> {
 
     return null == opt || opt.string || opt.string$
       ? [
-        (opt && opt.string$ ? '$' : '') +
-        (null == canon.zone ? '-' : canon.zone),
-        null == canon.base ? '-' : canon.base,
-        null == canon.name ? '-' : canon.name,
-      ].join('/') // TODO: make joiner an option
+          (opt && opt.string$ ? '$' : '') +
+            (null == canon.zone ? '-' : canon.zone),
+          null == canon.base ? '-' : canon.base,
+          null == canon.name ? '-' : canon.name,
+        ].join('/') // TODO: make joiner an option
       : opt.array
-        ? [canon.zone, canon.base, canon.name]
-        : opt.array$
-          ? [canon.zone, canon.base, canon.name]
-          : opt.object
-            ? { zone: canon.zone, base: canon.base, name: canon.name }
-            : opt.object$
-              ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
-              : [canon.zone, canon.base, canon.name]
+      ? [canon.zone, canon.base, canon.name]
+      : opt.array$
+      ? [canon.zone, canon.base, canon.name]
+      : opt.object
+      ? { zone: canon.zone, base: canon.base, name: canon.name }
+      : opt.object$
+      ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
+      : [canon.zone, canon.base, canon.name]
   }
-
 
   // data = object, or true|undef = include $, false = exclude $
   data$(data?: any, canonkind?: any) {
@@ -524,7 +526,6 @@ class Entity implements Record<string, any> {
     }
   }
 
-
   clone$() {
     const self: any = this
     let deep = this.#private$.get_instance().util.deep
@@ -537,12 +538,10 @@ class Entity implements Record<string, any> {
     return clone
   }
 
-
   custom$(_props: any): any {
     return {}
   }
 }
-
 
 // Return an entity operation result as a promise,
 // attaching the meta callback argument to the result object for easier access.
@@ -550,16 +549,20 @@ function entityPromise(si: any, entmsg: any) {
   let attachMeta = true === entmsg.q?.meta$
   return new Promise((res, rej) => {
     si.act(entmsg, (err: any, out: any, meta: any) => {
-      err ?
-        rej((attachMeta ? err.meta$ = meta : null, err)) :
-        res((attachMeta ?
-          (out?.entity$ ? proto(out) :
-            (out || (out = { entity$: null }))).meta$ = meta : null,
-          out))
+      err
+        ? rej((attachMeta ? (err.meta$ = meta) : null, err))
+        : res(
+            (attachMeta
+              ? ((out?.entity$
+                  ? proto(out)
+                  : out || (out = { entity$: null })
+                ).meta$ = meta)
+              : null,
+            out)
+          )
     })
   })
 }
-
 
 function prepareCmd(ent: any, data: any, entmsg: any, done: any): any {
   if ('function' === typeof data) {
@@ -572,18 +575,12 @@ function prepareCmd(ent: any, data: any, entmsg: any, done: any): any {
     entmsg.q = data
   }
 
-  return null == done
-    ? undefined
-    : ent.done$
-      ? ent.done$(done)
-      : done
+  return null == done ? undefined : ent.done$ ? ent.done$(done) : done
 }
-
 
 function emptyQuery(q: any): boolean {
   return null == q || 0 === Object.keys(q).length
 }
-
 
 // Query values can be a scalar id, array of scalar ids, or a query object.
 function normalize_query(qin: any, ent: any) {
@@ -597,7 +594,6 @@ function normalize_query(qin: any, ent: any) {
     q = null
   }
 
-
   // TODO: test needed
   // Remove undefined values.
   if (null != q) {
@@ -610,7 +606,6 @@ function normalize_query(qin: any, ent: any) {
 
   return q
 }
-
 
 // parse a canon string:
 // $zone-base-name
@@ -639,7 +634,9 @@ function parsecanon(str: string) {
     out.base = m[bi] === '-' ? void 0 : m[bi]
     out.name = m[5] === '-' ? void 0 : m[5]
   } else {
-    throw new Error(`Invalid entity canon: ${str}; expected format: zone/base/name.`)
+    throw new Error(
+      `Invalid entity canon: ${str}; expected format: zone/base/name.`
+    )
   }
 
   return out
@@ -667,18 +664,17 @@ function handle_options(entopts: any): any {
 
   if (false === entopts.meta?.provide) {
     // Drop meta argument from callback
-    ; (Entity.prototype as any).done$ = (done: any) => {
+    ;(Entity.prototype as any).done$ = (done: any) => {
       return null == done
         ? undefined
-        : function(this: any, err: any, out: any) {
-          done.call(this, err, out)
-        }
+        : function (this: any, err: any, out: any) {
+            done.call(this, err, out)
+          }
     }
   }
 
   return entopts
 }
-
 
 function make_toString(
   canon_str?: string,
@@ -699,7 +695,7 @@ function make_toString(
 
   hidden_fields.push('id')
 
-  return function(this: any) {
+  return function (this: any) {
     return [
       '$',
       canon_str || this.canon$({ string: true }),
@@ -725,9 +721,7 @@ function is_async(seneca: any, done: any) {
   return promisify_loaded && !has_callback
 }
 
-
 // type CustomProps = { custom$: (props: any) => any }
-
 
 function MakeEntity(canon: any, seneca: any, opts?: any): Entity {
   opts = handle_options(opts)
@@ -738,7 +732,7 @@ function MakeEntity(canon: any, seneca: any, opts?: any): Entity {
 
   let toString = (toString_map[canon_str] || toString_map['']).bind(ent)
 
-  let custom$ = function(this: any, props: any) {
+  let custom$ = function (this: any, props: any) {
     if (
       null != props &&
       ('object' === typeof props || 'function' === typeof props)
