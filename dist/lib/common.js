@@ -5,16 +5,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generate_id = void 0;
+// TODO: get this from current Seneca instance
 const nid_1 = __importDefault(require("nid"));
-// function arrayify() {
-//   return Array.prototype.slice.call(arguments[0], arguments[1])
-// }
 // cache nid funcs up to length 64
-var nids = [];
+const nids = [];
 function generate_id(msg, reply) {
-    var actnid = null == msg ? (0, nid_1.default)({}) : null;
+    let actnid = null == msg ? (0, nid_1.default)({}) : null;
     if (null == actnid) {
-        var length = 'object' === typeof msg
+        const length = 'object' === typeof msg
             ? parseInt(msg.length, 10) || 6
             : parseInt(msg, 10);
         if (length < 65) {

@@ -1,19 +1,17 @@
 /* Copyright (c) 2011-2022 Richard Rodger and other contributors, MIT License. */
 
+// TODO: get this from current Seneca instance
 import Nid from 'nid'
 
-// function arrayify() {
-//   return Array.prototype.slice.call(arguments[0], arguments[1])
-// }
 
 // cache nid funcs up to length 64
-var nids: any = []
+const nids: any = []
 
 function generate_id(msg: any, reply: any) {
-  var actnid = null == msg ? Nid({}) : null
+  let actnid = null == msg ? Nid({}) : null
 
   if (null == actnid) {
-    var length =
+    const length =
       'object' === typeof msg
         ? parseInt(msg.length, 10) || 6
         : parseInt(msg, 10)

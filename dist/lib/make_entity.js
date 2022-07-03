@@ -12,20 +12,23 @@ var _Entity_private$;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Entity = exports.MakeEntity = void 0;
 const util_1 = __importDefault(require("util"));
-const Eraro = require('eraro');
+// const Eraro = require('eraro')
 const Jsonic = require('jsonic');
 const proto = Object.getPrototypeOf;
-const error = Eraro({
-    package: 'seneca',
-    msgmap: ERRMSGMAP(),
-    override: true,
-});
+// const error = Eraro({
+//   package: 'seneca',
+//   msgmap: ERRMSGMAP(),
+//   override: true,
+// })
 const toString_map = {
     '': make_toString(),
 };
+// null represents no entity found
+const NO_ENTITY = null;
 function entargs(ent, args) {
     args.role = 'entity';
     args.ent = ent;
+    // TODO: should this be: null != ?
     if (this.canon.name !== null) {
         args.name = this.canon.name;
     }
@@ -155,7 +158,7 @@ class Entity {
         let done$ = prepareCmd(self, data, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
         let res = promise && !done$ ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$), promise ? null : self);
+            (si.act(entmsg, done$), promise ? NO_ENTITY : self);
         return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
     /** Callback for Entity.save$.
@@ -172,7 +175,7 @@ class Entity {
         let done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
         let res = promise ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$), promise ? null : self);
+            (si.act(entmsg, done$), promise ? NO_ENTITY : self);
         return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
     // load one
@@ -193,12 +196,12 @@ class Entity {
         // TODO: test needed
         // Empty query gives empty result.
         if (null == q || 0 === Object.keys(q).length) {
-            return promise ? null : (done && done.call(si), self);
+            return promise ? NO_ENTITY : (done && done.call(si), self);
         }
         let done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
         let res = promise ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$), promise ? null : self);
+            (si.act(entmsg, done$), promise ? NO_ENTITY : self);
         return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
     /** Callback for Entity.load$.
@@ -227,7 +230,7 @@ class Entity {
         const done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
         let res = promise ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$), promise ? null : self);
+            (si.act(entmsg, done$), promise ? NO_ENTITY : self);
         return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
     /** Callback for Entity.list$.
@@ -500,14 +503,10 @@ function parsecanon(str) {
         out.base = m[bi] === '-' ? void 0 : m[bi];
         out.name = m[5] === '-' ? void 0 : m[5];
     }
-    else
-        throw error('invalid_canon', { str: str });
+    else {
+        throw new Error(`Invalid entity canon: ${str}; expected format: zone/base/name.`);
+    }
     return out;
-}
-function ERRMSGMAP() {
-    return {
-        invalid_canon: 'Invalid entity canon: <%=str%>; expected format: zone/base/name.',
-    };
 }
 function handle_options(entopts) {
     var _a;

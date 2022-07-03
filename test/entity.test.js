@@ -334,27 +334,14 @@ describe('entity', function () {
     expect('-/0/0').toEqual(fmt(si.util.parsecanon('0/0')))
     expect('0/0/0').toEqual(fmt(si.util.parsecanon('0/0/0')))
 
-    let fail
-    try {
-      si.util.parsecanon('')
-      fail = ''
-    } catch (e) {
-      expect('invalid_canon').toEqual(e.code)
-    }
-
-    try {
-      si.util.parsecanon('?')
-      fail = '?'
-    } catch (e) {
-      expect('invalid_canon').toEqual(e.code)
-    }
-
-    expect(fail).toEqual(void 0)
+    expect(()=>si.util.parsecanon('')).toThrow('Invalid entity canon')
+    expect(()=>si.util.parsecanon('?')).toThrow('Invalid entity canon')
 
     const foo = si.make$('foo')
     expect('a/b/c').toEqual(fmt(foo.canon$({ parse: 'a/b/c' })))
     si.close(fin)
   })
+
 
   test('load-callback', function (fin) {
     const si = SenecaInstance().test(fin)
@@ -366,7 +353,7 @@ describe('entity', function () {
     })
   })
 
-  // TODO: a bit more please!
+
   test('remove-callback', function (fin) {
     const si = SenecaInstance().test(fin)
     const foo = si.make$('foo')
@@ -379,17 +366,35 @@ describe('entity', function () {
   })
 
 
-  // TODO: a bit more please!
+
+  test('save-callback', function (fin) {
+    const si = SenecaInstance().test(fin)
+    const foo = si.make$('foo')
+    foo.save$(function (err, fooS) {
+      expect(this.seneca).toBeDefined()
+
+      // TODO: fix mem-store - should be undefined
+      expect(err).toBeNull()
+      expect(fooS).toBeDefined()
+      fin()
+    })
+  })
+
+
   test('list-callback', function (fin) {
     const si = SenecaInstance().test(fin)
     const foo = si.make$('foo')
     foo.save$(function (err, fooS) {
       expect(this.seneca).toBeDefined()
+
+      // TODO: fix mem-store - should be undefined
       expect(err).toBeNull()
       expect(fooS).toBeDefined()
 
       foo.list$(function(err, list) {
         expect(this.seneca).toBeDefined()
+
+        // TODO: fix mem-store - should be undefined
         expect(err).toBeNull()
         expect(list[0].id).toEqual(fooS.id)
         fin()
@@ -398,6 +403,14 @@ describe('entity', function () {
   })
 
   
+  test('list-promise', async () => {
+    const si = SenecaInstance().test()
+    const foo = si.entity('foo')
+    const out = await foo.load$()
+    expect(out).toBeNull()
+  })
+
+
   test('fields-directive', function (fin) {
     const si = SenecaInstance()
     si.test(fin)
