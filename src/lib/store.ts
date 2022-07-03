@@ -89,9 +89,9 @@ function Store() {
 
           cmdfunc = Intern.reify_entity_wrap(cmdfunc, cmd, zone, base, name)
 
-          if (Intern.cmd_wrap[cmd]) {
-            cmdfunc = Intern.cmd_wrap[cmd](cmdfunc)
-          }
+          // if (Intern.cmd_wrap[cmd]) {
+          //   cmdfunc = Intern.cmd_wrap[cmd](cmdfunc)
+          // }
 
           for (const p in orig_cmdfunc) {
             cmdfunc[p] = orig_cmdfunc[p]
@@ -190,6 +190,7 @@ const Intern: any = {
     return outfunc
   },
 
+  /* REMOVE: Legacy
   cmd_wrap: {
     list: function(cmdfunc: any) {
       const outfunc = function(this: any, msg: any, done: any) {
@@ -209,6 +210,7 @@ const Intern: any = {
       return outfunc
     },
   },
+  */
 }
 
 export { Intern, Store }

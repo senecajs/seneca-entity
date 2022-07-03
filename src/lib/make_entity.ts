@@ -16,8 +16,11 @@ const toString_map: any = {
   '': make_toString(),
 }
 
-// null represents no entity found
+// `null` represents no entity found.
 const NO_ENTITY = null
+
+// `null` represents no error.
+const NO_ERROR = null
 
 
 function entargs(this: any, ent: Entity, args: any) {
@@ -177,13 +180,14 @@ class Entity implements Record<string, any> {
   save$(data: any, done?: any) {
     const self = this
     const si = self.#private$.get_instance()
-    const promise = self.#private$.promise
 
     let entmsg = { cmd: 'save', q: {} }
     let done$ = prepareCmd(self, data, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
-    let res = promise && !done$ ? entityPromise(si, entmsg) :
+    const promise = self.#private$.promise && !done$
+
+    let res = promise ? entityPromise(si, entmsg) :
       (si.act(entmsg, done$), promise ? NO_ENTITY : self)
     return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
@@ -205,7 +209,7 @@ class Entity implements Record<string, any> {
     let done$ = prepareCmd(self, undefined, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
-    let res = promise ? entityPromise(si, entmsg) :
+    let res = promise && !done ? entityPromise(si, entmsg) :
       (si.act(entmsg, done$), promise ? NO_ENTITY : self)
     return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
@@ -221,27 +225,32 @@ class Entity implements Record<string, any> {
    */
   load$(query: any, done?: any) {
     const self = this
+
+    if ('function' === typeof query) {
+      done = query
+      query = null
+    }
+
     const si = self.#private$.get_instance()
-    const promise = self.#private$.promise
-    const qent = self
 
     const q = normalize_query(query, self)
-    let entmsg = { cmd: 'load', q, qent }
-
-    done = 'function' === typeof query ? query : done
-
-    // TODO: test needed
-    // Empty query gives empty result.
-    if (null == q || 0 === Object.keys(q).length) {
-      return promise ? NO_ENTITY : (done && done.call(si), self)
-    }
+    let entmsg = { cmd: 'load', q, qent: self }
 
     let done$ = prepareCmd(self, undefined, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
+    const promise = self.#private$.promise && !done$
+
+    // Empty query gives empty result.
+    if (emptyQuery(q)) {
+      return promise ? NO_ENTITY : (done && done.call(si, NO_ERROR, NO_ENTITY), self)
+    }
+
     let res = promise ? entityPromise(si, entmsg) :
       (si.act(entmsg, done$), promise ? NO_ENTITY : self)
-    return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
+
+    // Sync: Enity self, Async: Entity Promise, Async+Callback: null
+    return res
   }
 
 
@@ -271,7 +280,6 @@ class Entity implements Record<string, any> {
     }
 
     const si = self.#private$.get_instance()
-    const promise = self.#private$.promise
 
     const q = normalize_query(query, self)
     let entmsg = { cmd: 'list', q, qent: self }
@@ -279,9 +287,15 @@ class Entity implements Record<string, any> {
     const done$ = prepareCmd(self, undefined, entmsg, done)
     entmsg = self.#private$.entargs(self, entmsg)
 
+    const promise = self.#private$.promise && !done$
+
     let res = promise ? entityPromise(si, entmsg) :
-      (si.act(entmsg, done$), promise ? NO_ENTITY : self)
-    return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
+      (si.act(entmsg, done$),
+        promise ? NO_ENTITY : // NOTE: [] is *not* valid here, as result is async
+          self)
+
+    // Sync: Enity self, Async: Entity Promise, Async+Callback: null
+    return res
   }
 
   /** Callback for Entity.list$.
@@ -289,6 +303,7 @@ class Entity implements Record<string, any> {
    *  @param {error} error - Error object, if any.
    *  @param {Entity} entity - Array of `Entity` objects matching query.
    */
+
 
   // remove one or more
   // TODO: make qin optional, in which case, use id
@@ -299,34 +314,33 @@ class Entity implements Record<string, any> {
    */
   remove$(query: any, done?: any) {
     const self = this
+
+    if ('function' === typeof query) {
+      done = query
+      query = null
+    }
+
     const si = self.#private$.get_instance()
 
     const q = normalize_query(query, self)
+    let entmsg = self.#private$.entargs(self, { cmd: 'remove', q, qent: self })
 
-    done = 'function' === typeof query ? query : done
-
-    const async = is_async(si, done)
+    let done$ = prepareCmd(self, undefined, entmsg, done)
+    const promise = self.#private$.promise && !done$
 
     // empty query means take no action
-    if (q == null) {
-      return async ? null : (done && done.call(si), self)
+    if (emptyQuery(q)) {
+      return promise ? NO_ENTITY :
+        (done$ && done$.call(si, NO_ERROR, NO_ENTITY), self)
     }
 
-    const entmsg = self.#private$.entargs(self, {
-      qent: self,
-      q: q,
-      cmd: 'remove',
-    })
-
-    let done$ =
-      null == done
-        ? undefined
-        : (this as any).done$
-          ? (this as any).done$(done)
-          : done
-    return async ? si.post(entmsg) : (si.act(entmsg, done$), self)
+    let res = promise ? entityPromise(si, entmsg) :
+      (si.act(entmsg, done$), promise ? NO_ENTITY : self)
+    return res // Sync: Enity self, Async: Entity Promise, Async+Callback: null
   }
 
+
+  // DEPRECATE: legacy
   delete$(query: any, done?: any) {
     return this.remove$(query, done)
   }
@@ -335,6 +349,7 @@ class Entity implements Record<string, any> {
    *  @callback callback~remove$
    *  @param {error} error - Error object, if any.
    */
+
 
   fields$() {
     const self = this
@@ -352,6 +367,7 @@ class Entity implements Record<string, any> {
     return fields
   }
 
+  // TODO: remove
   close$(done?: any) {
     const self = this
     const si = self.#private$.get_instance()
@@ -531,17 +547,21 @@ class Entity implements Record<string, any> {
 // Return an entity operation result as a promise,
 // attaching the meta callback argument to the result object for easier access.
 function entityPromise(si: any, entmsg: any) {
+  let attachMeta = true === entmsg.q?.meta$
   return new Promise((res, rej) => {
     si.act(entmsg, (err: any, out: any, meta: any) => {
       err ?
-        rej((err.meta$ = meta, err)) :
-        res(((out.entity$ ? proto(out) : out).meta$ = meta, out))
+        rej((attachMeta ? err.meta$ = meta : null, err)) :
+        res((attachMeta ?
+          (out?.entity$ ? proto(out) :
+            (out || (out = { entity$: null }))).meta$ = meta : null,
+          out))
     })
   })
 }
 
 
-function prepareCmd(ent: any, data: any, entmsg: any, done: any) {
+function prepareCmd(ent: any, data: any, entmsg: any, done: any): any {
   if ('function' === typeof data) {
     done = data
   } else if (data && 'object' === typeof data) {
@@ -560,6 +580,11 @@ function prepareCmd(ent: any, data: any, entmsg: any, done: any) {
 }
 
 
+function emptyQuery(q: any): boolean {
+  return null == q || 0 === Object.keys(q).length
+}
+
+
 function normalize_query(qin: any, ent: any) {
   let q = qin
 
@@ -567,9 +592,10 @@ function normalize_query(qin: any, ent: any) {
     q = { id: ent.id }
   } else if ('string' === typeof qin || 'number' === typeof qin) {
     q = qin === '' ? null : { id: qin }
-  } else if ('function' === typeof qin) {
+  } else if ('function' === typeof qin || Array.isArray(q)) {
     q = null
   }
+
 
   // TODO: test needed
   // Remove undefined values.

@@ -78,9 +78,9 @@ function Store() {
                         });
                     }
                     cmdfunc = Intern.reify_entity_wrap(cmdfunc, cmd, zone, base, name);
-                    if (Intern.cmd_wrap[cmd]) {
-                        cmdfunc = Intern.cmd_wrap[cmd](cmdfunc);
-                    }
+                    // if (Intern.cmd_wrap[cmd]) {
+                    //   cmdfunc = Intern.cmd_wrap[cmd](cmdfunc)
+                    // }
                     for (const p in orig_cmdfunc) {
                         cmdfunc[p] = orig_cmdfunc[p];
                     }
@@ -161,24 +161,27 @@ const Intern = {
         });
         return outfunc;
     },
+    /* REMOVE: Legacy
     cmd_wrap: {
-        list: function (cmdfunc) {
-            const outfunc = function (msg, done) {
-                if ('string' === typeof msg.sort) {
-                    let sort = {};
-                    if (msg.sort[0] === '-') {
-                        sort[msg.sort.substring(1)] = -1;
-                    }
-                    else {
-                        sort[msg.sort] = +1;
-                    }
-                    msg.sort = sort;
-                }
-                return cmdfunc.call(this, msg, done);
-            };
-            return outfunc;
-        },
+      list: function(cmdfunc: any) {
+        const outfunc = function(this: any, msg: any, done: any) {
+          if ('string' === typeof msg.sort) {
+            let sort: any = {}
+            if (msg.sort[0] === '-') {
+              sort[msg.sort.substring(1)] = -1
+            } else {
+              sort[msg.sort] = +1
+            }
+            msg.sort = sort
+          }
+  
+          return cmdfunc.call(this, msg, done)
+        }
+  
+        return outfunc
+      },
     },
+    */
 };
 exports.Intern = Intern;
 //# sourceMappingURL=store.js.map

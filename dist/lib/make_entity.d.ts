@@ -39,8 +39,8 @@ declare class Entity implements Record<string, any> {
      *  param {object|string|number} [query] - Either a entity id, or a query object with field values that must match.
      *  param {callback~remove$} done - Callback function to confirm removal.
      */
-    remove$(query: any, done?: any): any;
-    delete$(query: any, done?: any): any;
+    remove$(query: any, done?: any): this | Promise<unknown> | null;
+    delete$(query: any, done?: any): this | Promise<unknown> | null;
     /** Callback for Entity.remove$.
      *  @callback callback~remove$
      *  @param {error} error - Error object, if any.

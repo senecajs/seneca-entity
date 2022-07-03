@@ -23,8 +23,10 @@ const proto = Object.getPrototypeOf;
 const toString_map = {
     '': make_toString(),
 };
-// null represents no entity found
+// `null` represents no entity found.
 const NO_ENTITY = null;
+// `null` represents no error.
+const NO_ERROR = null;
 function entargs(ent, args) {
     args.role = 'entity';
     args.ent = ent;
@@ -153,11 +155,11 @@ class Entity {
     save$(data, done) {
         const self = this;
         const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
-        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise;
         let entmsg = { cmd: 'save', q: {} };
         let done$ = prepareCmd(self, data, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
-        let res = promise && !done$ ? entityPromise(si, entmsg) :
+        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
+        let res = promise ? entityPromise(si, entmsg) :
             (si.act(entmsg, done$), promise ? NO_ENTITY : self);
         return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
@@ -174,7 +176,7 @@ class Entity {
         let entmsg = { cmd: 'native' };
         let done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
-        let res = promise ? entityPromise(si, entmsg) :
+        let res = promise && !done ? entityPromise(si, entmsg) :
             (si.act(entmsg, done$), promise ? NO_ENTITY : self);
         return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
@@ -187,22 +189,24 @@ class Entity {
      */
     load$(query, done) {
         const self = this;
-        const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
-        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise;
-        const qent = self;
-        const q = normalize_query(query, self);
-        let entmsg = { cmd: 'load', q, qent };
-        done = 'function' === typeof query ? query : done;
-        // TODO: test needed
-        // Empty query gives empty result.
-        if (null == q || 0 === Object.keys(q).length) {
-            return promise ? NO_ENTITY : (done && done.call(si), self);
+        if ('function' === typeof query) {
+            done = query;
+            query = null;
         }
+        const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
+        const q = normalize_query(query, self);
+        let entmsg = { cmd: 'load', q, qent: self };
         let done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
+        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
+        // Empty query gives empty result.
+        if (emptyQuery(q)) {
+            return promise ? NO_ENTITY : (done && done.call(si, NO_ERROR, NO_ENTITY), self);
+        }
         let res = promise ? entityPromise(si, entmsg) :
             (si.act(entmsg, done$), promise ? NO_ENTITY : self);
-        return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
+        // Sync: Enity self, Async: Entity Promise, Async+Callback: null
+        return res;
     }
     /** Callback for Entity.load$.
      *  @callback callback~load$
@@ -224,14 +228,17 @@ class Entity {
             query = null;
         }
         const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
-        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise;
         const q = normalize_query(query, self);
         let entmsg = { cmd: 'list', q, qent: self };
         const done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
+        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
         let res = promise ? entityPromise(si, entmsg) :
-            (si.act(entmsg, done$), promise ? NO_ENTITY : self);
-        return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
+            (si.act(entmsg, done$),
+                promise ? NO_ENTITY : // NOTE: [] is *not* valid here, as result is async
+                    self);
+        // Sync: Enity self, Async: Entity Promise, Async+Callback: null
+        return res;
     }
     /** Callback for Entity.list$.
      *  @callback callback~list$
@@ -246,26 +253,25 @@ class Entity {
      */
     remove$(query, done) {
         const self = this;
+        if ('function' === typeof query) {
+            done = query;
+            query = null;
+        }
         const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
         const q = normalize_query(query, self);
-        done = 'function' === typeof query ? query : done;
-        const async = is_async(si, done);
+        let entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { cmd: 'remove', q, qent: self });
+        let done$ = prepareCmd(self, undefined, entmsg, done);
+        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
         // empty query means take no action
-        if (q == null) {
-            return async ? null : (done && done.call(si), self);
+        if (emptyQuery(q)) {
+            return promise ? NO_ENTITY :
+                (done$ && done$.call(si, NO_ERROR, NO_ENTITY), self);
         }
-        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, {
-            qent: self,
-            q: q,
-            cmd: 'remove',
-        });
-        let done$ = null == done
-            ? undefined
-            : this.done$
-                ? this.done$(done)
-                : done;
-        return async ? si.post(entmsg) : (si.act(entmsg, done$), self);
+        let res = promise ? entityPromise(si, entmsg) :
+            (si.act(entmsg, done$), promise ? NO_ENTITY : self);
+        return res; // Sync: Enity self, Async: Entity Promise, Async+Callback: null
     }
+    // DEPRECATE: legacy
     delete$(query, done) {
         return this.remove$(query, done);
     }
@@ -285,6 +291,7 @@ class Entity {
         }
         return fields;
     }
+    // TODO: remove
     close$(done) {
         const self = this;
         const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
@@ -433,11 +440,16 @@ _Entity_private$ = new WeakMap();
 // Return an entity operation result as a promise,
 // attaching the meta callback argument to the result object for easier access.
 function entityPromise(si, entmsg) {
+    var _a;
+    let attachMeta = true === ((_a = entmsg.q) === null || _a === void 0 ? void 0 : _a.meta$);
     return new Promise((res, rej) => {
         si.act(entmsg, (err, out, meta) => {
             err ?
-                rej((err.meta$ = meta, err)) :
-                res(((out.entity$ ? proto(out) : out).meta$ = meta, out));
+                rej((attachMeta ? err.meta$ = meta : null, err)) :
+                res((attachMeta ?
+                    ((out === null || out === void 0 ? void 0 : out.entity$) ? proto(out) :
+                        (out || (out = { entity$: null }))).meta$ = meta : null,
+                    out));
         });
     });
 }
@@ -457,6 +469,9 @@ function prepareCmd(ent, data, entmsg, done) {
             ? ent.done$(done)
             : done;
 }
+function emptyQuery(q) {
+    return null == q || 0 === Object.keys(q).length;
+}
 function normalize_query(qin, ent) {
     let q = qin;
     if ((null == qin || 'function' === typeof qin) && ent.id != null) {
@@ -465,7 +480,7 @@ function normalize_query(qin, ent) {
     else if ('string' === typeof qin || 'number' === typeof qin) {
         q = qin === '' ? null : { id: qin };
     }
-    else if ('function' === typeof qin) {
+    else if ('function' === typeof qin || Array.isArray(q)) {
         q = null;
     }
     // TODO: test needed
