@@ -50,7 +50,7 @@
   },
   "peerDependencies": {
     "seneca": ">=3",
-    "seneca-promisify": ">=2"
+    "seneca-promisify": ">=3"
   },
   "devDependencies": {
     "@seneca/maintain": "^0.0.22",
