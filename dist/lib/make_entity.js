@@ -472,6 +472,7 @@ function prepareCmd(ent, data, entmsg, done) {
 function emptyQuery(q) {
     return null == q || 0 === Object.keys(q).length;
 }
+// Query values can be a scalar id, array of scalar ids, or a query object.
 function normalize_query(qin, ent) {
     let q = qin;
     if ((null == qin || 'function' === typeof qin) && ent.id != null) {
@@ -480,7 +481,7 @@ function normalize_query(qin, ent) {
     else if ('string' === typeof qin || 'number' === typeof qin) {
         q = qin === '' ? null : { id: qin };
     }
-    else if ('function' === typeof qin || Array.isArray(q)) {
+    else if ('function' === typeof qin) {
         q = null;
     }
     // TODO: test needed

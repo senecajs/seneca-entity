@@ -134,6 +134,7 @@ describe('entity', function () {
     expect(zeds.length).toEqual(1)
   })
 
+  
   test('tag-load', function (fin) {
     const s0 = Seneca()
       .test(fin)
@@ -144,6 +145,7 @@ describe('entity', function () {
     fin()
   })
 
+  
   test('plain-messages', function (fin) {
     const s0 = Seneca().test(fin).use(Entity)
 
