@@ -126,7 +126,23 @@ describe('entity', function () {
 
     const zed0 = await si.entity('core/zed').data$({ z: 0 }).save$()
     const zed1 = await si.entity('core/zed').data$({ z: 1 }).save$()
+
     let zeds = await si.entity('core/zed').list$()
+    expect(zeds.length).toEqual(2)
+
+    zeds = await si.entity('core/zed').list$([])
+    expect(zeds.length).toEqual(0)
+
+    zeds = await si.entity('core/zed').list$([zed0.id])
+    expect(zeds.length).toEqual(1)
+
+    zeds = await si.entity('core/zed').list$(zed0.id)
+    expect(zeds.length).toEqual(1)
+
+    zeds = await si.entity('core/zed').list$([zed0.id, zed1.id])
+    expect(zeds.length).toEqual(2)
+    
+    zeds = await si.entity('core/zed').list$({id:[zed0.id, zed1.id]})
     expect(zeds.length).toEqual(2)
 
     await si.entity('core/zed').remove$({ z: 1 })
