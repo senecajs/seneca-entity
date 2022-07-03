@@ -46,6 +46,7 @@
     "repo-publish-quick": "npm run prettier && npm run build && npm test && npm run repo-tag && npm publish --access public --registry=https://registry.npmjs.org"
   },
   "dependencies": {
+    "nid": "^2.0.0",
     "seneca-mem-store": "^7.0.0"
   },
   "peerDependencies": {
