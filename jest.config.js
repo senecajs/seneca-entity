@@ -5,6 +5,6 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/test/**/*.test.js'],
   watchPathIgnorePatterns: ['dist\\/'],
-  collectCoverageFrom: ['src/**/*.ts'],
+  collectCoverageFrom: ['dist/**/*.js'],
   coverageProvider: 'v8',
 };
