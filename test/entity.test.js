@@ -271,11 +271,10 @@ describe('entity', function () {
     )
   })
 
-
   test('generate_id', function (fin) {
     const si = SenecaInstance()
     const generate_id = si.export('entity/generate_id')
-    
+
     expect(generate_id(3).length).toEqual(3)
     expect(generate_id({ length: 1 }).length).toEqual(1)
     expect(generate_id(66).length).toEqual(66)
