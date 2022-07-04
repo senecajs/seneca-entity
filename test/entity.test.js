@@ -5,7 +5,6 @@ const Util = require('util')
 const Seneca = require('seneca')
 const Entity = require('../')
 const Store = require('../dist/lib/store')
-const { generate_id } = require('../dist/lib/common')
 
 const StoreIntern = Store.Intern
 
@@ -272,19 +271,11 @@ describe('entity', function () {
     )
   })
 
-  /*
-  test('cmd_wrap_list', function (fin) {
+
+  test('generate_id', function (fin) {
     const si = SenecaInstance()
-    const w0 = StoreIntern.cmd_wrap.list(function (msg, reply) {
-      expect(msg.sort).toEqual({ foo: -1 })
-      reply()
-    })
-
-    w0.call(si, { role: 'entity', cmd: 'list', name: 'n0', sort: '-foo' }, fin)
-  })
-  */
-
-  test('common', function (fin) {
+    const generate_id = si.export('entity/generate_id')
+    
     expect(generate_id(3).length).toEqual(3)
     expect(generate_id({ length: 1 }).length).toEqual(1)
     expect(generate_id(66).length).toEqual(66)
