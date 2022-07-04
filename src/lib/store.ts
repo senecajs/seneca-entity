@@ -16,7 +16,7 @@ function Store() {
 
     // opts.map = { canon: [cmds] }
     // canon is in string format zone/base/name, with empty or - indicating undefined
-    init: function (instance: any, opts: any, store: any, cb: any) {
+    init: function(instance: any, opts: any, store: any, cb: any) {
       const entspecs = []
 
       if (opts.map) {
@@ -75,7 +75,7 @@ function Store() {
         if (void 0 !== base) entargs.base = base
         if (void 0 !== zone) entargs.zone = zone
 
-        entspec.cmds.forEach(function (cmd: string) {
+        entspec.cmds.forEach(function(cmd: string) {
           const args = Object.assign({ role: 'entity', cmd: cmd }, entargs)
           const orig_cmdfunc = store[cmd]
           let cmdfunc = orig_cmdfunc
@@ -102,11 +102,11 @@ function Store() {
           } else if (cmd === 'close') {
             instance.add(
               'role:seneca,cmd:close',
-              function (this: any, close_args: any, done: any) {
+              function(this: any, close_args: any, done: any) {
                 const closer = this
 
                 if (!store.closed$) {
-                  cmdfunc.call(closer, close_args, function (err: any) {
+                  cmdfunc.call(closer, close_args, function(err: any) {
                     if (err) closer.log.error('close-error', close_args, err)
 
                     store.closed$ = true
@@ -138,14 +138,14 @@ function Store() {
 
 const Intern: any = {
   // Ensure entity objects are instantiated
-  reify_entity_wrap: function (
+  reify_entity_wrap: function(
     cmdfunc: any,
     cmd: string,
     zone?: string,
     base?: string,
     name?: string
   ) {
-    const outfunc = function (this: any, msg: any, reply: any, meta: any) {
+    const outfunc = function(this: any, msg: any, reply: any, meta: any) {
       if ('save' !== msg.cmd) {
         if (null == msg.q) {
           msg.q = {}
@@ -191,28 +191,6 @@ const Intern: any = {
 
     return outfunc
   },
-
-  /* REMOVE: Legacy
-  cmd_wrap: {
-    list: function(cmdfunc: any) {
-      const outfunc = function(this: any, msg: any, done: any) {
-        if ('string' === typeof msg.sort) {
-          let sort: any = {}
-          if (msg.sort[0] === '-') {
-            sort[msg.sort.substring(1)] = -1
-          } else {
-            sort[msg.sort] = +1
-          }
-          msg.sort = sort
-        }
-
-        return cmdfunc.call(this, msg, done)
-      }
-
-      return outfunc
-    },
-  },
-  */
 }
 
 export { Intern, Store }

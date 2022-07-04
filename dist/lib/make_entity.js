@@ -307,15 +307,11 @@ class Entity {
     close$(done) {
         const self = this;
         const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
-        const async = is_async(si, done);
-        const entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { cmd: 'close' });
+        let entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { cmd: 'close' });
+        let done$ = prepareCmd(self, undefined, entmsg, done);
+        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
         self.log$ && self.log$('close');
-        let done$ = null == done
-            ? undefined
-            : this.done$
-                ? this.done$(done)
-                : done;
-        return async ? si.post(entmsg) : (si.act(entmsg, done$), self);
+        return promise ? si.post(entmsg) : (si.act(entmsg, done$), self);
     }
     is$(canonspec) {
         const self = this;
@@ -592,12 +588,6 @@ function make_toString(canon_str, hidden_fields_spec, opts) {
         ].join('');
     };
 }
-function is_async(seneca, done) {
-    const promisify_loaded = true === seneca.root.__promisify$$ || 'function' === typeof seneca.post;
-    const has_callback = 'function' === typeof done;
-    return promisify_loaded && !has_callback;
-}
-// type CustomProps = { custom$: (props: any) => any }
 function MakeEntity(canon, seneca, opts) {
     opts = handle_options(opts);
     const deep = seneca.util.deep;

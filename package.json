@@ -3,7 +3,7 @@
   "main": "dist/entity.js",
   "version": "18.1.0",
   "type": "commonjs",
-  "types": "dist/gateway.d.ts",
+  "types": "dist/entity.d.ts",
   "description": "Entity plugin for seneca",
   "keywords": [
     "seneca",
@@ -20,7 +20,8 @@
     "Wyatt Preul (https://github.com/geek)",
     "Shane Lacey (https://github.com/shanel262)",
     "Emer Rutherford (https://github.com/eeswr)",
-    "Nicolás Fantone (https://github.com/nfantone)"
+    "Nicolás Fantone (https://github.com/nfantone)",
+    "Leonardo Cunha (https://github.com/LeonNimoy)"
   ],
   "files": [
     "LICENSE",
@@ -40,7 +41,7 @@
     "build": "tsc -d",
     "prettier": "prettier --write --no-semi --single-quote src/**/*.ts test/*.js",
     "reset": "npm run clean && npm i && npm test",
-    "clean": "rm -rf node_modules package-lock.json yarn.lock",
+    "clean": "rm -rf node_modules dist package-lock.json yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
     "repo-publish": "npm run clean && npm i --registry=https://registry.npmjs.org && npm run repo-publish-quick",
     "repo-publish-quick": "npm run prettier && npm run build && npm test && npm run repo-tag && npm publish --access public --registry=https://registry.npmjs.org"

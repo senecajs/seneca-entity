@@ -1,14 +1,13 @@
 "use strict";
 /* Copyright (c) 2010-2022 Richard Rodger and other contributors, MIT License */
 Object.defineProperty(exports, "__esModule", { value: true });
-const common_1 = require("./lib/common");
 const make_entity_1 = require("./lib/make_entity");
 const store_1 = require("./lib/store");
 const default_opts = {
     mem_store: true,
     server: false,
     client: false,
-    generate_id: common_1.generate_id,
+    generate_id,
     // Control stringification of entities
     jsonic: {
         depth: 7,
@@ -36,7 +35,7 @@ function preload(context) {
     const store = (0, store_1.Store)();
     // Removes dependency on seneca-basic
     // TODO: deprecate this
-    seneca.add('role:basic,cmd:generate_id', common_1.generate_id);
+    seneca.add('role:basic,cmd:generate_id', generate_id);
     seneca.util.parsecanon = seneca.util.parsecanon || make_entity_1.MakeEntity.parsecanon;
     // Create entity delegate.
     const sd = seneca.delegate();
@@ -117,11 +116,30 @@ function preload(context) {
         exports: {
             store: store,
             init: store.init,
-            generate_id: opts.generate_id,
+            generate_id: opts.generate_id.bind(seneca),
         },
     };
 }
 entity.preload = preload;
+// cache nid funcs up to length 64
+const nidCache = [];
+function generate_id(msg, reply) {
+    let seneca = this;
+    let Nid = seneca.util.Nid;
+    let actnid = null == msg ? Nid({}) : null;
+    if (null == actnid) {
+        const length = 'object' === typeof msg
+            ? parseInt(msg.length, 10) || 6
+            : parseInt(msg, 10);
+        if (length < 65) {
+            actnid = nidCache[length] || (nidCache[length] = Nid({ length: length }));
+        }
+        else {
+            actnid = Nid({ length: length });
+        }
+    }
+    return reply ? reply(actnid()) : actnid();
+}
 exports.default = entity;
 if ('undefined' !== typeof (module)) {
     module.exports = entity;

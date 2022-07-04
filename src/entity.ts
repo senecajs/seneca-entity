@@ -1,7 +1,6 @@
 /* Copyright (c) 2010-2022 Richard Rodger and other contributors, MIT License */
 
 
-import { generate_id } from './lib/common'
 import { MakeEntity, Entity } from './lib/make_entity'
 import { Store } from './lib/store'
 
@@ -148,7 +147,7 @@ function preload(this: any, context: any) {
     exports: {
       store: store,
       init: store.init,
-      generate_id: opts.generate_id,
+      generate_id: opts.generate_id.bind(seneca),
     },
   }
 }
@@ -156,6 +155,33 @@ function preload(this: any, context: any) {
 
 entity.preload = preload
 
+
+// cache nid funcs up to length 64
+const nidCache: any = []
+
+function generate_id(this: any, msg: any, reply: any) {
+  let seneca = this
+  let Nid = seneca.util.Nid
+
+  let actnid = null == msg ? Nid({}) : null
+
+  if (null == actnid) {
+    const length =
+      'object' === typeof msg
+        ? parseInt(msg.length, 10) || 6
+        : parseInt(msg, 10)
+
+    if (length < 65) {
+      actnid = nidCache[length] || (nidCache[length] = Nid({ length: length }))
+    } else {
+      actnid = Nid({ length: length })
+    }
+  }
+
+  return reply ? reply(actnid()) : actnid()
+}
+
+export type { Entity }
 
 export default entity
 

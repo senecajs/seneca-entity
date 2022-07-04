@@ -10,7 +10,7 @@ const { generate_id } = require('../dist/lib/common')
 const StoreIntern = Store.Intern
 
 // TODO: update when Seneca.util.Gex is available
-const GexModule = require('Gex') || require('Gex').default
+const GexModule = require('gex') || require('gex').default
 const Gex = Seneca.util.Gex || GexModule.Gex
 
 function SenecaInstance() {

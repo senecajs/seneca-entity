@@ -162,27 +162,6 @@ const Intern = {
         });
         return outfunc;
     },
-    /* REMOVE: Legacy
-    cmd_wrap: {
-      list: function(cmdfunc: any) {
-        const outfunc = function(this: any, msg: any, done: any) {
-          if ('string' === typeof msg.sort) {
-            let sort: any = {}
-            if (msg.sort[0] === '-') {
-              sort[msg.sort.substring(1)] = -1
-            } else {
-              sort[msg.sort] = +1
-            }
-            msg.sort = sort
-          }
-  
-          return cmdfunc.call(this, msg, done)
-        }
-  
-        return outfunc
-      },
-    },
-    */
 };
 exports.Intern = Intern;
 //# sourceMappingURL=store.js.map

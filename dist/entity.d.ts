@@ -1,3 +1,4 @@
+import { Entity } from './lib/make_entity';
 /** Define the `entity` plugin. */
 declare function entity(): {
     name: string;
@@ -21,4 +22,5 @@ declare namespace entity {
         };
     };
 }
+export type { Entity };
 export default entity;
