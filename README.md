@@ -93,7 +93,6 @@ await lily
   })
   .save$()
 
-
 // List all the person entities.
 let people = await Person.list$()
 
@@ -127,7 +126,7 @@ In particular, you can:
 * Customize specific operations for specific entities by adding your own action patterns - `seneca.message('role:entity,cmd:save,name:person', async function(msg) { ... })`
 * Expose most REST or GraphQL APIs as "databases" - [@seneca/trello-provider](senecajs/seneca-trello-provider)
 * Use different databases for different entities, see [Mapping Entities to Data Stores](https://senecajs.org/docs/tutorials/understanding-data-entities.html#mapping-entities-to-data-stores)
-* Namespace and isolate entities as desired; entities have not just a _name_, but also an optional _base_ (table namespace) and _zone_ (good for strict multi-tenancy), to ue as you see fit.
+* Namespace and isolate entities as desired; entities have not just a _name_, but also an optional _base_ (table namespace) and _zone_ (good for strict multi-tenancy), to use as you see fit.
 
 **BUT**, Seneca entity does not natively implement relations, and
 loads only the top level entity. Since relation mapping often leads to
