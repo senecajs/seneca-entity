@@ -321,7 +321,7 @@ class Entity {
         let match = sckeys.length === Object.keys(canon).length;
         if (match) {
             for (let key of sckeys) {
-                match = match && (selfcanon[key] === canon[key]);
+                match = match && selfcanon[key] === canon[key];
             }
         }
         return match;
@@ -547,8 +547,7 @@ function handle_options(entopts, seneca) {
                 canon.base == null ? '-' : canon.base,
                 canon.name == null ? '-' : canon.name,
             ].join('/');
-            toString_map[canon_str] =
-                make_toString(canon_str, hidden_fields, entopts, Jsonic);
+            toString_map[canon_str] = make_toString(canon_str, hidden_fields, entopts, Jsonic);
         });
     }
     if (false === ((_a = entopts.meta) === null || _a === void 0 ? void 0 : _a.provide)) {

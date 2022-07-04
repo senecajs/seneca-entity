@@ -1,7 +1,7 @@
 {
   "name": "seneca-entity",
   "main": "dist/entity.js",
-  "version": "18.2.0",
+  "version": "18.3.0",
   "type": "commonjs",
   "types": "dist/entity.d.ts",
   "description": "Entity plugin for seneca",
@@ -40,14 +40,17 @@
     "watch": "tsc -w -d",
     "build": "tsc -d",
     "prettier": "prettier --write --no-semi --single-quote src/**/*.ts test/*.js",
-    "reset": "npm run clean && npm i && npm test",
+    "reset": "npm run clean && npm i && npm run build && npm test",
     "clean": "rm -rf node_modules dist package-lock.json yarn.lock",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
     "repo-publish": "npm run clean && npm i --registry=https://registry.npmjs.org && npm run repo-publish-quick",
     "repo-publish-quick": "npm run prettier && npm run build && npm test && npm run repo-tag && npm publish --access public --registry=https://registry.npmjs.org"
   },
+  "engines": {
+    "node": ">=14"
+  },
   "dependencies": {
-    "seneca-mem-store": "^7.0.0"
+    "seneca-mem-store": "^7.0.1"
   },
   "peerDependencies": {
     "seneca": ">=3",
