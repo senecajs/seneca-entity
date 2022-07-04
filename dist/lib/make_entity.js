@@ -5,15 +5,9 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 var _Entity_private$;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Entity = exports.MakeEntity = void 0;
-const util_1 = __importDefault(require("util"));
-// const Eraro = require('eraro')
-const Jsonic = require('jsonic');
 const proto = Object.getPrototypeOf;
 // const error = Eraro({
 //   package: 'seneca',
@@ -21,7 +15,7 @@ const proto = Object.getPrototypeOf;
 //   override: true,
 // })
 const toString_map = {
-    '': make_toString(),
+// '': make_toString(),
 };
 // `null` represents no entity found.
 const NO_ENTITY = null;
@@ -322,7 +316,15 @@ class Entity {
             : null;
         if (!canon)
             return false;
-        return util_1.default.inspect(self.canon$({ object: true })) === util_1.default.inspect(canon);
+        let selfcanon = self.canon$({ object: true });
+        let sckeys = Object.keys(selfcanon);
+        let match = sckeys.length === Object.keys(canon).length;
+        if (match) {
+            for (let key of sckeys) {
+                match = match && (selfcanon[key] === canon[key]);
+            }
+        }
+        return match;
     }
     canon$(opt) {
         const self = this;
@@ -530,9 +532,10 @@ function parsecanon(str) {
     }
     return out;
 }
-function handle_options(entopts) {
+function handle_options(entopts, seneca) {
     var _a;
     entopts = entopts || Object.create(null);
+    let Jsonic = seneca.util.Jsonic;
     if (entopts.hide) {
         //_.each(entopts.hide, function (hidden_fields, canon_in) {
         Object.keys(entopts.hide).forEach((hidden_fields) => {
@@ -544,7 +547,8 @@ function handle_options(entopts) {
                 canon.base == null ? '-' : canon.base,
                 canon.name == null ? '-' : canon.name,
             ].join('/');
-            toString_map[canon_str] = make_toString(canon_str, hidden_fields, entopts);
+            toString_map[canon_str] =
+                make_toString(canon_str, hidden_fields, entopts, Jsonic);
         });
     }
     if (false === ((_a = entopts.meta) === null || _a === void 0 ? void 0 : _a.provide)) {
@@ -560,7 +564,7 @@ function handle_options(entopts) {
     }
     return entopts;
 }
-function make_toString(canon_str, hidden_fields_spec, opts) {
+function make_toString(canon_str, hidden_fields_spec, opts, Jsonic) {
     opts = opts || { jsonic: {} };
     let hidden_fields = [];
     if (Array.isArray(hidden_fields_spec)) {
@@ -589,11 +593,13 @@ function make_toString(canon_str, hidden_fields_spec, opts) {
     };
 }
 function MakeEntity(canon, seneca, opts) {
-    opts = handle_options(opts);
+    opts = handle_options(opts, seneca);
     const deep = seneca.util.deep;
     const ent = new Entity(canon, seneca);
     let canon_str = ent.canon$({ string: true });
-    let toString = (toString_map[canon_str] || toString_map['']).bind(ent);
+    let toString = (toString_map[canon_str] ||
+        toString_map[''] ||
+        (toString_map[''] = make_toString(undefined, undefined, undefined, seneca.util.Jsonic))).bind(ent);
     let custom$ = function (props) {
         if (null != props &&
             ('object' === typeof props || 'function' === typeof props)) {
