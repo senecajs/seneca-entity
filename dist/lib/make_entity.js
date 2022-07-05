@@ -123,7 +123,9 @@ class Entity {
         new_canon.name = name == null ? self.private$.canon.name : name;
         new_canon.base = base == null ? self.private$.canon.base : base;
         new_canon.zone = zone == null ? self.private$.canon.zone : zone;
-        const entity = MakeEntity(new_canon, self.private$.get_instance(), { promise });
+        const entity = MakeEntity(new_canon, self.private$.get_instance(), {
+            promise,
+        });
         for (const p in props) {
             if (Object.prototype.hasOwnProperty.call(props, p)) {
                 if (!~p.indexOf('$')) {

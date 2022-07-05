@@ -42,7 +42,7 @@ class Entity implements Record<string, any> {
 
   // NOTE: this will be moved to a per-instance prototype
   private$ = {
-    canon: (null as any),
+    canon: null as any,
     promise: false,
     get_instance: (): any => null,
     entargs,
@@ -51,7 +51,7 @@ class Entity implements Record<string, any> {
   constructor(canon: any, seneca: any) {
     const private$: any = this.private$
 
-    private$.get_instance = function() {
+    private$.get_instance = function () {
       return seneca
     }
     private$.canon = canon
@@ -93,7 +93,7 @@ class Entity implements Record<string, any> {
     // Set seneca instance, if provided as first arg.
     if (first && first.seneca) {
       const seneca = first
-      self.private$.get_instance = function() {
+      self.private$.get_instance = function () {
         return seneca
       }
       first = args[1]
@@ -146,27 +146,25 @@ class Entity implements Record<string, any> {
     new_canon.base = base == null ? self.private$.canon.base : base
     new_canon.zone = zone == null ? self.private$.canon.zone : zone
 
-    const entity: Entity = MakeEntity(
-      new_canon,
-      self.private$.get_instance(),
-      { promise }
-    )
+    const entity: Entity = MakeEntity(new_canon, self.private$.get_instance(), {
+      promise,
+    })
 
     for (const p in props) {
       if (Object.prototype.hasOwnProperty.call(props, p)) {
         if (!~p.indexOf('$')) {
-          ; (entity as any)[p] = props[p]
+          ;(entity as any)[p] = props[p]
         } else if (p.length > 2 && p.slice(-2) === '_$') {
-          ; (entity as any)[p.slice(0, -2)] = props[p]
+          ;(entity as any)[p.slice(0, -2)] = props[p]
         }
       }
     }
 
     if (Object.prototype.hasOwnProperty.call(props, 'id$')) {
-      ; (entity as any).id$ = props.id$
+      ;(entity as any).id$ = props.id$
     }
 
-    ; (self as any).log$ &&
+    ;(self as any).log$ &&
       (self as any).log$('make', entity.canon$({ string: true }), entity)
 
     return entity
@@ -380,7 +378,7 @@ class Entity implements Record<string, any> {
 
     const promise = self.private$.promise && !done$
 
-      ; (self as any).log$ && (self as any).log$('close')
+    ;(self as any).log$ && (self as any).log$('close')
 
     return promise ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
@@ -445,20 +443,20 @@ class Entity implements Record<string, any> {
 
     return null == opt || opt.string || opt.string$
       ? [
-        (opt && opt.string$ ? '$' : '') +
-        (null == canon.zone ? '-' : canon.zone),
-        null == canon.base ? '-' : canon.base,
-        null == canon.name ? '-' : canon.name,
-      ].join('/') // TODO: make joiner an option
+          (opt && opt.string$ ? '$' : '') +
+            (null == canon.zone ? '-' : canon.zone),
+          null == canon.base ? '-' : canon.base,
+          null == canon.name ? '-' : canon.name,
+        ].join('/') // TODO: make joiner an option
       : opt.array
-        ? [canon.zone, canon.base, canon.name]
-        : opt.array$
-          ? [canon.zone, canon.base, canon.name]
-          : opt.object
-            ? { zone: canon.zone, base: canon.base, name: canon.name }
-            : opt.object$
-              ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
-              : [canon.zone, canon.base, canon.name]
+      ? [canon.zone, canon.base, canon.name]
+      : opt.array$
+      ? [canon.zone, canon.base, canon.name]
+      : opt.object
+      ? { zone: canon.zone, base: canon.base, name: canon.name }
+      : opt.object$
+      ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
+      : [canon.zone, canon.base, canon.name]
   }
 
   // data = object, or true|undef = include $, false = exclude $
@@ -558,14 +556,14 @@ function entityPromise(si: any, entmsg: any) {
       err
         ? rej((attachMeta ? (err.meta$ = meta) : null, err))
         : res(
-          (attachMeta
-            ? ((out?.entity$
-              ? proto(out)
-              : out || (out = { entity$: null })
-            ).meta$ = meta)
-            : null,
+            (attachMeta
+              ? ((out?.entity$
+                  ? proto(out)
+                  : out || (out = { entity$: null })
+                ).meta$ = meta)
+              : null,
             out)
-        )
+          )
     })
   })
 }
@@ -676,12 +674,12 @@ function handle_options(entopts: any, seneca: any): any {
 
   if (false === entopts.meta?.provide) {
     // Drop meta argument from callback
-    ; (Entity.prototype as any).done$ = (done: any) => {
+    ;(Entity.prototype as any).done$ = (done: any) => {
       return null == done
         ? undefined
-        : function(this: any, err: any, out: any) {
-          done.call(this, err, out)
-        }
+        : function (this: any, err: any, out: any) {
+            done.call(this, err, out)
+          }
     }
   }
 
@@ -708,7 +706,7 @@ function make_toString(
 
   hidden_fields.push('id')
 
-  return function(this: any) {
+  return function (this: any) {
     return [
       '$',
       canon_str || this.canon$({ string: true }),
@@ -744,7 +742,7 @@ function MakeEntity(canon: any, seneca: any, opts?: any): Entity {
     ))
   ).bind(ent)
 
-  let custom$ = function(this: any, props: any) {
+  let custom$ = function (this: any, props: any) {
     if (
       null != props &&
       ('object' === typeof props || 'function' === typeof props)
