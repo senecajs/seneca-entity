@@ -59,7 +59,7 @@ let seneca = Seneca({ legacy: false })
       let bar = this.entity('bar').data$({ y: 1 })
       console.log('A-A', bar, bar.async$)
 
-      let barS = await bar.save$()
+      let barS = await bar.save$({meta$:true})
       console.log(
         'A-B',
         barS,

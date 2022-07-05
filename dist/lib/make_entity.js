@@ -1,11 +1,5 @@
 "use strict";
 /* Copyright (c) 2012-2022 Richard Rodger and other contributors, MIT License */
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-};
-var _Entity_private$;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Entity = exports.MakeEntity = void 0;
 const proto = Object.getPrototypeOf;
@@ -38,15 +32,21 @@ function entargs(ent, args) {
 }
 class Entity {
     constructor(canon, seneca) {
-        _Entity_private$.set(this, {});
-        const private$ = __classPrivateFieldGet(this, _Entity_private$, "f");
+        // NOTE: this will be moved to a per-instance prototype
+        this.private$ = {
+            canon: null,
+            promise: false,
+            get_instance: () => null,
+            entargs,
+        };
+        const private$ = this.private$;
         private$.get_instance = function () {
             return seneca;
         };
         private$.canon = canon;
         private$.entargs = entargs;
-        private$.promise = false;
-        this.private$ = __classPrivateFieldGet(this, _Entity_private$, "f");
+        // private$.promise = false
+        this.private$ = this.private$;
         // use as a quick test to identify Entity objects
         // returns compact string zone/base/name
         this.entity$ = this.canon$();
@@ -69,7 +69,7 @@ class Entity {
         const self = this;
         let first = args[0];
         let last = args[args.length - 1];
-        let promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise;
+        let promise = self.private$.promise;
         if ('boolean' === typeof last) {
             promise = last;
             args = args.slice(0, args.length - 1);
@@ -77,7 +77,7 @@ class Entity {
         // Set seneca instance, if provided as first arg.
         if (first && first.seneca) {
             const seneca = first;
-            __classPrivateFieldGet(self, _Entity_private$, "f").get_instance = function () {
+            self.private$.get_instance = function () {
                 return seneca;
             };
             first = args[1];
@@ -120,10 +120,10 @@ class Entity {
         zone = zone == null ? canon.zone : zone;
         zone = zone == null ? props.zone$ : zone;
         const new_canon = {};
-        new_canon.name = name == null ? __classPrivateFieldGet(self, _Entity_private$, "f").canon.name : name;
-        new_canon.base = base == null ? __classPrivateFieldGet(self, _Entity_private$, "f").canon.base : base;
-        new_canon.zone = zone == null ? __classPrivateFieldGet(self, _Entity_private$, "f").canon.zone : zone;
-        const entity = MakeEntity(new_canon, __classPrivateFieldGet(self, _Entity_private$, "f").get_instance(), { promise });
+        new_canon.name = name == null ? self.private$.canon.name : name;
+        new_canon.base = base == null ? self.private$.canon.base : base;
+        new_canon.zone = zone == null ? self.private$.canon.zone : zone;
+        const entity = MakeEntity(new_canon, self.private$.get_instance(), { promise });
         for (const p in props) {
             if (Object.prototype.hasOwnProperty.call(props, p)) {
                 if (!~p.indexOf('$')) {
@@ -151,11 +151,11 @@ class Entity {
      */
     save$(data, done) {
         const self = this;
-        const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
+        const si = self.private$.get_instance();
         let entmsg = { cmd: 'save', q: {} };
         let done$ = prepareCmd(self, data, entmsg, done);
-        entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
-        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
+        entmsg = self.private$.entargs(self, entmsg);
+        const promise = self.private$.promise && !done$;
         let res = promise
             ? entityPromise(si, entmsg)
             : (si.act(entmsg, done$), promise ? NO_ENTITY : self);
@@ -169,11 +169,11 @@ class Entity {
     // provide native database driver
     native$(done) {
         const self = this;
-        const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
-        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise;
+        const si = self.private$.get_instance();
+        const promise = self.private$.promise;
         let entmsg = { cmd: 'native' };
         let done$ = prepareCmd(self, undefined, entmsg, done);
-        entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
+        entmsg = self.private$.entargs(self, entmsg);
         let res = promise && !done
             ? entityPromise(si, entmsg)
             : (si.act(entmsg, done$), promise ? NO_ENTITY : self);
@@ -192,12 +192,12 @@ class Entity {
             done = query;
             query = null;
         }
-        const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
+        const si = self.private$.get_instance();
         const q = normalize_query(query, self);
         let entmsg = { cmd: 'load', q, qent: self };
         let done$ = prepareCmd(self, undefined, entmsg, done);
-        entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
-        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
+        entmsg = self.private$.entargs(self, entmsg);
+        const promise = self.private$.promise && !done$;
         // Empty query gives empty result.
         if (emptyQuery(q)) {
             return promise
@@ -229,12 +229,12 @@ class Entity {
             done = query;
             query = null;
         }
-        const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
+        const si = self.private$.get_instance();
         const q = normalize_query(query, self);
         let entmsg = { cmd: 'list', q, qent: self };
         const done$ = prepareCmd(self, undefined, entmsg, done);
-        entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, entmsg);
-        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
+        entmsg = self.private$.entargs(self, entmsg);
+        const promise = self.private$.promise && !done$;
         let res = promise
             ? entityPromise(si, entmsg)
             : (si.act(entmsg, done$),
@@ -261,11 +261,11 @@ class Entity {
             done = query;
             query = null;
         }
-        const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
+        const si = self.private$.get_instance();
         const q = normalize_query(query, self);
-        let entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { cmd: 'remove', q, qent: self });
+        let entmsg = self.private$.entargs(self, { cmd: 'remove', q, qent: self });
         let done$ = prepareCmd(self, undefined, entmsg, done);
-        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
+        const promise = self.private$.promise && !done$;
         // empty query means take no action
         if (emptyQuery(q)) {
             return promise
@@ -300,10 +300,10 @@ class Entity {
     // TODO: remove
     close$(done) {
         const self = this;
-        const si = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance();
-        let entmsg = __classPrivateFieldGet(self, _Entity_private$, "f").entargs(self, { cmd: 'close' });
+        const si = self.private$.get_instance();
+        let entmsg = self.private$.entargs(self, { cmd: 'close' });
         let done$ = prepareCmd(self, undefined, entmsg, done);
-        const promise = __classPrivateFieldGet(self, _Entity_private$, "f").promise && !done$;
+        const promise = self.private$.promise && !done$;
         self.log$ && self.log$('close');
         return promise ? si.post(entmsg) : (si.act(entmsg, done$), self);
     }
@@ -328,7 +328,7 @@ class Entity {
     }
     canon$(opt) {
         const self = this;
-        const canon = __classPrivateFieldGet(self, _Entity_private$, "f").canon;
+        const canon = self.private$.canon;
         if (opt) {
             if (opt.isa) {
                 const isa = parsecanon(opt.isa);
@@ -413,7 +413,7 @@ class Entity {
                 canonformat[canonkind] = true;
                 data.entity$ = self.canon$(canonformat);
                 if (0 < Object.keys(self.custom$).length) {
-                    data.custom$ = __classPrivateFieldGet(self, _Entity_private$, "f").get_instance().util.deep(self.custom$);
+                    data.custom$ = self.private$.get_instance().util.deep(self.custom$);
                 }
             }
             const fields = self.fields$();
@@ -434,7 +434,7 @@ class Entity {
     }
     clone$() {
         const self = this;
-        let deep = __classPrivateFieldGet(this, _Entity_private$, "f").get_instance().util.deep;
+        let deep = this.private$.get_instance().util.deep;
         let clone = self.make$(deep({}, self.data$()));
         if (0 < Object.keys(self.custom$).length) {
             clone.custom$(self.custom$);
@@ -446,7 +446,6 @@ class Entity {
     }
 }
 exports.Entity = Entity;
-_Entity_private$ = new WeakMap();
 // Return an entity operation result as a promise,
 // attaching the meta callback argument to the result object for easier access.
 function entityPromise(si, entmsg) {

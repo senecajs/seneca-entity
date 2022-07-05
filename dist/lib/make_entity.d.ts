@@ -1,7 +1,12 @@
+declare function entargs(this: any, ent: Entity, args: any): any;
 declare class Entity implements Record<string, any> {
-    #private;
     entity$: string;
-    private$: any;
+    private$: {
+        canon: any;
+        promise: boolean;
+        get_instance: () => any;
+        entargs: typeof entargs;
+    };
     constructor(canon: any, seneca: any);
     make$(...args: any[]): any;
     /** Save the entity.

@@ -41,21 +41,24 @@ class Entity implements Record<string, any> {
   entity$: string
 
   // NOTE: this will be moved to a per-instance prototype
-  private$: any
-
-  #private$: any = {}
+  private$ = {
+    canon: (null as any),
+    promise: false,
+    get_instance: (): any => null,
+    entargs,
+  }
 
   constructor(canon: any, seneca: any) {
-    const private$: any = this.#private$
+    const private$: any = this.private$
 
-    private$.get_instance = function () {
+    private$.get_instance = function() {
       return seneca
     }
     private$.canon = canon
     private$.entargs = entargs
-    private$.promise = false
+    // private$.promise = false
 
-    this.private$ = this.#private$
+    this.private$ = this.private$
 
     // use as a quick test to identify Entity objects
     // returns compact string zone/base/name
@@ -80,7 +83,7 @@ class Entity implements Record<string, any> {
     const self = this
     let first = args[0]
     let last = args[args.length - 1]
-    let promise = self.#private$.promise
+    let promise = self.private$.promise
 
     if ('boolean' === typeof last) {
       promise = last
@@ -90,7 +93,7 @@ class Entity implements Record<string, any> {
     // Set seneca instance, if provided as first arg.
     if (first && first.seneca) {
       const seneca = first
-      self.#private$.get_instance = function () {
+      self.private$.get_instance = function() {
         return seneca
       }
       first = args[1]
@@ -139,31 +142,31 @@ class Entity implements Record<string, any> {
     zone = zone == null ? props.zone$ : zone
 
     const new_canon: any = {}
-    new_canon.name = name == null ? self.#private$.canon.name : name
-    new_canon.base = base == null ? self.#private$.canon.base : base
-    new_canon.zone = zone == null ? self.#private$.canon.zone : zone
+    new_canon.name = name == null ? self.private$.canon.name : name
+    new_canon.base = base == null ? self.private$.canon.base : base
+    new_canon.zone = zone == null ? self.private$.canon.zone : zone
 
     const entity: Entity = MakeEntity(
       new_canon,
-      self.#private$.get_instance(),
+      self.private$.get_instance(),
       { promise }
     )
 
     for (const p in props) {
       if (Object.prototype.hasOwnProperty.call(props, p)) {
         if (!~p.indexOf('$')) {
-          ;(entity as any)[p] = props[p]
+          ; (entity as any)[p] = props[p]
         } else if (p.length > 2 && p.slice(-2) === '_$') {
-          ;(entity as any)[p.slice(0, -2)] = props[p]
+          ; (entity as any)[p.slice(0, -2)] = props[p]
         }
       }
     }
 
     if (Object.prototype.hasOwnProperty.call(props, 'id$')) {
-      ;(entity as any).id$ = props.id$
+      ; (entity as any).id$ = props.id$
     }
 
-    ;(self as any).log$ &&
+    ; (self as any).log$ &&
       (self as any).log$('make', entity.canon$({ string: true }), entity)
 
     return entity
@@ -175,13 +178,13 @@ class Entity implements Record<string, any> {
    */
   save$(data: any, done?: any) {
     const self = this
-    const si = self.#private$.get_instance()
+    const si = self.private$.get_instance()
 
     let entmsg = { cmd: 'save', q: {} }
     let done$ = prepareCmd(self, data, entmsg, done)
-    entmsg = self.#private$.entargs(self, entmsg)
+    entmsg = self.private$.entargs(self, entmsg)
 
-    const promise = self.#private$.promise && !done$
+    const promise = self.private$.promise && !done$
 
     let res = promise
       ? entityPromise(si, entmsg)
@@ -198,12 +201,12 @@ class Entity implements Record<string, any> {
   // provide native database driver
   native$(done?: any) {
     const self = this
-    const si = self.#private$.get_instance()
-    const promise = self.#private$.promise
+    const si = self.private$.get_instance()
+    const promise = self.private$.promise
 
     let entmsg = { cmd: 'native' }
     let done$ = prepareCmd(self, undefined, entmsg, done)
-    entmsg = self.#private$.entargs(self, entmsg)
+    entmsg = self.private$.entargs(self, entmsg)
 
     let res =
       promise && !done
@@ -228,15 +231,15 @@ class Entity implements Record<string, any> {
       query = null
     }
 
-    const si = self.#private$.get_instance()
+    const si = self.private$.get_instance()
 
     const q = normalize_query(query, self)
     let entmsg = { cmd: 'load', q, qent: self }
 
     let done$ = prepareCmd(self, undefined, entmsg, done)
-    entmsg = self.#private$.entargs(self, entmsg)
+    entmsg = self.private$.entargs(self, entmsg)
 
-    const promise = self.#private$.promise && !done$
+    const promise = self.private$.promise && !done$
 
     // Empty query gives empty result.
     if (emptyQuery(q)) {
@@ -278,15 +281,15 @@ class Entity implements Record<string, any> {
       query = null
     }
 
-    const si = self.#private$.get_instance()
+    const si = self.private$.get_instance()
 
     const q = normalize_query(query, self)
     let entmsg = { cmd: 'list', q, qent: self }
 
     const done$ = prepareCmd(self, undefined, entmsg, done)
-    entmsg = self.#private$.entargs(self, entmsg)
+    entmsg = self.private$.entargs(self, entmsg)
 
-    const promise = self.#private$.promise && !done$
+    const promise = self.private$.promise && !done$
 
     let res = promise
       ? entityPromise(si, entmsg)
@@ -320,13 +323,13 @@ class Entity implements Record<string, any> {
       query = null
     }
 
-    const si = self.#private$.get_instance()
+    const si = self.private$.get_instance()
 
     const q = normalize_query(query, self)
-    let entmsg = self.#private$.entargs(self, { cmd: 'remove', q, qent: self })
+    let entmsg = self.private$.entargs(self, { cmd: 'remove', q, qent: self })
 
     let done$ = prepareCmd(self, undefined, entmsg, done)
-    const promise = self.#private$.promise && !done$
+    const promise = self.private$.promise && !done$
 
     // empty query means take no action
     if (emptyQuery(q)) {
@@ -370,14 +373,14 @@ class Entity implements Record<string, any> {
   // TODO: remove
   close$(done?: any) {
     const self = this
-    const si = self.#private$.get_instance()
+    const si = self.private$.get_instance()
 
-    let entmsg = self.#private$.entargs(self, { cmd: 'close' })
+    let entmsg = self.private$.entargs(self, { cmd: 'close' })
     let done$ = prepareCmd(self, undefined, entmsg, done)
 
-    const promise = self.#private$.promise && !done$
+    const promise = self.private$.promise && !done$
 
-    ;(self as any).log$ && (self as any).log$('close')
+      ; (self as any).log$ && (self as any).log$('close')
 
     return promise ? si.post(entmsg) : (si.act(entmsg, done$), self)
   }
@@ -410,7 +413,7 @@ class Entity implements Record<string, any> {
   canon$(opt?: any) {
     const self = this
 
-    const canon = self.#private$.canon
+    const canon = self.private$.canon
 
     if (opt) {
       if (opt.isa) {
@@ -442,20 +445,20 @@ class Entity implements Record<string, any> {
 
     return null == opt || opt.string || opt.string$
       ? [
-          (opt && opt.string$ ? '$' : '') +
-            (null == canon.zone ? '-' : canon.zone),
-          null == canon.base ? '-' : canon.base,
-          null == canon.name ? '-' : canon.name,
-        ].join('/') // TODO: make joiner an option
+        (opt && opt.string$ ? '$' : '') +
+        (null == canon.zone ? '-' : canon.zone),
+        null == canon.base ? '-' : canon.base,
+        null == canon.name ? '-' : canon.name,
+      ].join('/') // TODO: make joiner an option
       : opt.array
-      ? [canon.zone, canon.base, canon.name]
-      : opt.array$
-      ? [canon.zone, canon.base, canon.name]
-      : opt.object
-      ? { zone: canon.zone, base: canon.base, name: canon.name }
-      : opt.object$
-      ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
-      : [canon.zone, canon.base, canon.name]
+        ? [canon.zone, canon.base, canon.name]
+        : opt.array$
+          ? [canon.zone, canon.base, canon.name]
+          : opt.object
+            ? { zone: canon.zone, base: canon.base, name: canon.name }
+            : opt.object$
+              ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
+              : [canon.zone, canon.base, canon.name]
   }
 
   // data = object, or true|undef = include $, false = exclude $
@@ -506,7 +509,7 @@ class Entity implements Record<string, any> {
         data.entity$ = self.canon$(canonformat)
 
         if (0 < Object.keys(self.custom$).length) {
-          data.custom$ = self.#private$.get_instance().util.deep(self.custom$)
+          data.custom$ = self.private$.get_instance().util.deep(self.custom$)
         }
       }
 
@@ -531,7 +534,7 @@ class Entity implements Record<string, any> {
 
   clone$() {
     const self: any = this
-    let deep = this.#private$.get_instance().util.deep
+    let deep = this.private$.get_instance().util.deep
     let clone = self.make$(deep({}, self.data$()))
 
     if (0 < Object.keys(self.custom$).length) {
@@ -555,14 +558,14 @@ function entityPromise(si: any, entmsg: any) {
       err
         ? rej((attachMeta ? (err.meta$ = meta) : null, err))
         : res(
-            (attachMeta
-              ? ((out?.entity$
-                  ? proto(out)
-                  : out || (out = { entity$: null })
-                ).meta$ = meta)
-              : null,
+          (attachMeta
+            ? ((out?.entity$
+              ? proto(out)
+              : out || (out = { entity$: null })
+            ).meta$ = meta)
+            : null,
             out)
-          )
+        )
     })
   })
 }
@@ -673,12 +676,12 @@ function handle_options(entopts: any, seneca: any): any {
 
   if (false === entopts.meta?.provide) {
     // Drop meta argument from callback
-    ;(Entity.prototype as any).done$ = (done: any) => {
+    ; (Entity.prototype as any).done$ = (done: any) => {
       return null == done
         ? undefined
-        : function (this: any, err: any, out: any) {
-            done.call(this, err, out)
-          }
+        : function(this: any, err: any, out: any) {
+          done.call(this, err, out)
+        }
     }
   }
 
@@ -705,7 +708,7 @@ function make_toString(
 
   hidden_fields.push('id')
 
-  return function (this: any) {
+  return function(this: any) {
     return [
       '$',
       canon_str || this.canon$({ string: true }),
@@ -741,7 +744,7 @@ function MakeEntity(canon: any, seneca: any, opts?: any): Entity {
     ))
   ).bind(ent)
 
-  let custom$ = function (this: any, props: any) {
+  let custom$ = function(this: any, props: any) {
     if (
       null != props &&
       ('object' === typeof props || 'function' === typeof props)
@@ -764,7 +767,7 @@ function MakeEntity(canon: any, seneca: any, opts?: any): Entity {
 
   Object.setPrototypeOf(ent, hidden)
 
-  delete ent.private$
+  delete (ent as any).private$
   return ent as Entity
 }
 
