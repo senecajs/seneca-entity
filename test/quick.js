@@ -5,8 +5,27 @@ const dur = 5000
 
 let seneca = Seneca({ legacy: false })
   .test()
-  .use(Entity)
-  .ready(function () {
+    .use(Entity)
+
+    .add('sys:entity,transaction:begin', function(msg, reply) {
+      reply({handle:{tx:'start'}})
+    })
+
+    .add('sys:entity,transaction:end', function(msg, reply) {
+      reply({handle:{tx:'end'}})
+    })
+
+
+  .ready(async function () {
+    let s0 = await seneca.entity.begin('sys/foo')
+    // console.log(s0.fixedmeta.custom.sys__entity)
+    console.log('TXI', s0)
+
+    // console.log('BBB', s0.entity())// .private$.get_instance())
+
+    let tx = await s0.entity.end()
+    console.log(tx)
+
     /*
     let foo0 = seneca.make$('foo').data$({ x: 1 })
     let foo11 = seneca.make$('foo').data$({ x: 11 })
@@ -47,6 +66,7 @@ let seneca = Seneca({ legacy: false })
     })
     */
 
+    /*
     let foo = this.make('foo').data$({ x: 1 })
     console.log('S-A', foo, foo.async$)
 
@@ -67,5 +87,6 @@ let seneca = Seneca({ legacy: false })
         barS.meta$.pattern,
         barS.meta$.action
       )
-    })
+      })
+      */
   })

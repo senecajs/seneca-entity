@@ -22,6 +22,14 @@ const default_opts = {
         provide: true,
     },
 };
+class Foo {
+    constructor(x) {
+        this.a = x;
+    }
+    bar() {
+        return this.a;
+    }
+}
 /** Define the `entity` plugin. */
 function entity() {
     return {
@@ -31,7 +39,8 @@ function entity() {
 // All functionality should be loaded when defining plugin
 function preload(context) {
     const seneca = this;
-    const opts = seneca.util.deepextend({}, default_opts, context.options);
+    const { deep } = seneca.util;
+    const opts = deep({}, default_opts, context.options);
     const store = (0, store_1.Store)();
     // Removes dependency on seneca-basic
     // TODO: deprecate this
@@ -53,9 +62,79 @@ function preload(context) {
     }
     // all optional
     function build_api_make(promise) {
-        return function () {
+        let entityAPI = function () {
             return seneca.private$.entity.make$(this, ...[...arguments, promise]);
         };
+        entityAPI.begin = async function (canonspec, extra) {
+            let emptyEntity = this();
+            let instance = emptyEntity.private$.get_instance();
+            let canon = make_entity_1.MakeEntity.parsecanon(canonspec);
+            let result = await new Promise((res, rej) => {
+                instance.act('sys:entity,transaction:begin', { ...canon, ...(extra || {}) }, function (err, out) {
+                    return err ? rej(err) : res(out);
+                });
+            });
+            let { handle } = result;
+            let transaction = {
+                start: Date.now(),
+                begin: result,
+                canon,
+                handle,
+                trace: []
+            };
+            let transactionInstance = instance.delegate(null, {
+                custom: {
+                    sys__entity: {
+                        transaction
+                    }
+                }
+            });
+            transaction.sid = transactionInstance.id;
+            transaction.did = transactionInstance.did;
+            // Generate correct get_instance referencing transactionInstance
+            // TODO: refactor?
+            transactionInstance.entity();
+            return transactionInstance;
+        };
+        entityAPI.end = async function (canonspec, extra) {
+            let emptyEntity = this();
+            let instance = emptyEntity.private$.get_instance();
+            let transaction = instance.fixedmeta.custom.sys__entity.transaction;
+            let details = () => transaction;
+            let canon = make_entity_1.MakeEntity.parsecanon(canonspec);
+            let result = await new Promise((res, rej) => {
+                instance.act('sys:entity,transaction:end', {
+                    ...canon,
+                    ...(extra || {}),
+                    details,
+                }, function (err, out) {
+                    return err ? rej(err) : res(out);
+                });
+            });
+            transaction.end = result;
+            transaction.finish = Date.now();
+            return transaction;
+        };
+        entityAPI.rollback = async function (canonspec, extra) {
+            let emptyEntity = this();
+            let instance = emptyEntity.private$.get_instance();
+            let transaction = instance.fixedmeta.custom.sys__entity.transaction;
+            let details = () => transaction;
+            let canon = make_entity_1.MakeEntity.parsecanon(canonspec);
+            let result = await new Promise((res, rej) => {
+                instance.act('sys:entity,transaction:rollback', {
+                    ...canon,
+                    ...(extra || {}),
+                    details,
+                }, function (err, out) {
+                    return err ? rej(err) : res(out);
+                });
+            });
+            transaction.end = result;
+            transaction.finish = Date.now();
+            return transaction;
+        };
+        return entityAPI;
     }
     let make = build_api_make(false);
     let entity = build_api_make(true);
