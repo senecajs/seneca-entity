@@ -22,14 +22,6 @@ const default_opts = {
         provide: true,
     },
 };
-class Foo {
-    constructor(x) {
-        this.a = x;
-    }
-    bar() {
-        return this.a;
-    }
-}
 /** Define the `entity` plugin. */
 function entity() {
     return {

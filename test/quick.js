@@ -5,16 +5,15 @@ const dur = 5000
 
 let seneca = Seneca({ legacy: false })
   .test()
-    .use(Entity)
+  .use(Entity)
 
-    .add('sys:entity,transaction:begin', function(msg, reply) {
-      reply({handle:{tx:'start'}})
-    })
+  .add('sys:entity,transaction:begin', function (msg, reply) {
+    reply({ handle: { tx: 'start' } })
+  })
 
-    .add('sys:entity,transaction:end', function(msg, reply) {
-      reply({handle:{tx:'end'}})
-    })
-
+  .add('sys:entity,transaction:end', function (msg, reply) {
+    reply({ handle: { tx: 'end' } })
+  })
 
   .ready(async function () {
     let s0 = await seneca.entity.begin('sys/foo')

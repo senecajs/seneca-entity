@@ -976,7 +976,6 @@ describe('entity', function () {
     fin()
   })
 
-  
   test('entity-log-test', function (fin) {
     let tmp = []
     const si = Seneca({
@@ -991,22 +990,21 @@ describe('entity', function () {
     })
       .use(Entity, { log: { active: true } })
       .test('print')
-    
-    si.ready(function() {
+
+    si.ready(function () {
       tmp = []
       const fooent = si.make$('foo')
       fooent.log$('foo')
-      
+
       // console.log(tmp)
-    
+
       expect(tmp[0]).toContain('make')
       expect(tmp[1]).toContain('foo')
-      
+
       fin()
     })
   })
 
-  
   test('data-null-undef', function (fin) {
     const si = Seneca({ legacy: false }).test(fin).use(Entity)
 
