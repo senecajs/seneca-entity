@@ -99,7 +99,8 @@ function preload(this: any, context: any) {
         begin: result,
         canon,
         handle,
-        trace: []
+        trace: [],
+        id: instance.util.Nid()
       }
 
       let transactionInstance = instance.delegate(null, {
@@ -126,25 +127,30 @@ function preload(this: any, context: any) {
       let instance = emptyEntity.private$.get_instance()
 
       let transaction = instance.fixedmeta.custom.sys__entity.transaction
-      let details = () => transaction
 
-      let canon = MakeEntity.parsecanon(canonspec)
-      let result = await new Promise((res, rej) => {
-        instance.act(
-          'sys:entity,transaction:end',
-          {
-            ...canon,
-            ...(extra || {}),
-            details,
-          },
-          function(err: any, out: any) {
-            return err ? rej(err) : res(out)
-          }
-        )
-      })
+      if (transaction) {
+        let details = () => transaction
 
-      transaction.end = result
-      transaction.finish = Date.now()
+        let canon = MakeEntity.parsecanon(canonspec)
+        let result = await new Promise((res, rej) => {
+          instance.act(
+            'sys:entity,transaction:end',
+            {
+              ...canon,
+              ...(extra || {}),
+              details,
+            },
+            function(err: any, out: any) {
+              return err ? rej(err) : res(out)
+            }
+          )
+        })
+
+        transaction.end = result
+        transaction.finish = Date.now()
+
+        delete instance.fixedmeta.custom.sys__entity.transaction
+      }
 
       return transaction
     }
@@ -177,6 +183,17 @@ function preload(this: any, context: any) {
 
       return transaction
     }
+
+
+    entityAPI.active = function() {
+      let emptyEntity = this()
+      let instance = emptyEntity.private$.get_instance()
+
+      let transaction = instance.fixedmeta.custom?.sys__entity?.transaction
+
+      return transaction
+    }
+
 
     return entityAPI
   }

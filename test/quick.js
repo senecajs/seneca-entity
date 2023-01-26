@@ -3,28 +3,185 @@ const Entity = require('..')
 
 const dur = 5000
 
+const txlog = (seneca, str) => {
+  let handle = seneca.fixedmeta?.custom?.sys__entity?.transaction?.handle
+  handle && handle.log.push(str+' ['+handle.mark+']')
+}
+
+
 let seneca = Seneca({ legacy: false })
-  .test()
+    .test()
+    .use('promisify')
   .use(Entity)
 
   .add('sys:entity,transaction:begin', function (msg, reply) {
-    reply({ handle: { tx: 'start' } })
+    reply({ handle: { tx: 'start', mark: this.util.Nid(), log: [] } })
   })
 
   .add('sys:entity,transaction:end', function (msg, reply) {
     reply({ handle: { tx: 'end' } })
   })
 
-  .ready(async function () {
-    let s0 = await seneca.entity.begin('sys/foo')
-    // console.log(s0.fixedmeta.custom.sys__entity)
-    console.log('TXI', s0)
+    .add('foo:1', async function(msg, reply, meta) {
+      txlog(this,'START foo:1')
+      
+      this.entity('red').save$({x:msg.x}, function(err, out) {
+        txlog(this,'SAVED red '+out.id)
+        reply(out)
+      })
+    })
 
-    // console.log('BBB', s0.entity())// .private$.get_instance())
 
-    let tx = await s0.entity.end()
-    console.log(tx)
+    .add('foo:2', async function(msg, reply, meta) {
+      txlog(this,'START foo:2')
 
+      this.entity('green').save$({x:msg.x}, function(err, out) {
+        txlog(this,'SAVED green '+out.id)
+        reply(out)
+      })
+    })
+
+    .message('bar:1', async function(msg, reply, meta) {
+      txlog(this,'START bar:1')
+
+      await this.post('foo:1',{x:msg.x})
+
+      txlog(this,'MID bar:1')
+      
+      await this.post('foo:2',{x:msg.x})
+
+      txlog(this,'END bar:1')
+
+      return {x:msg.x}
+    })
+
+
+    .message('zed:1', async function(msg, reply, meta) {
+      txlog(this,'START zed:1 A')
+
+      let out = await this.post('bar:1',{x:msg.x})
+
+      txlog(this,'END zed:1 A')
+
+      return out
+    })
+
+
+    .message('zed:1', async function(msg, reply, meta) {
+      txlog(this,'START zed:1 B')
+
+      let out = await this.prior(msg)
+
+      txlog(this,'END zed:1 B')
+
+      return out
+    })
+
+
+    .message('zed:1', async function(msg, reply, meta) {
+      txlog(this,'START zed:1 C')
+
+      let out = await this.prior(msg)
+
+      txlog(this,'END zed:1 C')
+
+      return out
+    })
+
+
+    .ready(async function () {
+      const seneca = this
+
+      let tn = seneca.entity.active()
+      console.log('tn', null)
+      
+      let s0 = await seneca.entity.begin() // 'sys/foo')
+      let t0a = seneca.entity.active()
+      console.log('t0a', t0a)
+      
+      // console.log(s0.fixedmeta.custom.sys__entity)
+      // console.log('TXI', s0)
+      
+      // console.log('BBB', s0.entity())// .private$.get_instance())
+      
+      let out = await s0.post('foo:1,x:9')    
+      console.log(out)
+
+      out = await s0.post('foo:2,x:8')    
+      console.log(out)
+
+      out = await s0.post('bar:1,x:7')    
+      console.log(out)
+
+      out = await s0.post('zed:1,x:6')    
+      console.log(out)
+
+      let t0b = seneca.entity.active()
+      console.log('t0b', t0b)
+      let tx = await s0.entity.end()
+      // console.log(tx)
+      console.log(tx.handle.log)
+      console.log(tx.handle.log.length)
+
+      let t0c = seneca.entity.active()
+      console.log('t0c', t0c)
+
+      
+      out = await seneca.post('foo:1,x:99')    
+      console.log(out)
+
+      out = await seneca.post('foo:2,x:88')    
+      console.log(out)
+
+      out = await seneca.post('bar:1,x:77')    
+      console.log(out)
+
+      out = await seneca.post('zed:1,x:66')    
+      console.log(out)
+
+      // console.log(tx.handle.log)
+      console.log(tx.handle.log.length)
+
+
+      out = await s0.post('foo:1,x:999')    
+      console.log(out)
+
+      out = await s0.post('foo:2,x:888')    
+      console.log(out)
+
+      out = await s0.post('bar:1,x:777')    
+      console.log(out)
+
+      out = await s0.post('zed:1,x:666')    
+      console.log(out)
+
+      // console.log(tx.handle.log)
+      console.log(tx.handle.log.length)
+
+
+      let t0d = seneca.entity.active()
+      console.log('t0d', t0d)
+      
+      let s1 = await s0.entity.begin() // 'sys/foo')
+
+      let t1a= seneca.entity.active()
+      console.log('t1a', t1a)
+      
+      out = await s1.post('foo:1,x:9')    
+      console.log(out)
+
+      let t1b= seneca.entity.active()
+      console.log('t1b', t1b)
+
+      tx = await s1.entity.end()
+      let t1c= seneca.entity.active()
+      console.log('t1c', t1c)
+
+
+      // console.log(tx)
+      console.log(tx.handle.log)
+      console.log(tx.handle.log.length)
+      
     /*
     let foo0 = seneca.make$('foo').data$({ x: 1 })
     let foo11 = seneca.make$('foo').data$({ x: 11 })

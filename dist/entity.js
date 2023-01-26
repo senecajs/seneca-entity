@@ -72,7 +72,8 @@ function preload(context) {
                 begin: result,
                 canon,
                 handle,
-                trace: []
+                trace: [],
+                id: instance.util.Nid()
             };
             let transactionInstance = instance.delegate(null, {
                 custom: {
@@ -92,19 +93,22 @@ function preload(context) {
             let emptyEntity = this();
             let instance = emptyEntity.private$.get_instance();
             let transaction = instance.fixedmeta.custom.sys__entity.transaction;
-            let details = () => transaction;
-            let canon = make_entity_1.MakeEntity.parsecanon(canonspec);
-            let result = await new Promise((res, rej) => {
-                instance.act('sys:entity,transaction:end', {
-                    ...canon,
-                    ...(extra || {}),
-                    details,
-                }, function (err, out) {
-                    return err ? rej(err) : res(out);
+            if (transaction) {
+                let details = () => transaction;
+                let canon = make_entity_1.MakeEntity.parsecanon(canonspec);
+                let result = await new Promise((res, rej) => {
+                    instance.act('sys:entity,transaction:end', {
+                        ...canon,
+                        ...(extra || {}),
+                        details,
+                    }, function (err, out) {
+                        return err ? rej(err) : res(out);
+                    });
                 });
-            });
-            transaction.end = result;
-            transaction.finish = Date.now();
+                transaction.end = result;
+                transaction.finish = Date.now();
+                delete instance.fixedmeta.custom.sys__entity.transaction;
+            }
             return transaction;
         };
         entityAPI.rollback = async function (canonspec, extra) {
@@ -124,6 +128,13 @@ function preload(context) {
             });
             transaction.end = result;
             transaction.finish = Date.now();
+            return transaction;
+        };
+        entityAPI.active = function () {
+            var _a, _b;
+            let emptyEntity = this();
+            let instance = emptyEntity.private$.get_instance();
+            let transaction = (_b = (_a = instance.fixedmeta.custom) === null || _a === void 0 ? void 0 : _a.sys__entity) === null || _b === void 0 ? void 0 : _b.transaction;
             return transaction;
         };
         return entityAPI;
