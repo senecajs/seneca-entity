@@ -1,5 +1,8 @@
 /* Copyright (c) 2010-2022 Richard Rodger and other contributors, MIT License */
 
+import {
+  EntityState
+} from './lib/types'
 
 import { MakeEntity, Entity } from './lib/make_entity'
 import { Store } from './lib/store'
@@ -26,6 +29,10 @@ const default_opts: any = {
     // Provide action meta object as third argument to callbacks.
     provide: true,
   },
+
+  transaction: {
+    active: false
+  }
 }
 
 
@@ -50,7 +57,25 @@ function preload(this: any, context: any) {
 
   // Removes dependency on seneca-basic
   // TODO: deprecate this
-  seneca.add('role:basic,cmd:generate_id', generate_id)
+  seneca
+    .add('role:basic,cmd:generate_id', generate_id)
+    .add('sys:entity,hook:intercept,intercept:act_error', hook_intercept_act_error)
+
+
+  // Stores are responsible for calling transaction rollback on errors.
+  function hook_intercept_act_error(this: any, msg: any, reply: any, meta: any) {
+    let action = msg.action
+    if ('function' != typeof action) {
+      throw new Error('intercept action parameter must be a function')
+    }
+
+    this.private$.intercept.act_error.push(action)
+    let act_errors =
+      this.private$.intercept.act_error.map((action: any) => action.name)
+
+    reply({ act_errors })
+  }
+
 
   seneca.util.parsecanon = seneca.util.parsecanon || MakeEntity.parsecanon
 
@@ -74,67 +99,121 @@ function preload(this: any, context: any) {
 
   // all optional
   function build_api_make(promise: boolean) {
-    let entityAPI: any = function(this: any) {
+
+    let entityAPI: any = function entityAPI(this: any) {
       return seneca.private$.entity.make$(this, ...[...arguments, promise])
     }
 
-    entityAPI.begin = async function(this: any, canonspec: any, extra: any) {
+    // TODO: message to inject direct function call for rollbacks
+    // to be called in intercept act_error, keyed by canonstr
+
+
+    entityAPI.instance = function(this: any) {
       let emptyEntity = this()
       let instance = emptyEntity.private$.get_instance()
-
-      let canon = MakeEntity.parsecanon(canonspec)
-      let result: any = await new Promise((res, rej) => {
-        instance.act(
-          'sys:entity,transaction:begin', { ...canon, ...(extra || {}) },
-          function(err: any, out: any) {
-            return err ? rej(err) : res(out)
-          }
-        )
-      })
-
-      let { handle } = result
-
-      let transaction: any = {
-        start: Date.now(),
-        begin: result,
-        canon,
-        handle,
-        trace: [],
-        id: instance.util.Nid()
-      }
-
-      let transactionInstance = instance.delegate(null, {
-        custom: {
-          sys__entity: {
-            transaction
-          }
-        }
-      })
-
-      transaction.sid = transactionInstance.id
-      transaction.did = transactionInstance.did
-
-      // Generate correct get_instance referencing transactionInstance
-      // TODO: refactor?
-      transactionInstance.entity()
-
-      return transactionInstance
+      return instance
     }
 
 
-    entityAPI.end = async function(this: any, canonspec: any, extra: any) {
+    entityAPI.state = function(canonspec: any) {
       let emptyEntity = this()
-      let instance = emptyEntity.private$.get_instance()
+      return get_state(emptyEntity, canonspec)
+    }
 
-      let transaction = instance.fixedmeta.custom.sys__entity.transaction
 
-      if (transaction) {
+    if (opts.transaction.active) {
+
+      entityAPI.begin = async function(this: any, canonspec: any, extra: any) {
+        let emptyEntity = this()
+        let state = get_state(emptyEntity, canonspec)
+
+        let result: any = await new Promise((res, rej) => {
+          state.instance.act(
+            'sys:entity,transaction:begin', { ...state.canon, ...(extra || {}) },
+            function(err: any, out: any) {
+              return err ? rej(err) : res(out)
+            }
+          )
+        })
+
+        let { get_handle } = result
+
+        let transaction: any = {
+          start: Date.now(),
+          begin: result,
+          canon: state.canon,
+          handle: get_handle(),
+          trace: [],
+          id: state.instance.util.Nid()
+        }
+
+        let transactionInstance = state.instance.delegate(null, {
+          custom: {
+            sys__entity: {
+              transaction: {
+                [state.canonstr]: transaction
+              }
+            }
+          }
+        })
+
+        transaction.sid = transactionInstance.id
+        transaction.did = transactionInstance.did
+
+        // Generate correct get_instance referencing transactionInstance
+        transactionInstance.entity()
+
+        return transactionInstance
+      }
+
+
+      entityAPI.end = async function(this: any, canonspec: any, extra: any) {
+        let emptyEntity = this()
+        let state = get_state(emptyEntity, canonspec)
+
+        let transaction =
+          state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr]
+
+        if (transaction) {
+          let details = () => transaction
+
+          let get_result: any = await new Promise((res, rej) => {
+            state.instance.act(
+              'sys:entity,transaction:end',
+              {
+                ...state.canon,
+                ...(extra || {}),
+                details,
+              },
+              function(err: any, out: any) {
+                return err ? rej(err) : res(out)
+              }
+            )
+          })
+
+          transaction.result = get_result()
+          transaction.finish = Date.now()
+
+          delete state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr]
+        }
+
+        return transaction
+      }
+
+
+      entityAPI.rollback = async function(this: any, canonspec: any, extra: any) {
+        let emptyEntity = this()
+        let state = get_state(emptyEntity, canonspec)
+
+        let transaction =
+          state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr]
+
         let details = () => transaction
 
         let canon = MakeEntity.parsecanon(canonspec)
         let result = await new Promise((res, rej) => {
-          instance.act(
-            'sys:entity,transaction:end',
+          state.instance.act(
+            'sys:entity,transaction:rollback',
             {
               ...canon,
               ...(extra || {}),
@@ -149,56 +228,79 @@ function preload(this: any, context: any) {
         transaction.end = result
         transaction.finish = Date.now()
 
-        delete instance.fixedmeta.custom.sys__entity.transaction
+        delete state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr]
+
+        return transaction
       }
 
-      return transaction
-    }
 
+      entityAPI.adopt = async function(
+        this: any,
+        handle: any,
+        canonspec: any,
+        extra: any
+      ) {
+        let emptyEntity = this()
+        let state = get_state(emptyEntity, canonspec)
 
-    entityAPI.rollback = async function(this: any, canonspec: any, extra: any) {
-      let emptyEntity = this()
-      let instance = emptyEntity.private$.get_instance()
+        let transaction =
+          state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr]
 
-      let transaction = instance.fixedmeta.custom.sys__entity.transaction
-      let details = () => transaction
+        if (transaction) {
+          let err = new Error('Transaction already exists for canon ' + state.canonstr)
+            ; (err as any).transaction = transaction
+          throw err
+        }
 
-      let canon = MakeEntity.parsecanon(canonspec)
-      let result = await new Promise((res, rej) => {
-        instance.act(
-          'sys:entity,transaction:rollback',
-          {
-            ...canon,
+        let result: any = await new Promise((res, rej) => {
+          state.instance.act(
+            'sys:entity,transaction:adopt', {
+            ...state.canon,
             ...(extra || {}),
-            details,
+            get_handle: () => handle
           },
-          function(err: any, out: any) {
-            return err ? rej(err) : res(out)
+            function(err: any, out: any) {
+              return err ? rej(err) : res(out)
+            }
+          )
+        })
+
+        let { get_handle } = result
+
+        transaction = {
+          start: Date.now(),
+          begin: result,
+          canon: state.canon,
+          handle: get_handle(),
+          trace: [],
+          id: state.instance.util.Nid()
+        }
+
+        let transactionInstance = state.instance.delegate(null, {
+          custom: {
+            sys__entity: {
+              transaction: {
+                [state.canonstr]: transaction
+              }
+            }
           }
-        )
-      })
+        })
 
-      transaction.end = result
-      transaction.finish = Date.now()
+        transaction.sid = transactionInstance.id
+        transaction.did = transactionInstance.did
 
-      return transaction
+        // Generate correct get_instance referencing transactionInstance
+        transactionInstance.entity()
+
+        return transactionInstance
+      }
     }
-
-
-    entityAPI.active = function() {
-      let emptyEntity = this()
-      let instance = emptyEntity.private$.get_instance()
-
-      let transaction = instance.fixedmeta.custom?.sys__entity?.transaction
-
-      return transaction
-    }
-
 
     return entityAPI
   }
 
   let make = build_api_make(false)
+
   let entity = build_api_make(true)
 
   if (!seneca.make$) {
@@ -233,6 +335,9 @@ function preload(this: any, context: any) {
   ) {
     seneca.root.use(require('seneca-mem-store'))
   }
+
+
+
 
   // FIX: does not work! need to invert this so
   // older stuff hits role then sys
@@ -282,6 +387,7 @@ entity.preload = preload
 // cache nid funcs up to length 64
 const nidCache: any = []
 
+
 function generate_id(this: any, msg: any, reply: any) {
   let seneca = this
   let Nid = seneca.util.Nid
@@ -303,6 +409,24 @@ function generate_id(this: any, msg: any, reply: any) {
 
   return reply ? reply(actnid()) : actnid()
 }
+
+
+// Get the current entity instance and transaction state
+function get_state(emptyEntity: any, canonspec: any): EntityState {
+  let instance = emptyEntity.private$.get_instance()
+  let canon = MakeEntity.parsecanon(canonspec)
+  let canonstr = MakeEntity.canonstr(canon)
+  let transaction = instance.fixedmeta.custom.sys__entity.transaction[canonstr]
+
+  return {
+    when: Date.now(),
+    instance,
+    canon,
+    canonstr,
+    transaction,
+  }
+}
+
 
 export type { Entity }
 

@@ -358,13 +358,14 @@ class Entity {
                 self.entity$ = self.canon$();
             }
         }
-        return null == opt || opt.string || opt.string$
-            ? [
-                (opt && opt.string$ ? '$' : '') +
-                    (null == canon.zone ? '-' : canon.zone),
-                null == canon.base ? '-' : canon.base,
-                null == canon.name ? '-' : canon.name,
-            ].join('/') // TODO: make joiner an option
+        return (null == opt || opt.string || opt.string$)
+            // ? [
+            //   (opt && opt.string$ ? '$' : '') +
+            //   (null == canon.zone ? '-' : canon.zone),
+            //   null == canon.base ? '-' : canon.base,
+            //   null == canon.name ? '-' : canon.name,
+            // ].join('/') // TODO: make joiner an option
+            ? (opt && opt.string$ ? '$' : '') + canonstr(canon)
             : opt.array
                 ? [canon.zone, canon.base, canon.name]
                 : opt.array$
@@ -533,6 +534,14 @@ function parsecanon(str) {
     }
     return out;
 }
+function canonstr(canon) {
+    canon = canon || { name: '' };
+    return [
+        (null == canon.zone || '' === canon.zone ? '-' : canon.zone),
+        null == canon.base || '' === canon.base ? '-' : canon.base,
+        null == canon.name || '' === canon.name ? '-' : canon.name,
+    ].join('/');
+}
 function handle_options(entopts, seneca) {
     var _a;
     entopts = entopts || Object.create(null);
@@ -620,4 +629,5 @@ function MakeEntity(canon, seneca, opts) {
 }
 exports.MakeEntity = MakeEntity;
 MakeEntity.parsecanon = parsecanon;
+MakeEntity.canonstr = canonstr;
 //# sourceMappingURL=make_entity.js.map

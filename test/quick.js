@@ -9,11 +9,80 @@ const txlog = (seneca, str) => {
 }
 
 
+const tmp = {}
+
 let seneca = Seneca({ legacy: false })
     .test()
     .use('promisify')
   .use(Entity)
 
+
+seneca
+  .add('sys:entity,transaction:begin', function (msg, reply) {
+    tmp.tx = { handle: { state: 'start', mark: this.util.Nid(), log: [] } }
+    reply(tmp.tx)
+  })
+
+  .add('sys:entity,transaction:end', function (msg, reply) {
+    tmp.tx.handle.state = 'end'
+    reply(tmp.tx)
+  })
+
+
+seneca.ready(async function() {
+  let s0 = this
+  console.log('s0 A', s0)
+  
+  let entapi0 = s0.entity()
+
+  let s1 = s0.delegate()
+  console.log('s1 A', s1)
+
+  let entapi1 = s1.entity()
+  let entapi0a = s0.entity()
+
+
+  let foo0 = s0.entity('foo')
+  console.log('foo0', foo0.private$.get_instance())
+
+  console.log('AAA')
+  let entapi0a_foo0 = s0.entity()
+  console.log('BBB')
+  let entapi1_foo0 = s1.entity()
+  console.log('CCC')
+  
+  let foo00 = s0.entity('foo')
+  console.log('foo00', foo00.private$.get_instance())
+
+  
+  let foo1 = s1.entity('foo')
+  console.log('foo1', foo1.private$.get_instance())
+
+
+  console.log('ins0.entity', s0.entity.toString())
+  console.log('ins0.entity()', s0.entity())
+  console.log('ins0', s0.entity.instance())
+
+  console.log('ins1.entity', s1.entity.toString())
+  console.log('ins1.entity()', s1.entity())
+  console.log('ins1', s1.entity.instance())
+  
+
+/*
+  let st1 = await this.entity.begin()
+  console.log('st1 begin', st1)
+  console.log('s0 B', s0)
+  
+  let st1txa = st1.entity.active()
+  console.log('st1txa active', st1txa)
+
+  let s0txa = s0.entity.active()
+  console.log('s0txa active', s0txa)
+  */
+  
+})
+
+/*
   .add('sys:entity,transaction:begin', function (msg, reply) {
     reply({ handle: { tx: 'start', mark: this.util.Nid(), log: [] } })
   })
@@ -181,6 +250,8 @@ let seneca = Seneca({ legacy: false })
       // console.log(tx)
       console.log(tx.handle.log)
       console.log(tx.handle.log.length)
+
+*/
       
     /*
     let foo0 = seneca.make$('foo').data$({ x: 1 })
@@ -245,4 +316,4 @@ let seneca = Seneca({ legacy: false })
       )
       })
       */
-  })
+//  })

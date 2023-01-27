@@ -1,3 +1,4 @@
+import { Canon } from './types';
 declare function entargs(this: any, ent: Entity, args: any): any;
 declare class Entity implements Record<string, any> {
     entity$: string;
@@ -61,5 +62,6 @@ declare class Entity implements Record<string, any> {
 declare function MakeEntity(canon: any, seneca: any, opts?: any): Entity;
 declare namespace MakeEntity {
     var parsecanon: (str: string) => any;
+    var canonstr: (canon: Canon) => string;
 }
 export { MakeEntity, Entity };
