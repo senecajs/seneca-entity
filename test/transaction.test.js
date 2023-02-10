@@ -92,11 +92,11 @@ describe('transaction', () => {
     await si.ready()
 
 
-    let tn = si.entity.active()
+    let tn = si.entity.state()
     expect(tn).toBeNull()
     
     let s0 = await si.entity.begin() // 'sys/foo')
-    let t0a = si.entity.active()
+    let t0a = si.entity.state()
     // console.log('t0a', t0a)
     // console.log(s0.fixedmeta.custom.sys__entity)
     // console.log('TXI', s0)
@@ -122,7 +122,7 @@ describe('transaction', () => {
     let red1 = await s0.post('zed:1,x:6')    
     // console.log(red1)
 
-    let t0b = si.entity.active()
+    let t0b = si.entity.state()
     expect(t0b).toBeDefined()
 
     let tx = await s0.entity.end()
@@ -163,7 +163,7 @@ describe('transaction', () => {
 
     // operations post transaction do not pollute or reuse transaction:
     
-    let t0c = si.entity.active()
+    let t0c = si.entity.state()
     expect(t0c).toBeNull()
     
     let out = await si.post('foo:1,x:99')    
@@ -181,7 +181,7 @@ describe('transaction', () => {
     expect(tx.handle.log.length).toEqual(txlen)
     
     
-    let t0d = s0.entity.active()
+    let t0d = s0.entity.state()
     expect(t0d).toBeNull()
 
     out = await s0.post('foo:1,x:999')    
@@ -200,13 +200,13 @@ describe('transaction', () => {
 
 
 
-    let t0e = si.entity.active()
+    let t0e = si.entity.state()
     expect(t0e).toBeNull()
 
     
     let s1 = await s0.entity.begin()
 
-    let t1a= si.entity.active()
+    let t1a= si.entity.state()
     expect(t1a).toBeDefined()
 
 
@@ -214,11 +214,11 @@ describe('transaction', () => {
     
     out = await s1.post('foo:1,x:9')    
 
-    let t1b= si.entity.active()
+    let t1b= si.entity.state()
     expect(t1b).toBeDefined()
 
     tx = await s1.entity.end()
-    let t1c= si.entity.active()
+    let t1c= si.entity.state()
     console.log('t1c', t1c)
 
 
