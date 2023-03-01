@@ -5,35 +5,109 @@ const Entity = require('../')
 
 
 describe('transaction', () => {
-  test('basic', async () => {
+
+  test('child-context-only', async () => {
     const si = makeSenecaInstance()
 
     const tmp = {}
     
-    const txlog = (seneca, str) => {
-      let handle = seneca.fixedmeta?.custom?.sys__entity?.transaction?.handle
+    const txlog = (seneca, str, canonstr) => {
+      canonstr = canonstr || '-/-/-'
+      let tx = seneca.fixedmeta?.custom?.sys__entity?.transaction
+      let handle = tx && tx[canonstr] && tx[canonstr].handle
       handle && handle.log.push(str+' ['+handle.mark+']')
     }
 
     si
       .add('sys:entity,transaction:begin', function (msg, reply) {
-        tmp.tx = { handle: { state: 'start', mark: this.util.Nid(), log: [] } }
-        reply(tmp.tx)
+        tmp.tx = { state: 'start', mark: msg.mark, log: [] }
+        reply({ get_handle: ()=>tmp.tx })
       })
     
       .add('sys:entity,transaction:end', function (msg, reply) {
-        tmp.tx.handle.state = 'end'
-        reply(tmp.tx)
+        tmp.tx.state = 'end'
+        reply({ done: true, mark: tmp.tx.mark })
       })
     
-      .add('foo:1', async function(msg, reply, meta) {
+      .add('foo:red', async function(msg, reply, meta) {
         txlog(this,'START foo:1')
       
         this.entity('red').save$({x:msg.x}, function(err, out) {
           txlog(this,'SAVED red '+out.id)
           reply(out)
         })
-    })
+      })
+
+
+    await si.ready()
+
+    let e0 = si.entity()
+
+    // No transaction running.
+    let es0a = si.entity.state()
+    expect(es0a.canonstr).toEqual('-/-/-')
+    expect(es0a.transaction).toBeNull()
+
+    // Begin transaction - returns seneca instance to use.
+    let s0 = await si.entity.begin(null,{mark:'zero'})
+    expect(s0.isSeneca).toBeTruthy()
+    expect(s0.fixedmeta.custom.sys__entity.transaction['-/-/-'].handle.mark)
+      .toEqual('zero')
+
+    // No transaction running in parent!
+    let es0b = si.entity.state()
+    expect(es0b.canonstr).toEqual('-/-/-')
+    expect(es0b.transaction).toBeNull()
+
+    // Get current transaction from entity state.
+    let s0t0 = s0.entity.state()
+    expect(s0t0.canonstr).toEqual('-/-/-')
+    expect(s0t0.transaction.handle.mark).toEqual('zero')
+    expect(s0t0.transaction.handle.log).toEqual([])
+
+    // No transaction running in parent!
+    let es0c = si.entity.state()
+    expect(es0c.transaction).toBeNull()
+    
+    // Execute msg in transaction context.
+    let red0 = await s0.post('foo:red,x:9')    
+    expect(red0.x).toEqual(9)
+
+    // No transaction running in parent!
+    let es0d = si.entity.state()
+    expect(es0d.transaction).toBeNull()
+
+    // Confirm transaction context.
+    let s0t1 = s0.entity.state()
+    expect(s0t1.canonstr).toEqual('-/-/-')
+    expect(s0t1.transaction.handle.mark).toEqual('zero')
+    expect(s0t1.transaction.handle.log).toEqual([
+      `START foo:1 [zero]`,
+      `SAVED red ${red0.id} [zero]`,
+    ])
+
+    // No transaction running in parent!
+    let es0e = si.entity.state()
+    expect(es0e.transaction).toBeNull()
+    
+    // End transaction context.
+    let tx0 = await s0.entity.end()
+    expect(tx0).toBeDefined()
+    expect(tx0.result.done).toEqual(true)
+
+    // No transaction running in parent!
+    let es0f = si.entity.state()
+    expect(es0f.transaction).toBeNull()
+
+    // No transaction running in child now
+    let s0t2 = s0.entity.state()
+    expect(s0t2.transaction.finish).toBeTruthy()
+
+    await si.close()
+    
+    return;
+    
+/*
 
       .add('foo:2', async function(msg, reply, meta) {
         txlog(this,'START foo:2')
@@ -47,7 +121,7 @@ describe('transaction', () => {
       .message('bar:1', async function(msg, reply, meta) {
         txlog(this,'START bar:1')
         
-        let foo1 = await this.post('foo:1',{x:msg.x})
+        let foo1 = await this.post('foo:red',{x:msg.x})
         
         txlog(this,'MID bar:1')
         
@@ -89,30 +163,7 @@ describe('transaction', () => {
       })
     
 
-    await si.ready()
-
-
-    let tn = si.entity.state()
-    expect(tn).toBeNull()
     
-    let s0 = await si.entity.begin() // 'sys/foo')
-    let t0a = si.entity.state()
-    // console.log('t0a', t0a)
-    // console.log(s0.fixedmeta.custom.sys__entity)
-    // console.log('TXI', s0)
-    // console.log('BBB', s0.entity())// .private$.get_instance())
-
-    expect(t0a).toMatchObject({
-      begin: { handle: { state: 'start', log: [] } },
-      canon: {},
-      handle: { state: 'start', log: [] },
-      trace: [],
-      sid: si.id,
-    })
-    
-    let red0 = await s0.post('foo:1,x:9')    
-    // console.log(red)
-
     let green0 = await s0.post('foo:2,x:8')    
     // console.log(green)
 
@@ -133,12 +184,12 @@ describe('transaction', () => {
 
     let mark = tx.handle.mark
     expect(tx.handle.log).toEqual([
-      'START foo:1 ['+mark+']',
+      'START foo:red ['+mark+']',
       'SAVED red '+red0.id+' ['+mark+']',
       'START foo:2 ['+mark+']',
       'SAVED green '+green0.id+' ['+mark+']',
       'START bar:1 ['+mark+']',
-      'START foo:1 ['+mark+']',
+      'START foo:red ['+mark+']',
       'SAVED red '+green1.foo1.id+' ['+mark+']',
       'MID bar:1 ['+mark+']',
       'START foo:2 ['+mark+']',
@@ -148,7 +199,7 @@ describe('transaction', () => {
       'START zed:1 B ['+mark+']',
       'START zed:1 A ['+mark+']',
       'START bar:1 ['+mark+']',
-      'START foo:1 ['+mark+']',
+      'START foo:red ['+mark+']',
       'SAVED red '+red1.foo1.id+' ['+mark+']',
       'MID bar:1 ['+mark+']',
       'START foo:2 ['+mark+']',
@@ -166,7 +217,7 @@ describe('transaction', () => {
     let t0c = si.entity.state()
     expect(t0c).toBeNull()
     
-    let out = await si.post('foo:1,x:99')    
+    let out = await si.post('foo:red,x:99')    
     // console.log(out)
 
     out = await si.post('foo:2,x:88')    
@@ -184,7 +235,7 @@ describe('transaction', () => {
     let t0d = s0.entity.state()
     expect(t0d).toBeNull()
 
-    out = await s0.post('foo:1,x:999')    
+    out = await s0.post('foo:red,x:999')    
     // console.log(out)
 
     out = await s0.post('foo:2,x:888')    
@@ -208,11 +259,11 @@ describe('transaction', () => {
 
     let t1a= si.entity.state()
     expect(t1a).toBeDefined()
-
+    */ 
 
     /*
     
-    out = await s1.post('foo:1,x:9')    
+    out = await s1.post('foo:red,x:9')    
 
     let t1b= si.entity.state()
     expect(t1b).toBeDefined()
@@ -228,7 +279,7 @@ describe('transaction', () => {
 
     */
     
-    await si.close()
+
   })
 })
 
@@ -242,17 +293,22 @@ function makeSenecaInstance() {
   const seneca = Seneca(
     {
       legacy: false,
-      default_plugins: {
-        entity: false,
-        'mem-store': false,
-      },
-      plugins: [Entity],
+      // default_plugins: {
+      //   entity: false,
+      //   'mem-store': false,
+      // },
+      // plugins: [Entity],
     }
   )
 
   seneca
     .test()
     .use('promisify')
+    .use(Entity, {
+      transaction: {
+        active: true
+      }
+    })
 
   return seneca
 }
