@@ -361,14 +361,14 @@ class Entity {
                 self.entity$ = self.canon$();
             }
         }
-        return (null == opt || opt.string || opt.string$)
-            // ? [
-            //   (opt && opt.string$ ? '$' : '') +
-            //   (null == canon.zone ? '-' : canon.zone),
-            //   null == canon.base ? '-' : canon.base,
-            //   null == canon.name ? '-' : canon.name,
-            // ].join('/') // TODO: make joiner an option
-            ? (opt && opt.string$ ? '$' : '') + canonstr(canon)
+        return null == opt || opt.string || opt.string$
+            ? // ? [
+                //   (opt && opt.string$ ? '$' : '') +
+                //   (null == canon.zone ? '-' : canon.zone),
+                //   null == canon.base ? '-' : canon.base,
+                //   null == canon.name ? '-' : canon.name,
+                // ].join('/') // TODO: make joiner an option
+                (opt && opt.string$ ? '$' : '') + canonstr(canon)
             : opt.array
                 ? [canon.zone, canon.base, canon.name]
                 : opt.array$
@@ -540,7 +540,7 @@ function parsecanon(str) {
 function canonstr(canon) {
     canon = canon || { name: '' };
     return [
-        (null == canon.zone || '' === canon.zone ? '-' : canon.zone),
+        null == canon.zone || '' === canon.zone ? '-' : canon.zone,
         null == canon.base || '' === canon.base ? '-' : canon.base,
         null == canon.name || '' === canon.name ? '-' : canon.name,
     ].join('/');

@@ -14,7 +14,6 @@ const Gex = Seneca.util.Gex || GexModule.Gex
 
 const MemOps = require('./mem-ops.js')
 
-
 function SenecaInstance() {
   const seneca = Seneca({
     default_plugins: {
@@ -26,8 +25,6 @@ function SenecaInstance() {
 
   return seneca
 }
-
-
 
 describe('entity', function () {
   test('happy-mem', function (fin) {
@@ -48,8 +45,6 @@ describe('entity', function () {
     })
   })
 
-
-  
   test('happy-mem-promise', async function () {
     const si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
@@ -322,12 +317,11 @@ describe('entity', function () {
   })
 
   // TODO: promisify in Seneca 4
-  test('mem-ops', function(fin) {
+  test('mem-ops', function (fin) {
     let si = SenecaInstance()
     MemOps(si)(fin)
   })
 
-  
   test('parsecanon', function (fin) {
     const si = SenecaInstance()
 
@@ -1299,4 +1293,3 @@ describe('entity', function () {
 function jj(x) {
   return JSON.parse(JSON.stringify(x))
 }
-

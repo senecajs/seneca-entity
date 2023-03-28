@@ -1,4 +1,3 @@
-
 export type Canon = {
   zone?: string
   base?: string
@@ -7,7 +6,6 @@ export type Canon = {
 
 export type CanonSpec = Canon | string | string[]
 
-
 export type EntityState = {
   when: number
   instance: any // Seneca
@@ -15,7 +13,6 @@ export type EntityState = {
   canonstr: string
   transaction?: Transaction | null
 }
-
 
 export type Transaction = {
   id: string
@@ -30,7 +27,6 @@ export type Transaction = {
   trace: any[]
 }
 
-
 export type EntityAPI = (() => any) & {
   // TODO: Seneca types!
   instance: () => any
@@ -38,7 +34,9 @@ export type EntityAPI = (() => any) & {
   begin: (canonspec: CanonSpec, extra: any) => null | Promise<any>
   end: (canonspec: CanonSpec, extra: any) => Promise<null | Transaction>
   rollback: (canonspec: CanonSpec, extra: any) => Promise<null | Transaction>
-  adopt: (handle: any, canonspec: CanonSpec, extra: any) =>
-    Promise<null | Transaction>
+  adopt: (
+    handle: any,
+    canonspec: CanonSpec,
+    extra: any
+  ) => Promise<null | Transaction>
 }
-

@@ -5,17 +5,12 @@ const dur = 5000
 
 const txlog = (seneca, str) => {
   let handle = seneca.fixedmeta?.custom?.sys__entity?.transaction?.handle
-  handle && handle.log.push(str+' ['+handle.mark+']')
+  handle && handle.log.push(str + ' [' + handle.mark + ']')
 }
-
 
 const tmp = {}
 
-let seneca = Seneca({ legacy: false })
-    .test()
-    .use('promisify')
-  .use(Entity)
-
+let seneca = Seneca({ legacy: false }).test().use('promisify').use(Entity)
 
 seneca
   .add('sys:entity,transaction:begin', function (msg, reply) {
@@ -28,11 +23,10 @@ seneca
     reply(tmp.tx)
   })
 
-
-seneca.ready(async function() {
+seneca.ready(async function () {
   let s0 = this
   console.log('s0 A', s0)
-  
+
   let entapi0 = s0.entity()
 
   let s1 = s0.delegate()
@@ -40,7 +34,6 @@ seneca.ready(async function() {
 
   let entapi1 = s1.entity()
   let entapi0a = s0.entity()
-
 
   let foo0 = s0.entity('foo')
   console.log('foo0', foo0.private$.get_instance())
@@ -50,14 +43,12 @@ seneca.ready(async function() {
   console.log('BBB')
   let entapi1_foo0 = s1.entity()
   console.log('CCC')
-  
+
   let foo00 = s0.entity('foo')
   console.log('foo00', foo00.private$.get_instance())
 
-  
   let foo1 = s1.entity('foo')
   console.log('foo1', foo1.private$.get_instance())
-
 
   console.log('ins0.entity', s0.entity.toString())
   console.log('ins0.entity()', s0.entity())
@@ -66,9 +57,8 @@ seneca.ready(async function() {
   console.log('ins1.entity', s1.entity.toString())
   console.log('ins1.entity()', s1.entity())
   console.log('ins1', s1.entity.instance())
-  
 
-/*
+  /*
   let st1 = await this.entity.begin()
   console.log('st1 begin', st1)
   console.log('s0 B', s0)
@@ -79,7 +69,6 @@ seneca.ready(async function() {
   let s0txa = s0.entity.active()
   console.log('s0txa active', s0txa)
   */
-  
 })
 
 /*
@@ -252,8 +241,8 @@ seneca.ready(async function() {
       console.log(tx.handle.log.length)
 
 */
-      
-    /*
+
+/*
     let foo0 = seneca.make$('foo').data$({ x: 1 })
     let foo11 = seneca.make$('foo').data$({ x: 11 })
 
@@ -293,7 +282,7 @@ seneca.ready(async function() {
     })
     */
 
-    /*
+/*
     let foo = this.make('foo').data$({ x: 1 })
     console.log('S-A', foo, foo.async$)
 

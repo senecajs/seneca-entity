@@ -3,41 +3,37 @@
 const Seneca = require('seneca')
 const Entity = require('../')
 
-
 describe('transaction', () => {
-
   test('child-context-only', async () => {
     const si = makeSenecaInstance()
 
     const tmp = {}
-    
+
     const txlog = (seneca, str, canonstr) => {
       canonstr = canonstr || '-/-/-'
       let tx = seneca.fixedmeta?.custom?.sys__entity?.transaction
       let handle = tx && tx[canonstr] && tx[canonstr].handle
-      handle && handle.log.push(str+' ['+handle.mark+']')
+      handle && handle.log.push(str + ' [' + handle.mark + ']')
     }
 
-    si
-      .add('sys:entity,transaction:begin', function (msg, reply) {
-        tmp.tx = { state: 'start', mark: msg.mark, log: [] }
-        reply({ get_handle: ()=>tmp.tx })
-      })
-    
+    si.add('sys:entity,transaction:begin', function (msg, reply) {
+      tmp.tx = { state: 'start', mark: msg.mark, log: [] }
+      reply({ get_handle: () => tmp.tx })
+    })
+
       .add('sys:entity,transaction:end', function (msg, reply) {
         tmp.tx.state = 'end'
         reply({ done: true, mark: tmp.tx.mark })
       })
-    
-      .add('foo:red', async function(msg, reply, meta) {
-        txlog(this,'START foo:1')
-      
-        this.entity('red').save$({x:msg.x}, function(err, out) {
-          txlog(this,'SAVED red '+out.id)
+
+      .add('foo:red', async function (msg, reply, meta) {
+        txlog(this, 'START foo:1')
+
+        this.entity('red').save$({ x: msg.x }, function (err, out) {
+          txlog(this, 'SAVED red ' + out.id)
           reply(out)
         })
       })
-
 
     await si.ready()
 
@@ -49,10 +45,11 @@ describe('transaction', () => {
     expect(es0a.transaction).toBeNull()
 
     // Begin transaction - returns seneca instance to use.
-    let s0 = await si.entity.begin(null,{mark:'zero'})
+    let s0 = await si.entity.begin(null, { mark: 'zero' })
     expect(s0.isSeneca).toBeTruthy()
-    expect(s0.fixedmeta.custom.sys__entity.transaction['-/-/-'].handle.mark)
-      .toEqual('zero')
+    expect(
+      s0.fixedmeta.custom.sys__entity.transaction['-/-/-'].handle.mark
+    ).toEqual('zero')
 
     // No transaction running in parent!
     let es0b = si.entity.state()
@@ -68,9 +65,9 @@ describe('transaction', () => {
     // No transaction running in parent!
     let es0c = si.entity.state()
     expect(es0c.transaction).toBeNull()
-    
+
     // Execute msg in transaction context.
-    let red0 = await s0.post('foo:red,x:9')    
+    let red0 = await s0.post('foo:red,x:9')
     expect(red0.x).toEqual(9)
 
     // No transaction running in parent!
@@ -89,7 +86,7 @@ describe('transaction', () => {
     // No transaction running in parent!
     let es0e = si.entity.state()
     expect(es0e.transaction).toBeNull()
-    
+
     // End transaction context.
     let tx0 = await s0.entity.end()
     expect(tx0).toBeDefined()
@@ -104,10 +101,10 @@ describe('transaction', () => {
     expect(s0t2.transaction.finish).toBeTruthy()
 
     await si.close()
-    
-    return;
-    
-/*
+
+    return
+
+    /*
 
       .add('foo:2', async function(msg, reply, meta) {
         txlog(this,'START foo:2')
@@ -259,7 +256,7 @@ describe('transaction', () => {
 
     let t1a= si.entity.state()
     expect(t1a).toBeDefined()
-    */ 
+    */
 
     /*
     
@@ -278,36 +275,30 @@ describe('transaction', () => {
     console.log(tx.handle.log.length)    
 
     */
-    
-
   })
 })
-
 
 function jj(x) {
   return JSON.parse(JSON.stringify(x))
 }
 
-
 function makeSenecaInstance() {
-  const seneca = Seneca(
-    {
-      legacy: false,
-      // default_plugins: {
-      //   entity: false,
-      //   'mem-store': false,
-      // },
-      // plugins: [Entity],
-    }
-  )
+  const seneca = Seneca({
+    legacy: false,
+    // default_plugins: {
+    //   entity: false,
+    //   'mem-store': false,
+    // },
+    // plugins: [Entity],
+  })
 
   seneca
     .test()
     .use('promisify')
     .use(Entity, {
       transaction: {
-        active: true
-      }
+        active: true,
+      },
     })
 
   return seneca

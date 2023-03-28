@@ -13,13 +13,17 @@ let s0 = Seneca({
   },
 })
   .test()
-    .use(Entity, {transaction:{active:true}})
+  .use(Entity, { transaction: { active: true } })
 
-  .act('sys:entity,hook:intercept,intercept:act_error', {
-    action: function foo_interceptor(actcall) {
-      console.log('FOO_INTERCEPTOR', actcall.actdef)
-    }
-  }, Seneca.util.print)
+  .act(
+    'sys:entity,hook:intercept,intercept:act_error',
+    {
+      action: function foo_interceptor(actcall) {
+        console.log('FOO_INTERCEPTOR', actcall.actdef)
+      },
+    },
+    Seneca.util.print
+  )
   .add('a:1', function a1(msg, reply) {
     reply({ x: msg.x })
   })
