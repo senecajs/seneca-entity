@@ -1,7 +1,8 @@
 /* Copyright (c) 2012-2022 Richard Rodger and other contributors, MIT License */
 
 import {
-  Canon
+  Canon,
+  CanonSpec,
 } from './types'
 
 
@@ -43,7 +44,12 @@ function entargs(this: any, ent: Entity, args: any) {
 }
 
 class Entity implements Record<string, any> {
+
+  // Canon spec in string format: "zone/base/name".
   entity$: string
+
+  // Debugging mark.
+  mark$?: string
 
   // NOTE: this will be moved to a per-instance prototype
   private$ = {
@@ -624,7 +630,7 @@ function normalize_query(qin: any, ent: any) {
 // parse a canon string:
 // $zone-base-name
 // $, zone, base are optional
-function parsecanon(str: string) {
+function parsecanon(str: CanonSpec) {
   let out: any = {}
 
   if (Array.isArray(str)) {

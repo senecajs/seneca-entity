@@ -1,7 +1,8 @@
-import { Canon } from './types';
+import { Canon, CanonSpec } from './types';
 declare function entargs(this: any, ent: Entity, args: any): any;
 declare class Entity implements Record<string, any> {
     entity$: string;
+    mark$?: string;
     private$: {
         canon: any;
         promise: boolean;
@@ -61,7 +62,7 @@ declare class Entity implements Record<string, any> {
 }
 declare function MakeEntity(canon: any, seneca: any, opts?: any): Entity;
 declare namespace MakeEntity {
-    var parsecanon: (str: string) => any;
+    var parsecanon: (str: CanonSpec) => any;
     var canonstr: (canon: Canon) => string;
 }
 export { MakeEntity, Entity };
