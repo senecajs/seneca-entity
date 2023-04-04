@@ -68,12 +68,21 @@ function preload(this: any, context: any) {
     // Rollback any open transactions on current instance
     // if there is an action error.
     seneca.on('act-err', function entity_act_err(this: any, msg: any, err: any) {
+      // Avoid death loop
+      if ('sys' === msg.entity && 'rollback' === msg.transaction) {
+        return
+      }
+
       let instance = this
       let custom = instance?.fixedmeta?.custom
       let tmap = (custom?.sys__entity?.transaction) || {}
       let txs: any[] = Object.values(tmap)
       for (let tx of txs) {
-        let details = () => tx
+        if (null != tx.finish) {
+          continue
+        }
+
+        let get_transaction = () => tx
         let canon = tx.canon
 
         tx.finish = Date.now()
@@ -82,7 +91,7 @@ function preload(this: any, context: any) {
           'sys:entity,transaction:rollback',
           {
             ...canon,
-            details,
+            get_transaction,
             msg,
             err,
           }, function(err: any, result: any) {
@@ -138,7 +147,11 @@ function preload(this: any, context: any) {
     }
 
 
-    entityAPI.begin = async function(this: any, canonspec: any, extra: any) {
+    entityAPI.begin = async function(
+      this: any,
+      canonspec: any,
+      extra: any
+    ) {
       if (!opts.transaction.active) {
         return null
       }
@@ -214,7 +227,7 @@ function preload(this: any, context: any) {
           (state.canonstr ? ` (${state.canonstr})` : ''))
       }
 
-      let details = () => transaction
+      let get_transaction = () => transaction
 
       transaction.finish = Date.now()
 
@@ -224,7 +237,7 @@ function preload(this: any, context: any) {
           {
             ...state.canon,
             ...(extra || {}),
-            details,
+            get_transaction,
           },
           function(err: any, out: any) {
             return err ? rej(err) : res(out)
@@ -254,7 +267,7 @@ function preload(this: any, context: any) {
           (state.canonstr ? ` (${state.canonstr})` : ''))
       }
 
-      let details = () => transaction
+      let get_transaction = () => transaction
 
       let canon = MakeEntity.parsecanon(canonspec)
 
@@ -266,7 +279,7 @@ function preload(this: any, context: any) {
           {
             ...canon,
             ...(extra || {}),
-            details,
+            get_transaction,
           },
           function(err: any, out: any) {
             return err ? rej(err) : res(out)
@@ -296,7 +309,7 @@ function preload(this: any, context: any) {
       let state = get_state(emptyEntity, canonspec)
 
       let transaction =
-        state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr]
+        state.instance.fixedmeta.custom?.sys__entity?.transaction[state.canonstr]
 
       if (transaction && !transaction.finish) {
         let err = new Error('Transaction already exists' +

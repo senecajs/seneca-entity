@@ -46,17 +46,24 @@ function preload(context) {
         // if there is an action error.
         seneca.on('act-err', function entity_act_err(msg, err) {
             var _a, _b;
+            // Avoid death loop
+            if ('sys' === msg.entity && 'rollback' === msg.transaction) {
+                return;
+            }
             let instance = this;
             let custom = (_a = instance === null || instance === void 0 ? void 0 : instance.fixedmeta) === null || _a === void 0 ? void 0 : _a.custom;
             let tmap = ((_b = custom === null || custom === void 0 ? void 0 : custom.sys__entity) === null || _b === void 0 ? void 0 : _b.transaction) || {};
             let txs = Object.values(tmap);
             for (let tx of txs) {
-                let details = () => tx;
+                if (null != tx.finish) {
+                    continue;
+                }
+                let get_transaction = () => tx;
                 let canon = tx.canon;
                 tx.finish = Date.now();
                 instance.act('sys:entity,transaction:rollback', {
                     ...canon,
-                    details,
+                    get_transaction,
                     msg,
                     err,
                 }, function (err, result) {
@@ -154,13 +161,13 @@ function preload(context) {
                 throw new Error('Transaction does not exist' +
                     (state.canonstr ? ` (${state.canonstr})` : ''));
             }
-            let details = () => transaction;
+            let get_transaction = () => transaction;
             transaction.finish = Date.now();
             let result = await new Promise((res, rej) => {
                 state.instance.act('sys:entity,transaction:end', {
                     ...state.canon,
                     ...(extra || {}),
-                    details,
+                    get_transaction,
                 }, function (err, out) {
                     return err ? rej(err) : res(out);
                 });
@@ -179,14 +186,14 @@ function preload(context) {
                 throw new Error('Transaction does not exist' +
                     (state.canonstr ? ` (${state.canonstr})` : ''));
             }
-            let details = () => transaction;
+            let get_transaction = () => transaction;
             let canon = make_entity_1.MakeEntity.parsecanon(canonspec);
             transaction.finish = Date.now();
             let result = await new Promise((res, rej) => {
                 state.instance.act('sys:entity,transaction:rollback', {
                     ...canon,
                     ...(extra || {}),
-                    details,
+                    get_transaction,
                 }, function (err, out) {
                     return err ? rej(err) : res(out);
                 });
@@ -195,12 +202,13 @@ function preload(context) {
             return transaction;
         };
         entityAPI.adopt = async function (handle, canonspec, extra) {
+            var _a, _b;
             if (!opts.transaction.active) {
                 return null;
             }
             let emptyEntity = this();
             let state = get_state(emptyEntity, canonspec);
-            let transaction = state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr];
+            let transaction = (_b = (_a = state.instance.fixedmeta.custom) === null || _a === void 0 ? void 0 : _a.sys__entity) === null || _b === void 0 ? void 0 : _b.transaction[state.canonstr];
             if (transaction && !transaction.finish) {
                 let err = new Error('Transaction already exists' +
                     (state.canonstr ? ` (${state.canonstr})` : ''));
