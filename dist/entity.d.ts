@@ -20,7 +20,7 @@ declare namespace entity {
             } | undefined;
             generate_id: any;
         };
-    };
+    } | undefined;
 }
 export type { Entity };
 export default entity;
