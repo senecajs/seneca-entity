@@ -77,7 +77,6 @@ function preload(context) {
                 }
             });
         }
-        return;
     }
     seneca.util.parsecanon = seneca.util.parsecanon || make_entity_1.MakeEntity.parsecanon;
     // Create entity delegate.

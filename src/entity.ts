@@ -99,7 +99,7 @@ function preload(this: any, context: any) {
               msg,
               err,
             },
-            function (err: any, result: any) {
+            function(err: any, result: any) {
               // TODO: handle errors here and below, from rollback cmds
               tx.result = result;
             }
@@ -107,8 +107,6 @@ function preload(this: any, context: any) {
         }
       });
     }
-
-    return;
   }
 
   seneca.util.parsecanon = seneca.util.parsecanon || MakeEntity.parsecanon

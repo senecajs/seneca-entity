@@ -16,12 +16,13 @@ describe('transaction', () => {
       handle && handle.log.push(str + ' [' + handle.mark + ']')
     }
 
-    si.add('sys:entity,transaction:begin', function (msg, reply) {
-      tmp.tx = { state: 'start', mark: msg.mark, log: [] }
-      reply({ get_handle: () => tmp.tx })
-    })
+    si
+      .add('sys:entity,transaction:transaction', function (msg, reply) {
+        tmp.tx = { state: 'start', mark: msg.mark, log: [] }
+        reply({ get_handle: () => tmp.tx })
+      })
 
-      .add('sys:entity,transaction:end', function (msg, reply) {
+      .add('sys:entity,transaction:commit', function (msg, reply) {
         tmp.tx.state = 'end'
         reply({ done: true, mark: tmp.tx.mark })
       })
@@ -45,7 +46,7 @@ describe('transaction', () => {
     expect(es0a.transaction).toBeNull()
 
     // Begin transaction - returns seneca instance to use.
-    let s0 = await si.entity.begin(null, { mark: 'zero' })
+    let s0 = await si.entity.transaction(null, { mark: 'zero' })
     expect(s0.isSeneca).toBeTruthy()
     expect(
       s0.fixedmeta.custom.sys__entity.transaction['-/-/-'].handle.mark
@@ -88,7 +89,7 @@ describe('transaction', () => {
     expect(es0e.transaction).toBeNull()
 
     // End transaction context.
-    let tx0 = await s0.entity.end()
+    let tx0 = await s0.entity.commit()
     expect(tx0).toBeDefined()
     expect(tx0.result.done).toEqual(true)
 
@@ -252,7 +253,7 @@ describe('transaction', () => {
     expect(t0e).toBeNull()
 
     
-    let s1 = await s0.entity.begin()
+    let s1 = await s0.entity.transaction()
 
     let t1a= si.entity.state()
     expect(t1a).toBeDefined()
@@ -265,7 +266,7 @@ describe('transaction', () => {
     let t1b= si.entity.state()
     expect(t1b).toBeDefined()
 
-    tx = await s1.entity.end()
+    tx = await s1.entity.transaction()
     let t1c= si.entity.state()
     console.log('t1c', t1c)
 
