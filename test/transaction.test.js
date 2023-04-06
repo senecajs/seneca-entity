@@ -16,11 +16,10 @@ describe('transaction', () => {
       handle && handle.log.push(str + ' [' + handle.mark + ']')
     }
 
-    si
-      .add('sys:entity,transaction:transaction', function (msg, reply) {
-        tmp.tx = { state: 'start', mark: msg.mark, log: [] }
-        reply({ get_handle: () => tmp.tx })
-      })
+    si.add('sys:entity,transaction:transaction', function (msg, reply) {
+      tmp.tx = { state: 'start', mark: msg.mark, log: [] }
+      reply({ get_handle: () => tmp.tx })
+    })
 
       .add('sys:entity,transaction:commit', function (msg, reply) {
         tmp.tx.state = 'end'
