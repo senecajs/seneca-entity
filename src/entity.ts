@@ -34,7 +34,10 @@ const default_opts: any = {
   },
 
   transaction: {
-    active: false
+    active: false,
+    rollback: {
+      onerror: true,
+    }
   }
 }
 
@@ -67,39 +70,45 @@ function preload(this: any, context: any) {
   if (opts.transaction.active) {
     // Rollback any open transactions on current instance
     // if there is an action error.
-    seneca.on('act-err', function entity_act_err(this: any, msg: any, err: any) {
-      // Avoid death loop
-      if ('sys' === msg.entity && 'rollback' === msg.transaction) {
-        return
-      }
-
-      let instance = this
-      let custom = instance?.fixedmeta?.custom
-      let tmap = (custom?.sys__entity?.transaction) || {}
-      let txs: any[] = Object.values(tmap)
-      for (let tx of txs) {
-        if (null != tx.finish) {
-          continue
+    if (opts.transaction.rollback.onerror) {
+      seneca.on("act-err", function entity_act_err(this: any, msg: any, err: any) {
+        // Avoid death loop
+        if ("sys" === msg.entity && "rollback" === msg.transaction) {
+          return;
         }
 
-        let get_transaction = () => tx
-        let canon = tx.canon
+        let instance = this;
+        let custom = instance?.fixedmeta?.custom;
+        let tmap = custom?.sys__entity?.transaction || {};
+        let txs: any[] = Object.values(tmap);
+        for (let tx of txs) {
+          if (null != tx.finish) {
+            continue;
+          }
 
-        tx.finish = Date.now()
+          let get_transaction = () => tx;
+          let canon = tx.canon;
 
-        instance.act(
-          'sys:entity,transaction:rollback',
-          {
-            ...canon,
-            get_transaction,
-            msg,
-            err,
-          }, function(err: any, result: any) {
-            // TODO: handle errors here and below, from rollback cmds
-            tx.result = result
-          })
-      }
-    })
+          tx.finish = Date.now();
+
+          instance.act(
+            "sys:entity,transaction:rollback",
+            {
+              ...canon,
+              get_transaction,
+              msg,
+              err,
+            },
+            function (err: any, result: any) {
+              // TODO: handle errors here and below, from rollback cmds
+              tx.result = result;
+            }
+          );
+        }
+      });
+    }
+
+    return;
   }
 
   seneca.util.parsecanon = seneca.util.parsecanon || MakeEntity.parsecanon
@@ -147,7 +156,7 @@ function preload(this: any, context: any) {
     }
 
 
-    entityAPI.begin = async function(
+    entityAPI.transaction = async function(
       this: any,
       canonspec: any,
       extra: any
@@ -171,7 +180,7 @@ function preload(this: any, context: any) {
       // NOTE: using Promise as seneca-promisify may not be loaded
       let result: any = await new Promise((res, rej) => {
         state.instance.act(
-          'sys:entity,transaction:begin', { ...state.canon, ...(extra || {}) },
+          'sys:entity,transaction:transaction', { ...state.canon, ...(extra || {}) },
           function(err: any, out: any) {
             return err ? rej(err) : res(out)
           }
@@ -211,7 +220,7 @@ function preload(this: any, context: any) {
     }
 
 
-    entityAPI.end = async function(this: any, canonspec: CanonSpec, extra: any) {
+    entityAPI.commit = async function(this: any, canonspec: CanonSpec, extra: any) {
       if (!opts.transaction.active) {
         return null
       }
@@ -233,7 +242,7 @@ function preload(this: any, context: any) {
 
       let result: any = await new Promise((res, rej) => {
         state.instance.act(
-          'sys:entity,transaction:end',
+          'sys:entity,transaction:commit',
           {
             ...state.canon,
             ...(extra || {}),
