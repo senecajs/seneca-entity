@@ -22,7 +22,10 @@ const default_opts = {
         provide: true,
     },
     transaction: {
-        active: false
+        active: false,
+        rollback: {
+            onerror: true,
+        }
     }
 };
 /** Define the `entity` plugin. */
@@ -44,34 +47,37 @@ function preload(context) {
     if (opts.transaction.active) {
         // Rollback any open transactions on current instance
         // if there is an action error.
-        seneca.on('act-err', function entity_act_err(msg, err) {
-            var _a, _b;
-            // Avoid death loop
-            if ('sys' === msg.entity && 'rollback' === msg.transaction) {
-                return;
-            }
-            let instance = this;
-            let custom = (_a = instance === null || instance === void 0 ? void 0 : instance.fixedmeta) === null || _a === void 0 ? void 0 : _a.custom;
-            let tmap = ((_b = custom === null || custom === void 0 ? void 0 : custom.sys__entity) === null || _b === void 0 ? void 0 : _b.transaction) || {};
-            let txs = Object.values(tmap);
-            for (let tx of txs) {
-                if (null != tx.finish) {
-                    continue;
+        if (opts.transaction.rollback.onerror) {
+            seneca.on("act-err", function entity_act_err(msg, err) {
+                var _a, _b;
+                // Avoid death loop
+                if ("sys" === msg.entity && "rollback" === msg.transaction) {
+                    return;
                 }
-                let get_transaction = () => tx;
-                let canon = tx.canon;
-                tx.finish = Date.now();
-                instance.act('sys:entity,transaction:rollback', {
-                    ...canon,
-                    get_transaction,
-                    msg,
-                    err,
-                }, function (err, result) {
-                    // TODO: handle errors here and below, from rollback cmds
-                    tx.result = result;
-                });
-            }
-        });
+                let instance = this;
+                let custom = (_a = instance === null || instance === void 0 ? void 0 : instance.fixedmeta) === null || _a === void 0 ? void 0 : _a.custom;
+                let tmap = ((_b = custom === null || custom === void 0 ? void 0 : custom.sys__entity) === null || _b === void 0 ? void 0 : _b.transaction) || {};
+                let txs = Object.values(tmap);
+                for (let tx of txs) {
+                    if (null != tx.finish) {
+                        continue;
+                    }
+                    let get_transaction = () => tx;
+                    let canon = tx.canon;
+                    tx.finish = Date.now();
+                    instance.act("sys:entity,transaction:rollback", {
+                        ...canon,
+                        get_transaction,
+                        msg,
+                        err,
+                    }, function (err, result) {
+                        // TODO: handle errors here and below, from rollback cmds
+                        tx.result = result;
+                    });
+                }
+            });
+        }
+        return;
     }
     seneca.util.parsecanon = seneca.util.parsecanon || make_entity_1.MakeEntity.parsecanon;
     // Create entity delegate.
@@ -105,7 +111,7 @@ function preload(context) {
             let emptyEntity = this();
             return get_state(emptyEntity, canonspec);
         };
-        entityAPI.begin = async function (canonspec, extra) {
+        entityAPI.transaction = async function (canonspec, extra) {
             if (!opts.transaction.active) {
                 return null;
             }
@@ -120,7 +126,7 @@ function preload(context) {
             }
             // NOTE: using Promise as seneca-promisify may not be loaded
             let result = await new Promise((res, rej) => {
-                state.instance.act('sys:entity,transaction:begin', { ...state.canon, ...(extra || {}) }, function (err, out) {
+                state.instance.act('sys:entity,transaction:transaction', { ...state.canon, ...(extra || {}) }, function (err, out) {
                     return err ? rej(err) : res(out);
                 });
             });
@@ -150,7 +156,7 @@ function preload(context) {
             Object.assign(transactionInstance.entity, state.instance.entity);
             return transactionInstance;
         };
-        entityAPI.end = async function (canonspec, extra) {
+        entityAPI.commit = async function (canonspec, extra) {
             if (!opts.transaction.active) {
                 return null;
             }
@@ -164,7 +170,7 @@ function preload(context) {
             let get_transaction = () => transaction;
             transaction.finish = Date.now();
             let result = await new Promise((res, rej) => {
-                state.instance.act('sys:entity,transaction:end', {
+                state.instance.act('sys:entity,transaction:commit', {
                     ...state.canon,
                     ...(extra || {}),
                     get_transaction,

@@ -26,8 +26,8 @@ export type Transaction = {
 export type EntityAPI = (() => any) & {
     instance: () => any;
     state: (canonspec: CanonSpec) => EntityState;
-    begin: (canonspec: CanonSpec, extra: any) => null | Promise<any>;
-    end: (canonspec: CanonSpec, extra: any) => Promise<null | Transaction>;
+    transaction: (canonspec: CanonSpec, extra: any) => null | Promise<any>;
+    commit: (canonspec: CanonSpec, extra: any) => Promise<null | Transaction>;
     rollback: (canonspec: CanonSpec, extra: any) => Promise<null | Transaction>;
     adopt: (handle: any, canonspec: CanonSpec, extra: any) => Promise<null | Transaction>;
 };
