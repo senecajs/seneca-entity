@@ -26,14 +26,14 @@ function SenecaInstance() {
   return seneca
 }
 
-function myTest(description, f) {
+function test(description, f) { // mock
   f((err) => {
     if (err) console.error(err)
     else console.log(description, 'OK')
   })
 }
 
-function expect(_subject) {
+function expect(_subject) { // mock
   return new Proxy({}, {
     get(self, prop, receiver) {
       return function () {}
@@ -41,7 +41,7 @@ function expect(_subject) {
   })
 }
 
-myTest('happy-mem', function (fin) {
+test('happy-mem', function (fin) {
   const si = SenecaInstance()
   si.test(fin)
 
@@ -59,7 +59,7 @@ myTest('happy-mem', function (fin) {
   })
 })
 
-myTest('happy-mem-promise', async function () {
+test('happy-mem-promise', async function () {
   const si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
   const fooent = si.entity('foo')
@@ -76,7 +76,7 @@ myTest('happy-mem-promise', async function () {
   await si.close()
 })
 
-myTest('happy-mem-zone-base-name', function (fin) {
+test('happy-mem-zone-base-name', function (fin) {
   const si = SenecaInstance()
   si.test(fin)
 
@@ -94,7 +94,7 @@ myTest('happy-mem-zone-base-name', function (fin) {
   })
 })
 
-myTest('entity-promise', async () => {
+test('entity-promise', async () => {
   const si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
   const bar0 = si.entity('bar').data$({ a: 1 })
@@ -163,7 +163,7 @@ myTest('entity-promise', async () => {
   expect(zeds.length).toEqual(1)
 })
 
-myTest('tag-load', function (fin) {
+test('tag-load', function (fin) {
   const s0 = Seneca()
     .test(fin)
     .use('../')
@@ -173,7 +173,7 @@ myTest('tag-load', function (fin) {
   fin()
 })
 
-myTest('plain-messages', function (fin) {
+test('plain-messages', function (fin) {
   const s0 = Seneca().test(fin).use(Entity)
 
   s0.gate()
@@ -253,7 +253,7 @@ myTest('plain-messages', function (fin) {
     .ready(fin)
 })
 
-myTest('reify_entity_wrap_without_ent', function (fin) {
+test('reify_entity_wrap_without_ent', function (fin) {
   const si = SenecaInstance()
   const w0 = StoreIntern.reify_entity_wrap(function (msg, reply) {
     expect(msg.q).toEqual({})
@@ -264,7 +264,7 @@ myTest('reify_entity_wrap_without_ent', function (fin) {
   w0.call(si, { role: 'entity', zone: 'z0', base: 'b0', name: 'n0' }, fin)
 })
 
-myTest('reify_entity_wrap_with_ent', function (fin) {
+test('reify_entity_wrap_with_ent', function (fin) {
   const si = SenecaInstance()
   const w0 = StoreIntern.reify_entity_wrap(function (msg, reply) {
     expect(msg.q).toBeUndefined()
@@ -287,7 +287,7 @@ myTest('reify_entity_wrap_with_ent', function (fin) {
   )
 })
 
-myTest('generate_id', function (fin) {
+test('generate_id', function (fin) {
   const si = SenecaInstance()
   const generate_id = si.export('entity/generate_id')
 
@@ -305,7 +305,7 @@ myTest('generate_id', function (fin) {
   })
 })
 
-myTest('setid-mem', function (fin) {
+test('setid-mem', function (fin) {
   const si = SenecaInstance()
   const z0 = si.make('zed')
   z0.id$ = 0
@@ -331,12 +331,12 @@ myTest('setid-mem', function (fin) {
 })
 
 // TODO: promisify in Seneca 4
-myTest('mem-ops', function (fin) {
+test('mem-ops', function (fin) {
   let si = SenecaInstance()
   MemOps(si)(fin)
 })
 
-myTest('parsecanon', function (fin) {
+test('parsecanon', function (fin) {
   const si = SenecaInstance()
 
   function def(v, d) {
@@ -367,7 +367,7 @@ myTest('parsecanon', function (fin) {
   si.close(fin)
 })
 
-myTest('load-callback', function (fin) {
+test('load-callback', function (fin) {
   const si = SenecaInstance().test(fin)
   const foo = si.make$('foo')
   foo.load$(function (err, out) {
@@ -378,7 +378,7 @@ myTest('load-callback', function (fin) {
   })
 })
 
-myTest('remove-callback', function (fin) {
+test('remove-callback', function (fin) {
   const si = SenecaInstance().test(fin)
   const foo = si.make$('foo')
   foo.remove$(function (err, out) {
@@ -389,7 +389,7 @@ myTest('remove-callback', function (fin) {
   })
 })
 
-myTest('save-callback', function (fin) {
+test('save-callback', function (fin) {
   const si = SenecaInstance().test(fin)
   const foo = si.make$('foo')
   const out = foo.save$(function (err, fooS) {
@@ -406,7 +406,7 @@ myTest('save-callback', function (fin) {
   expect(out.entity$).toEqual('-/-/foo')
 })
 
-myTest('list-callback', function (fin) {
+test('list-callback', function (fin) {
   const si = SenecaInstance().test(fin)
   const foo = si.make$('foo')
   foo.save$(function (err, fooS) {
@@ -427,7 +427,7 @@ myTest('list-callback', function (fin) {
   })
 })
 
-myTest('load-promise', async () => {
+test('load-promise', async () => {
   const si = SenecaInstance().test()
   const foo = si.entity('foo')
   const out0 = await foo.load$()
@@ -453,7 +453,7 @@ myTest('load-promise', async () => {
   })
 })
 
-myTest('save-promise', async () => {
+test('save-promise', async () => {
   const si = SenecaInstance().test()
   const foo = si.entity('foo')
   const out0 = await foo.save$()
@@ -482,7 +482,7 @@ myTest('save-promise', async () => {
   })
 })
 
-myTest('list-promise', async () => {
+test('list-promise', async () => {
   const si = SenecaInstance().test()
   const foo = si.entity('foo')
   const out0 = await foo.list$()
@@ -508,7 +508,7 @@ myTest('list-promise', async () => {
   })
 })
 
-myTest('remove-promise', async () => {
+test('remove-promise', async () => {
   const si = SenecaInstance().test()
   const foo = si.entity('foo')
   const out0 = await foo.remove$()
@@ -533,7 +533,7 @@ myTest('remove-promise', async () => {
   })
 })
 
-myTest('fields-directive', function (fin) {
+test('fields-directive', function (fin) {
   const si = SenecaInstance()
   si.test(fin)
   si.make$('fdent', { a: 1, b: 2 }).save$(function (err, out0) {
@@ -551,7 +551,7 @@ myTest('fields-directive', function (fin) {
   })
 })
 
-myTest('make', function (fin) {
+test('make', function (fin) {
   const si = SenecaInstance()
   const foo = si.make$('foo')
   expect('-/-/foo').toEqual(foo.entity$)
@@ -606,7 +606,7 @@ myTest('make', function (fin) {
   fin()
 })
 
-myTest('toString', function (fin) {
+test('toString', function (fin) {
   const si = SenecaInstance()
   const f1 = si.make$('foo')
   f1.a = 1
@@ -623,7 +623,7 @@ myTest('toString', function (fin) {
   fin()
 })
 
-myTest('isa', function (fin) {
+test('isa', function (fin) {
   const si = SenecaInstance()
   const f1 = si.make$('foo')
 
@@ -662,7 +662,7 @@ myTest('isa', function (fin) {
   fin()
 })
 
-myTest('mem-store-import-export', async function () {
+test('mem-store-import-export', async function () {
   let si = Seneca({ legacy: false }).use('promisify').use('..').test()
 
   // NOTE: zone is NOT saved! by design!
@@ -703,7 +703,7 @@ myTest('mem-store-import-export', async function () {
   await si.close()
 })
 
-myTest('close', function (fin) {
+test('close', function (fin) {
   const si = SenecaInstance()
   const tmp = { s0: 0, s1: 0, s2: 0 }
 
@@ -780,7 +780,7 @@ myTest('close', function (fin) {
   })
 })
 
-myTest('entity.mapping', function (fin) {
+test('entity.mapping', function (fin) {
   const si = SenecaInstance()
   si.use('mem-store', { map: { '-/-/foo': '*' } })
   si.use('mem-store', { map: { '-/-/bar': '*' } })
@@ -800,7 +800,7 @@ myTest('entity.mapping', function (fin) {
   })
 })
 
-myTest('mem store disabled by user', function (fin) {
+test('mem store disabled by user', function (fin) {
   const si = SenecaInstance()
   expect(!si.hasplugin('seneca-mem-store')).toBeTruthy()
   expect(!si.plugins()['seneca-mem-store']).toBeTruthy()
@@ -808,7 +808,7 @@ myTest('mem store disabled by user', function (fin) {
   fin()
 })
 
-myTest('exports', function (fin) {
+test('exports', function (fin) {
   const si = SenecaInstance()
   const generate_id = si.export('entity/generate_id')
 
@@ -817,7 +817,7 @@ myTest('exports', function (fin) {
   fin()
 })
 
-myTest('client-server', function (fin) {
+test('client-server', function (fin) {
   Seneca()
     .test(fin)
     .use(Entity, { server: true })
@@ -842,7 +842,7 @@ myTest('client-server', function (fin) {
     })
 })
 
-myTest('make-passes-through', function (fin) {
+test('make-passes-through', function (fin) {
   const si0 = Seneca().test(fin).use(Entity)
 
   const foo0 = si0.make('foo', { a: 1 })
@@ -873,7 +873,7 @@ myTest('make-passes-through', function (fin) {
   })
 })
 
-myTest('id-handling', function (fin) {
+test('id-handling', function (fin) {
   const si0 = Seneca().test(fin).use(Entity)
 
   const foo0 = si0.make('foo', { a: 0 })
@@ -897,7 +897,7 @@ myTest('id-handling', function (fin) {
   })
 })
 
-myTest('is-comparison', function (fin) {
+test('is-comparison', function (fin) {
   const si0 = Seneca().test(fin).use(Entity)
 
   const foo0 = si0.make('foo', { a: 0 })
@@ -939,7 +939,7 @@ myTest('is-comparison', function (fin) {
   fin()
 })
 
-myTest('multiple-instances', function (fin) {
+test('multiple-instances', function (fin) {
   const si0 = Seneca()
     .test(fin)
     .use({ init: Entity, name: 'entity', tag: 'A' }, { client: true })
@@ -957,7 +957,7 @@ myTest('multiple-instances', function (fin) {
   })
 })
 
-myTest('deep-clone', function (fin) {
+test('deep-clone', function (fin) {
   const si0 = Seneca().test(fin).use(Entity)
 
   const foo0 = si0.make('foo', {
@@ -995,7 +995,7 @@ myTest('deep-clone', function (fin) {
   fin()
 })
 
-myTest('entity-log-test', function (fin) {
+test('entity-log-test', function (fin) {
   let tmp = []
   const si = Seneca({
     legacy: false,
@@ -1024,7 +1024,7 @@ myTest('entity-log-test', function (fin) {
   })
 })
 
-myTest('data-null-undef', function (fin) {
+test('data-null-undef', function (fin) {
   const si = Seneca({ legacy: false }).test(fin).use(Entity)
 
   const foo = si.make$('foo')
@@ -1041,7 +1041,7 @@ myTest('data-null-undef', function (fin) {
   fin()
 })
 
-myTest('direct', async () => {
+test('direct', async () => {
   const si = Seneca({ legacy: false }).test().use('promisify').use(Entity)
 
   let out = await si.post('sys:entity,cmd:save,name:foo,ent:{id$:a,x:1}')
@@ -1053,7 +1053,7 @@ myTest('direct', async () => {
   )
 })
 
-myTest('prior-entity-save', (fin) => {
+test('prior-entity-save', (fin) => {
   const si = Seneca({ legacy: false }).test(fin).use(Entity)
 
   si.make('foo')
@@ -1099,7 +1099,7 @@ myTest('prior-entity-save', (fin) => {
   }
 })
 
-myTest('prior-entity-error-save', (fin) => {
+test('prior-entity-error-save', (fin) => {
   const si = Seneca({
     legacy: false,
     log: 'silent',
@@ -1156,7 +1156,7 @@ myTest('prior-entity-error-save', (fin) => {
   }
 })
 
-myTest('custom-basic', function (fin) {
+test('custom-basic', function (fin) {
   let si0 = Seneca().test(fin).use(Entity)
   let foo0 = si0.make$('foo').data$({ a: 1, b: 2 })
 
@@ -1221,7 +1221,7 @@ myTest('custom-basic', function (fin) {
   fin()
 })
 
-myTest('custom-directive', function (fin) {
+test('custom-directive', function (fin) {
   let si0 = Seneca().test(fin).use(Entity)
   let tmp = { saves: { a: [], b: [] } }
 
@@ -1261,7 +1261,7 @@ myTest('custom-directive', function (fin) {
   })
 })
 
-myTest('drop-callback-meta', function (fin) {
+test('drop-callback-meta', function (fin) {
   let s0 = Seneca().test(fin).use(Entity)
   s0.make$('bar').data$({ y: 0 }).save$()
 
