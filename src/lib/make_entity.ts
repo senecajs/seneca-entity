@@ -642,6 +642,8 @@ class Entity implements Record<string, any> {
 
 
   async commit(canonspec: CanonSpec, extra: any) {
+    debugger // dbg
+
     /* TODO
     if (!opts.transaction.active) {
       return null
@@ -652,7 +654,7 @@ class Entity implements Record<string, any> {
     let state = get_state(emptyEntity, canonspec)
 
     let transaction: Transaction =
-      state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr]
+      state.instance.fixedmeta?.custom?.sys__entity?.transaction[state.canonstr]
 
     if (null == transaction) {
       throw new Error('Transaction does not exist' +
@@ -694,7 +696,7 @@ class Entity implements Record<string, any> {
     let state = get_state(emptyEntity, canonspec)
 
     let transaction: Transaction =
-      state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr]
+      state.instance.fixedmeta?.custom?.sys__entity?.transaction[state.canonstr]
 
     if (null == transaction) {
       throw new Error('Transaction does not exist' +
@@ -744,7 +746,7 @@ class Entity implements Record<string, any> {
     let state = get_state(emptyEntity, canonspec)
 
     let transaction =
-      state.instance.fixedmeta.custom?.sys__entity?.transaction[state.canonstr]
+      state.instance.fixedmeta?.custom?.sys__entity?.transaction[state.canonstr]
 
     if (transaction && !transaction.finish) {
       let err = new Error('Transaction already exists' +

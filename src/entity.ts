@@ -114,9 +114,6 @@ function preload(this: any, context: any) {
   // Create entity delegate.
   const sd = seneca.delegate()
 
-  // Template entity that makes all others.
-  seneca.private$.entity = seneca.private$.entity || MakeEntity({}, sd, opts)
-
   // Expose the Entity object so third-parties can do interesting things with it
   seneca.private$.exports.Entity =
     seneca.private$.exports.Entity || Entity
@@ -133,7 +130,7 @@ function preload(this: any, context: any) {
   // all optional
   function build_api_make(promise: boolean) {
     return function(this: any) {
-      return seneca.private$.entity.make$(this, ...[...arguments, promise])
+      return MakeEntity({}, this, opts).make$(this, ...[...arguments, promise])
     }
   }
 

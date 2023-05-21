@@ -507,6 +507,8 @@ class Entity {
         return transactionInstance;
     }
     async commit(canonspec, extra) {
+        var _a, _b, _c;
+        debugger; // dbg
         /* TODO
         if (!opts.transaction.active) {
           return null
@@ -514,7 +516,7 @@ class Entity {
         */
         let emptyEntity = this;
         let state = get_state(emptyEntity, canonspec);
-        let transaction = state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr];
+        let transaction = (_c = (_b = (_a = state.instance.fixedmeta) === null || _a === void 0 ? void 0 : _a.custom) === null || _b === void 0 ? void 0 : _b.sys__entity) === null || _c === void 0 ? void 0 : _c.transaction[state.canonstr];
         if (null == transaction) {
             throw new Error('Transaction does not exist' +
                 (state.canonstr ? ` (${state.canonstr})` : ''));
@@ -539,9 +541,10 @@ class Entity {
           return null
         }
         */
+        var _a, _b, _c;
         let emptyEntity = this;
         let state = get_state(emptyEntity, canonspec);
-        let transaction = state.instance.fixedmeta.custom.sys__entity.transaction[state.canonstr];
+        let transaction = (_c = (_b = (_a = state.instance.fixedmeta) === null || _a === void 0 ? void 0 : _a.custom) === null || _b === void 0 ? void 0 : _b.sys__entity) === null || _c === void 0 ? void 0 : _c.transaction[state.canonstr];
         if (null == transaction) {
             throw new Error('Transaction does not exist' +
                 (state.canonstr ? ` (${state.canonstr})` : ''));
@@ -567,10 +570,10 @@ class Entity {
           return null
         }
         */
-        var _a, _b;
+        var _a, _b, _c;
         let emptyEntity = this;
         let state = get_state(emptyEntity, canonspec);
-        let transaction = (_b = (_a = state.instance.fixedmeta.custom) === null || _a === void 0 ? void 0 : _a.sys__entity) === null || _b === void 0 ? void 0 : _b.transaction[state.canonstr];
+        let transaction = (_c = (_b = (_a = state.instance.fixedmeta) === null || _a === void 0 ? void 0 : _a.custom) === null || _b === void 0 ? void 0 : _b.sys__entity) === null || _c === void 0 ? void 0 : _c.transaction[state.canonstr];
         if (transaction && !transaction.finish) {
             let err = new Error('Transaction already exists' +
                 (state.canonstr ? ` (${state.canonstr})` : ''));

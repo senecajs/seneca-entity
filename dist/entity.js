@@ -81,8 +81,6 @@ function preload(context) {
     seneca.util.parsecanon = seneca.util.parsecanon || make_entity_1.MakeEntity.parsecanon;
     // Create entity delegate.
     const sd = seneca.delegate();
-    // Template entity that makes all others.
-    seneca.private$.entity = seneca.private$.entity || (0, make_entity_1.MakeEntity)({}, sd, opts);
     // Expose the Entity object so third-parties can do interesting things with it
     seneca.private$.exports.Entity =
         seneca.private$.exports.Entity || make_entity_1.Entity;
@@ -96,7 +94,7 @@ function preload(context) {
     // all optional
     function build_api_make(promise) {
         return function () {
-            return seneca.private$.entity.make$(this, ...[...arguments, promise]);
+            return (0, make_entity_1.MakeEntity)({}, this, opts).make$(this, ...[...arguments, promise]);
         };
     }
     let make = build_api_make(false);

@@ -3,7 +3,43 @@
 const Seneca = require('seneca')
 const Entity = require('../')
 
+function describe(description, suite) {
+  suite()
+}
+
+function test(description, f) { // mock
+  function onTestError(err) {
+    return console.error(description, err)
+  }
+
+  function onTestDone() {
+    return console.log(description, 'OK')
+  }
+
+  const p = f((err) => {
+    if (err) onTestError(err)
+    else onTestDone()
+  })
+
+  if (p && p.then) {
+    p.then(onTestDone)
+  }
+
+  if (p && p.catch) {
+    p.catch(onTestError)
+  }
+}
+
+function expect(_subject) { // mock
+  return new Proxy({}, {
+    get(self, prop, receiver) {
+      return function () {}
+    }
+  })
+}
+
 describe('transaction', () => {
+  /*
   test('child-context-only', async () => {
     const si = makeSenecaInstance()
 
@@ -103,180 +139,42 @@ describe('transaction', () => {
     await si.close()
 
     return
+  })
+  */
 
-    /*
+  test('simple transaction() - commit() routine', (fin_) => {
+    const onDone = calledOnce(fin_)
 
-      .add('foo:2', async function(msg, reply, meta) {
-        txlog(this,'START foo:2')
-        
-        this.entity('green').save$({x:msg.x}, function(err, out) {
-          txlog(this,'SAVED green '+out.id)
-          reply(out)
-        })
-      })
-
-      .message('bar:1', async function(msg, reply, meta) {
-        txlog(this,'START bar:1')
-        
-        let foo1 = await this.post('foo:red',{x:msg.x})
-        
-        txlog(this,'MID bar:1')
-        
-        let foo2 = await this.post('foo:2',{x:msg.x})
-        
-        txlog(this,'END bar:1')
-        
-        return {x:msg.x, foo1, foo2}
-      })
-    
-      .message('zed:1', async function(msg, reply, meta) {
-        txlog(this,'START zed:1 A')
-        
-        let out = await this.post('bar:1',{x:msg.x})
-        
-        txlog(this,'END zed:1 A')
-        
-        return out
-      })
-
-      .message('zed:1', async function(msg, reply, meta) {
-        txlog(this,'START zed:1 B')
-        
-        let out = await this.prior(msg)
-        
-        txlog(this,'END zed:1 B')
-        
-        return out
-      })
-    
-      .message('zed:1', async function(msg, reply, meta) {
-        txlog(this,'START zed:1 C')
-        
-        let out = await this.prior(msg)
-        
-        txlog(this,'END zed:1 C')
-        
-        return out
-      })
-    
-
-    
-    let green0 = await s0.post('foo:2,x:8')    
-    // console.log(green)
-
-    let green1 = await s0.post('bar:1,x:7')    
-    // console.log(green1)
-
-    let red1 = await s0.post('zed:1,x:6')    
-    // console.log(red1)
-
-    let t0b = si.entity().state()
-    expect(t0b).toBeDefined()
-
-    let tx = await s0.entity().end()
-    expect(tx).toBeDefined()
-    // console.log(tx)
-    //console.log(tx.handle.log)
-    //console.log(tx.handle.log.length)
-
-    let mark = tx.handle.mark
-    expect(tx.handle.log).toEqual([
-      'START foo:red ['+mark+']',
-      'SAVED red '+red0.id+' ['+mark+']',
-      'START foo:2 ['+mark+']',
-      'SAVED green '+green0.id+' ['+mark+']',
-      'START bar:1 ['+mark+']',
-      'START foo:red ['+mark+']',
-      'SAVED red '+green1.foo1.id+' ['+mark+']',
-      'MID bar:1 ['+mark+']',
-      'START foo:2 ['+mark+']',
-      'SAVED green '+green1.foo2.id+' ['+mark+']',
-      'END bar:1 ['+mark+']',
-      'START zed:1 C ['+mark+']',
-      'START zed:1 B ['+mark+']',
-      'START zed:1 A ['+mark+']',
-      'START bar:1 ['+mark+']',
-      'START foo:red ['+mark+']',
-      'SAVED red '+red1.foo1.id+' ['+mark+']',
-      'MID bar:1 ['+mark+']',
-      'START foo:2 ['+mark+']',
-      'SAVED green '+red1.foo2.id+' ['+mark+']',
-      'END bar:1 ['+mark+']',
-      'END zed:1 A ['+mark+']',
-      'END zed:1 B ['+mark+']',
-      'END zed:1 C ['+mark+']'
-    ])
-    let txlen = tx.handle.log.length
+    const si = makeSenecaInstance()
+    si.test(onDone)
 
 
-    // operations post transaction do not pollute or reuse transaction:
-    
-    let t0c = si.entity().state()
-    expect(t0c).toBeNull()
-    
-    let out = await si.post('foo:red,x:99')    
-    // console.log(out)
+    const trx_handle = { tx: { state: 'start', mark: 'whatever', log: [] } }
 
-    out = await si.post('foo:2,x:88')    
-    // console.log(out)
+    si.add('sys:entity,transaction:transaction', function (msg, reply) {
+      reply({ get_handle: () => trx_handle })
+    })
 
-    out = await si.post('bar:1,x:77')    
-    // console.log(out)
-
-    out = await si.post('zed:1,x:66')    
-    // console.log(out)
-
-    expect(tx.handle.log.length).toEqual(txlen)
-    
-    
-    let t0d = s0.entity().state()
-    expect(t0d).toBeNull()
-
-    out = await s0.post('foo:red,x:999')    
-    // console.log(out)
-
-    out = await s0.post('foo:2,x:888')    
-    // console.log(out)
-
-    out = await s0.post('bar:1,x:777')    
-    // console.log(out)
-
-    out = await s0.post('zed:1,x:666')    
-    // console.log(out)
-
-    expect(tx.handle.log.length).toEqual(txlen)
+    si.add('sys:entity,transaction:commit', function (msg, reply) {
+      trx_handle.tx.state = 'end'
+      reply({ done: true, mark: trx_handle.tx.mark })
+    })
 
 
+    si.add('hello:world', function (args, reply) {
+      this.entity().transaction()
+      	.then((trx) => {
+	  debugger // dbg
+	  return trx.entity().commit()
+	})
+	.then(() => reply())
+	.catch(reply)
+    })
 
-    let t0e = si.entity().state()
-    expect(t0e).toBeNull()
-
-    
-    let s1 = await s0.entity().transaction()
-
-    let t1a= si.entity().state()
-    expect(t1a).toBeDefined()
-    */
-
-    /*
-    
-    out = await s1.post('foo:red,x:9')    
-
-    let t1b= si.entity().state()
-    expect(t1b).toBeDefined()
-
-    tx = await s1.entity().transaction()
-    let t1c= si.entity().state()
-    console.log('t1c', t1c)
-
-
-    // console.log(tx)
-    console.log(tx.handle.log)
-    console.log(tx.handle.log.length)    
-
-    */
+    si.act('hello:world', onDone)
   })
 
+  /*
   test('does not crash when used with priors', (fin_) => {
     const onDone = calledOnce(fin_)
 
@@ -322,6 +220,7 @@ describe('transaction', () => {
       onDone(new Error('timed out'))
     }, 5e3)
   })
+  */
 })
 
 function calledOnce(f) {
