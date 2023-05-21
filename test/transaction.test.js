@@ -276,7 +276,64 @@ describe('transaction', () => {
 
     */
   })
+
+  test('does not crash when used with priors', (fin_) => {
+    const onDone = calledOnce(fin_)
+
+    const si = makeSenecaInstance()
+    si.test(onDone)
+
+
+    const trx_handle = { tx: { state: 'start', mark: 'whatever', log: [] } }
+
+    si.add('sys:entity,transaction:transaction', function (msg, reply) {
+      reply({ get_handle: () => trx_handle })
+    })
+
+    si.add('sys:entity,transaction:commit', function (msg, reply) {
+      trx_handle.tx.state = 'end'
+      reply({ done: true, mark: trx_handle.tx.mark })
+    })
+
+
+    si.add('hello:world', function (args, reply) {
+      reply()
+    })
+
+    si.add('hello:world', function (args, reply) {
+      this.entity().transaction()
+      	.then((trx) => {
+	  trx.prior(args, function (err) {
+	    if (err) {
+	      return onDone(err)
+	    }
+
+	    trx.entity().commit()
+	      .then(() => onDone())
+	      .catch(onDone)
+	  })
+	})
+	.catch(reply)
+    })
+
+    si.act('hello:world', onDone)
+
+    setTimeout(() => {
+      onDone(new Error('timed out'))
+    }, 5e3)
+  })
 })
+
+function calledOnce(f) {
+  let was_called = false
+
+  return (...args) => {
+    if (was_called) return
+    was_called = true
+
+    f(...args)
+  }
+}
 
 function jj(x) {
   return JSON.parse(JSON.stringify(x))
