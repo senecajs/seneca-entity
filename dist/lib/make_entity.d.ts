@@ -1,4 +1,4 @@
-import { Canon, CanonSpec } from './types';
+import { Canon, CanonSpec, EntityState, Transaction } from './types';
 declare function entargs(this: any, ent: Entity, args: any): any;
 declare class Entity implements Record<string, any> {
     entity$: string;
@@ -59,6 +59,12 @@ declare class Entity implements Record<string, any> {
     data$(data?: any, canonkind?: any): any;
     clone$(): any;
     custom$(_props: any): any;
+    instance(): any;
+    state(canonspec: CanonSpec): EntityState;
+    transaction(canonspec: any, extra: any): Promise<any>;
+    commit(canonspec: CanonSpec, extra: any): Promise<Transaction>;
+    rollback(canonspec: CanonSpec, extra: any): Promise<Transaction>;
+    adopt(handle: any, canonspec: any, extra: any): Promise<any>;
 }
 declare function MakeEntity(canon: any, seneca: any, opts?: any): Entity;
 declare namespace MakeEntity {
