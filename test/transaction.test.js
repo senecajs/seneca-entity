@@ -40,30 +40,30 @@ describe('transaction', () => {
     let e0 = si.entity()
 
     // No transaction running.
-    let es0a = si.entity.state()
+    let es0a = si.entity().state()
     expect(es0a.canonstr).toEqual('-/-/-')
     expect(es0a.transaction).toBeNull()
 
     // Begin transaction - returns seneca instance to use.
-    let s0 = await si.entity.transaction(null, { mark: 'zero' })
+    let s0 = await si.entity().transaction(null, { mark: 'zero' })
     expect(s0.isSeneca).toBeTruthy()
     expect(
       s0.fixedmeta.custom.sys__entity.transaction['-/-/-'].handle.mark
     ).toEqual('zero')
 
     // No transaction running in parent!
-    let es0b = si.entity.state()
+    let es0b = si.entity().state()
     expect(es0b.canonstr).toEqual('-/-/-')
     expect(es0b.transaction).toBeNull()
 
     // Get current transaction from entity state.
-    let s0t0 = s0.entity.state()
+    let s0t0 = s0.entity().state()
     expect(s0t0.canonstr).toEqual('-/-/-')
     expect(s0t0.transaction.handle.mark).toEqual('zero')
     expect(s0t0.transaction.handle.log).toEqual([])
 
     // No transaction running in parent!
-    let es0c = si.entity.state()
+    let es0c = si.entity().state()
     expect(es0c.transaction).toBeNull()
 
     // Execute msg in transaction context.
@@ -71,11 +71,11 @@ describe('transaction', () => {
     expect(red0.x).toEqual(9)
 
     // No transaction running in parent!
-    let es0d = si.entity.state()
+    let es0d = si.entity().state()
     expect(es0d.transaction).toBeNull()
 
     // Confirm transaction context.
-    let s0t1 = s0.entity.state()
+    let s0t1 = s0.entity().state()
     expect(s0t1.canonstr).toEqual('-/-/-')
     expect(s0t1.transaction.handle.mark).toEqual('zero')
     expect(s0t1.transaction.handle.log).toEqual([
@@ -84,20 +84,20 @@ describe('transaction', () => {
     ])
 
     // No transaction running in parent!
-    let es0e = si.entity.state()
+    let es0e = si.entity().state()
     expect(es0e.transaction).toBeNull()
 
     // End transaction context.
-    let tx0 = await s0.entity.commit()
+    let tx0 = await s0.entity().commit()
     expect(tx0).toBeDefined()
     expect(tx0.result.done).toEqual(true)
 
     // No transaction running in parent!
-    let es0f = si.entity.state()
+    let es0f = si.entity().state()
     expect(es0f.transaction).toBeNull()
 
     // No transaction running in child now
-    let s0t2 = s0.entity.state()
+    let s0t2 = s0.entity().state()
     expect(s0t2.transaction.finish).toBeTruthy()
 
     await si.close()
@@ -170,10 +170,10 @@ describe('transaction', () => {
     let red1 = await s0.post('zed:1,x:6')    
     // console.log(red1)
 
-    let t0b = si.entity.state()
+    let t0b = si.entity().state()
     expect(t0b).toBeDefined()
 
-    let tx = await s0.entity.end()
+    let tx = await s0.entity().end()
     expect(tx).toBeDefined()
     // console.log(tx)
     //console.log(tx.handle.log)
@@ -211,7 +211,7 @@ describe('transaction', () => {
 
     // operations post transaction do not pollute or reuse transaction:
     
-    let t0c = si.entity.state()
+    let t0c = si.entity().state()
     expect(t0c).toBeNull()
     
     let out = await si.post('foo:red,x:99')    
@@ -229,7 +229,7 @@ describe('transaction', () => {
     expect(tx.handle.log.length).toEqual(txlen)
     
     
-    let t0d = s0.entity.state()
+    let t0d = s0.entity().state()
     expect(t0d).toBeNull()
 
     out = await s0.post('foo:red,x:999')    
@@ -248,13 +248,13 @@ describe('transaction', () => {
 
 
 
-    let t0e = si.entity.state()
+    let t0e = si.entity().state()
     expect(t0e).toBeNull()
 
     
-    let s1 = await s0.entity.transaction()
+    let s1 = await s0.entity().transaction()
 
-    let t1a= si.entity.state()
+    let t1a= si.entity().state()
     expect(t1a).toBeDefined()
     */
 
@@ -262,11 +262,11 @@ describe('transaction', () => {
     
     out = await s1.post('foo:red,x:9')    
 
-    let t1b= si.entity.state()
+    let t1b= si.entity().state()
     expect(t1b).toBeDefined()
 
-    tx = await s1.entity.transaction()
-    let t1c= si.entity.state()
+    tx = await s1.entity().transaction()
+    let t1c= si.entity().state()
     console.log('t1c', t1c)
 
 

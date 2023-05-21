@@ -1,6 +1,6 @@
 {
   "name": "seneca-entity",
-  "main": "dist/entity.v2.js",
+  "main": "dist/entity.js",
   "version": "22.0.0",
   "type": "commonjs",
   "types": "dist/entity.d.ts",
