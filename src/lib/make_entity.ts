@@ -634,16 +634,14 @@ class Entity implements Record<string, any> {
     transaction.sid = transactionInstance.id
     transaction.did = transactionInstance.did
 
-    transactionInstance.entity = state.instance.entity.bind(transactionInstance)
-    Object.assign(transactionInstance.entity, state.instance.entity)
+    //transactionInstance.entity = state.instance.entity.bind(transactionInstance)
+    //Object.assign(transactionInstance.entity, state.instance.entity)
 
     return transactionInstance
   }
 
 
   async commit(canonspec: CanonSpec, extra: any) {
-    debugger // dbg
-
     /* TODO
     if (!opts.transaction.active) {
       return null

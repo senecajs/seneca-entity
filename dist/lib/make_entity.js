@@ -502,18 +502,17 @@ class Entity {
         });
         transaction.sid = transactionInstance.id;
         transaction.did = transactionInstance.did;
-        transactionInstance.entity = state.instance.entity.bind(transactionInstance);
-        Object.assign(transactionInstance.entity, state.instance.entity);
+        //transactionInstance.entity = state.instance.entity.bind(transactionInstance)
+        //Object.assign(transactionInstance.entity, state.instance.entity)
         return transactionInstance;
     }
     async commit(canonspec, extra) {
-        var _a, _b, _c;
-        debugger; // dbg
         /* TODO
         if (!opts.transaction.active) {
           return null
         }
         */
+        var _a, _b, _c;
         let emptyEntity = this;
         let state = get_state(emptyEntity, canonspec);
         let transaction = (_c = (_b = (_a = state.instance.fixedmeta) === null || _a === void 0 ? void 0 : _a.custom) === null || _b === void 0 ? void 0 : _b.sys__entity) === null || _c === void 0 ? void 0 : _c.transaction[state.canonstr];

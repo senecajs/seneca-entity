@@ -3,6 +3,7 @@
 const Seneca = require('seneca')
 const Entity = require('../')
 
+/*
 function describe(description, suite) {
   suite()
 }
@@ -37,9 +38,9 @@ function expect(_subject) { // mock
     }
   })
 }
+*/
 
 describe('transaction', () => {
-  /*
   test('child-context-only', async () => {
     const si = makeSenecaInstance()
 
@@ -140,7 +141,7 @@ describe('transaction', () => {
 
     return
   })
-  */
+
 
   test('simple transaction() - commit() routine', (fin_) => {
     const onDone = calledOnce(fin_)
@@ -156,25 +157,54 @@ describe('transaction', () => {
     })
 
     si.add('sys:entity,transaction:commit', function (msg, reply) {
-      trx_handle.tx.state = 'end'
-      reply({ done: true, mark: trx_handle.tx.mark })
+      reply()
     })
 
 
     si.add('hello:world', function (args, reply) {
       this.entity().transaction()
       	.then((trx) => {
-	  debugger // dbg
 	  return trx.entity().commit()
 	})
 	.then(() => reply())
 	.catch(reply)
     })
 
+
     si.act('hello:world', onDone)
   })
 
-  /*
+  test('simple transaction() - rollback() routine', (fin_) => {
+    const onDone = calledOnce(fin_)
+
+    const si = makeSenecaInstance()
+    si.test(onDone)
+
+
+    const trx_handle = { tx: { state: 'start', mark: 'whatever', log: [] } }
+
+    si.add('sys:entity,transaction:transaction', function (msg, reply) {
+      reply({ get_handle: () => trx_handle })
+    })
+
+    si.add('sys:entity,transaction:rollback', function (msg, reply) {
+      reply()
+    })
+
+
+    si.add('hello:world', function (args, reply) {
+      this.entity().transaction()
+      	.then((trx) => {
+	  return trx.entity().rollback()
+	})
+	.then(() => reply())
+	.catch(reply)
+    })
+
+
+    si.act('hello:world', onDone)
+  })
+
   test('does not crash when used with priors', (fin_) => {
     const onDone = calledOnce(fin_)
 
@@ -189,8 +219,7 @@ describe('transaction', () => {
     })
 
     si.add('sys:entity,transaction:commit', function (msg, reply) {
-      trx_handle.tx.state = 'end'
-      reply({ done: true, mark: trx_handle.tx.mark })
+      reply()
     })
 
 
@@ -203,24 +232,19 @@ describe('transaction', () => {
       	.then((trx) => {
 	  trx.prior(args, function (err) {
 	    if (err) {
-	      return onDone(err)
+	      return reply(err)
 	    }
 
 	    trx.entity().commit()
-	      .then(() => onDone())
-	      .catch(onDone)
+	      .then(() => reply())
+	      .catch(reply)
 	  })
 	})
 	.catch(reply)
     })
 
     si.act('hello:world', onDone)
-
-    setTimeout(() => {
-      onDone(new Error('timed out'))
-    }, 5e3)
   })
-  */
 })
 
 function calledOnce(f) {
