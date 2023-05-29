@@ -278,6 +278,38 @@ describe('transaction', () => {
   })
 })
 
+describe('regression', () => {
+  test('trx started and committed in the same handler', async () => {
+    const si = makeSenecaInstance()
+
+
+    const transaction = {}
+
+    si
+      .add('sys:entity,transaction:transaction', function (msg, reply) {
+	transaction.tx = { state: 'start', mark: msg.mark, log: [] }
+	reply({ get_handle: () => transaction.tx })
+      })
+
+      .add('sys:entity,transaction:commit', function (msg, reply) {
+        tmp.tx.state = 'end'
+        reply({ done: true, mark: tmp.tx.mark })
+      })
+
+      .add('hello:world', function (msg, reply) {
+	this.entity.transaction()
+	  .then((senecatrx) => {
+	    return senecatrx.entity.commit()
+	  })
+	  .then(() => reply())
+	  .catch(reply)
+      })
+
+    await si.ready()
+    await si.post('hello:world')
+  })
+})
+
 function jj(x) {
   return JSON.parse(JSON.stringify(x))
 }
