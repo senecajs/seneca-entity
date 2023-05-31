@@ -277,17 +277,15 @@ describe('transaction', () => {
     */
   })
 
-  
   test('start-with-immediate-commit', async () => {
     const si = makeSenecaInstance()
     const transaction = {}
     const tmp = {}
 
-    si
-      .add('sys:entity,transaction:transaction', function (msg, reply) {
-	transaction.tx = { state: 'start', mark: msg.mark, log: [] }
-	reply({ get_handle: () => transaction.tx })
-      })
+    si.add('sys:entity,transaction:transaction', function (msg, reply) {
+      transaction.tx = { state: 'start', mark: msg.mark, log: [] }
+      reply({ get_handle: () => transaction.tx })
+    })
 
       .add('sys:entity,transaction:commit', function (msg, reply) {
         transaction.tx.state = 'end'
@@ -295,12 +293,13 @@ describe('transaction', () => {
       })
 
       .add('hello:world', function (msg, reply) {
-	this.entity.transaction()
-	  .then((senecatrx) => {
-	    return senecatrx.entity.commit()
-	  })
-	  .then(() => reply())
-	  .catch(reply)
+        this.entity
+          .transaction()
+          .then((senecatrx) => {
+            return senecatrx.entity.commit()
+          })
+          .then(() => reply())
+          .catch(reply)
       })
 
     await si.ready()

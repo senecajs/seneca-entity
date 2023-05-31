@@ -1,7 +1,6 @@
 const Seneca = require('seneca')
 const Entity = require('..')
 
-
 async function run() {
   let s0 = Seneca().test().use(Entity)
 
@@ -14,7 +13,6 @@ async function run() {
   let foo0 = s1.entity('foo')
   console.log('foo0-did', foo0.private$.get_instance().did)
 
-
   let s2 = s0.delegate()
   console.log('\ns2.did', s2.did)
 
@@ -24,7 +22,6 @@ async function run() {
   let foo1 = s2.entity('foo')
   console.log('foo1-did', foo1.private$.get_instance().did)
 
-
   let s3 = s1.delegate()
   console.log('\ns3.did', s3.did)
 
@@ -33,13 +30,9 @@ async function run() {
 
   let foo2 = s3.entity('foo')
   console.log('foo2-did', foo2.private$.get_instance().did)
-
-  
-} 
-
+}
 
 run()
-
 
 // const dur = 5000
 
@@ -102,7 +95,7 @@ run()
 //   let st1 = await this.entity.begin()
 //   console.log('st1 begin', st1)
 //   console.log('s0 B', s0)
-  
+
 //   let st1txa = st1.entity.active()
 //   console.log('st1txa active', st1txa)
 
@@ -122,13 +115,12 @@ run()
 
 //     .add('foo:1', async function(msg, reply, meta) {
 //       txlog(this,'START foo:1')
-      
+
 //       this.entity('red').save$({x:msg.x}, function(err, out) {
 //         txlog(this,'SAVED red '+out.id)
 //         reply(out)
 //       })
 //     })
-
 
 //     .add('foo:2', async function(msg, reply, meta) {
 //       txlog(this,'START foo:2')
@@ -145,14 +137,13 @@ run()
 //       await this.post('foo:1',{x:msg.x})
 
 //       txlog(this,'MID bar:1')
-      
+
 //       await this.post('foo:2',{x:msg.x})
 
 //       txlog(this,'END bar:1')
 
 //       return {x:msg.x}
 //     })
-
 
 //     .message('zed:1', async function(msg, reply, meta) {
 //       txlog(this,'START zed:1 A')
@@ -164,7 +155,6 @@ run()
 //       return out
 //     })
 
-
 //     .message('zed:1', async function(msg, reply, meta) {
 //       txlog(this,'START zed:1 B')
 
@@ -174,7 +164,6 @@ run()
 
 //       return out
 //     })
-
 
 //     .message('zed:1', async function(msg, reply, meta) {
 //       txlog(this,'START zed:1 C')
@@ -186,32 +175,31 @@ run()
 //       return out
 //     })
 
-
 //     .ready(async function () {
 //       const seneca = this
 
 //       let tn = seneca.entity.active()
 //       console.log('tn', null)
-      
+
 //       let s0 = await seneca.entity.begin() // 'sys/foo')
 //       let t0a = seneca.entity.active()
 //       console.log('t0a', t0a)
-      
+
 //       // console.log(s0.fixedmeta.custom.sys__entity)
 //       // console.log('TXI', s0)
-      
+
 //       // console.log('BBB', s0.entity())// .private$.get_instance())
-      
-//       let out = await s0.post('foo:1,x:9')    
+
+//       let out = await s0.post('foo:1,x:9')
 //       console.log(out)
 
-//       out = await s0.post('foo:2,x:8')    
+//       out = await s0.post('foo:2,x:8')
 //       console.log(out)
 
-//       out = await s0.post('bar:1,x:7')    
+//       out = await s0.post('bar:1,x:7')
 //       console.log(out)
 
-//       out = await s0.post('zed:1,x:6')    
+//       out = await s0.post('zed:1,x:6')
 //       console.log(out)
 
 //       let t0b = seneca.entity.active()
@@ -224,48 +212,45 @@ run()
 //       let t0c = seneca.entity.active()
 //       console.log('t0c', t0c)
 
-      
-//       out = await seneca.post('foo:1,x:99')    
+//       out = await seneca.post('foo:1,x:99')
 //       console.log(out)
 
-//       out = await seneca.post('foo:2,x:88')    
+//       out = await seneca.post('foo:2,x:88')
 //       console.log(out)
 
-//       out = await seneca.post('bar:1,x:77')    
+//       out = await seneca.post('bar:1,x:77')
 //       console.log(out)
 
-//       out = await seneca.post('zed:1,x:66')    
-//       console.log(out)
-
-//       // console.log(tx.handle.log)
-//       console.log(tx.handle.log.length)
-
-
-//       out = await s0.post('foo:1,x:999')    
-//       console.log(out)
-
-//       out = await s0.post('foo:2,x:888')    
-//       console.log(out)
-
-//       out = await s0.post('bar:1,x:777')    
-//       console.log(out)
-
-//       out = await s0.post('zed:1,x:666')    
+//       out = await seneca.post('zed:1,x:66')
 //       console.log(out)
 
 //       // console.log(tx.handle.log)
 //       console.log(tx.handle.log.length)
 
+//       out = await s0.post('foo:1,x:999')
+//       console.log(out)
+
+//       out = await s0.post('foo:2,x:888')
+//       console.log(out)
+
+//       out = await s0.post('bar:1,x:777')
+//       console.log(out)
+
+//       out = await s0.post('zed:1,x:666')
+//       console.log(out)
+
+//       // console.log(tx.handle.log)
+//       console.log(tx.handle.log.length)
 
 //       let t0d = seneca.entity.active()
 //       console.log('t0d', t0d)
-      
+
 //       let s1 = await s0.entity.begin() // 'sys/foo')
 
 //       let t1a= seneca.entity.active()
 //       console.log('t1a', t1a)
-      
-//       out = await s1.post('foo:1,x:9')    
+
+//       out = await s1.post('foo:1,x:9')
 //       console.log(out)
 
 //       let t1b= seneca.entity.active()
@@ -274,7 +259,6 @@ run()
 //       tx = await s1.entity.end()
 //       let t1c= seneca.entity.active()
 //       console.log('t1c', t1c)
-
 
 //       // console.log(tx)
 //       console.log(tx.handle.log)

@@ -1,7 +1,7 @@
 {
   "name": "seneca-entity",
   "main": "dist/entity.js",
-  "version": "22.0.0",
+  "version": "22.1.0",
   "type": "commonjs",
   "types": "dist/entity.d.ts",
   "description": "Entity plugin for seneca",
@@ -57,7 +57,7 @@
     "seneca-promisify": ">=3"
   },
   "devDependencies": {
-    "@seneca/maintain": "^0.0.28",
+    "@seneca/maintain": "^0.0.29",
     "@types/jest": "^29.5.1",
     "esbuild": "^0.17.19",
     "esbuild-jest": "^0.5.0",
