@@ -276,14 +276,12 @@ describe('transaction', () => {
 
     */
   })
-})
 
-describe('regression', () => {
-  test('trx started and committed in the same handler', async () => {
+  
+  test('start-with-immediate-commit', async () => {
     const si = makeSenecaInstance()
-
-
     const transaction = {}
+    const tmp = {}
 
     si
       .add('sys:entity,transaction:transaction', function (msg, reply) {
@@ -292,8 +290,8 @@ describe('regression', () => {
       })
 
       .add('sys:entity,transaction:commit', function (msg, reply) {
-        tmp.tx.state = 'end'
-        reply({ done: true, mark: tmp.tx.mark })
+        transaction.tx.state = 'end'
+        reply({ done: true, mark: transaction.tx.mark })
       })
 
       .add('hello:world', function (msg, reply) {

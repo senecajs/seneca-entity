@@ -9,8 +9,8 @@ const Store = require('../dist/lib/store')
 const StoreIntern = Store.Intern
 
 // TODO: update when Seneca.util.Gex is available
-const GexModule = require('gex') || require('gex').default
-const Gex = Seneca.util.Gex || GexModule.Gex
+// const GexModule = require('gex') || require('gex').default
+const Gex = Seneca.util.Gex // || GexModule.Gex
 
 const MemOps = require('./mem-ops.js')
 

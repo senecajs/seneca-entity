@@ -134,7 +134,7 @@ function preload(this: any, context: any) {
   function build_api_make(promise: boolean) {
 
     let entityAPI = (function entityAPI(this: any) {
-      // console.log('MAKE', this && this.did)
+      // console.log('MAKE', this && this.id, this && this.did)
       let ent = seneca.private$.entity.make$(this, ...[...arguments, promise])
       // console.log('ENT', ent.private$.get_instance().did)
       return ent
@@ -211,8 +211,13 @@ function preload(this: any, context: any) {
       transaction.sid = transactionInstance.id
       transaction.did = transactionInstance.did
 
-      transactionInstance.entity = state.instance.entity.bind(transactionInstance)
+      transactionInstance.entity = function(this: any, ...args: any[]) {
+        return state.instance.entity.call(transactionInstance, ...args)
+      }
+
       Object.assign(transactionInstance.entity, state.instance.entity)
+
+      transactionInstance.entity.did = transactionInstance.did
 
       return transactionInstance
     }
@@ -223,7 +228,9 @@ function preload(this: any, context: any) {
         return null
       }
 
+
       let emptyEntity = this()
+
       let state = get_state(emptyEntity, canonspec)
 
       let transaction: Transaction =
@@ -477,10 +484,10 @@ function generate_id(this: any, msg: any, reply: any) {
 }
 
 
-// Get the current entity instance and transaction state
+// Get the current entity instance and transaction state.
 function get_state(emptyEntity: any, canonspec: CanonSpec): EntityState {
   let instance = emptyEntity.private$.get_instance()
-  // console.log('GET_STATE', instance.did)
+  // console.log('GET_STATE', instance.id, instance.did)
 
   let canon = MakeEntity.parsecanon(canonspec)
   let canonstr = MakeEntity.canonstr(canon)

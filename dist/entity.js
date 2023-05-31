@@ -96,7 +96,7 @@ function preload(context) {
     // all optional
     function build_api_make(promise) {
         let entityAPI = (function entityAPI() {
-            // console.log('MAKE', this && this.did)
+            // console.log('MAKE', this && this.id, this && this.did)
             let ent = seneca.private$.entity.make$(this, ...[...arguments, promise]);
             // console.log('ENT', ent.private$.get_instance().did)
             return ent;
@@ -151,8 +151,11 @@ function preload(context) {
             });
             transaction.sid = transactionInstance.id;
             transaction.did = transactionInstance.did;
-            transactionInstance.entity = state.instance.entity.bind(transactionInstance);
+            transactionInstance.entity = function (...args) {
+                return state.instance.entity.call(transactionInstance, ...args);
+            };
             Object.assign(transactionInstance.entity, state.instance.entity);
+            transactionInstance.entity.did = transactionInstance.did;
             return transactionInstance;
         };
         entityAPI.commit = async function (canonspec, extra) {
@@ -334,11 +337,11 @@ function generate_id(msg, reply) {
     }
     return reply ? reply(actnid()) : actnid();
 }
-// Get the current entity instance and transaction state
+// Get the current entity instance and transaction state.
 function get_state(emptyEntity, canonspec) {
     var _a;
     let instance = emptyEntity.private$.get_instance();
-    // console.log('GET_STATE', instance.did)
+    // console.log('GET_STATE', instance.id, instance.did)
     let canon = make_entity_1.MakeEntity.parsecanon(canonspec);
     let canonstr = make_entity_1.MakeEntity.canonstr(canon);
     let custom = instance.fixedmeta.custom;
