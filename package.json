@@ -57,13 +57,13 @@
     "seneca-promisify": ">=3"
   },
   "devDependencies": {
-    "@seneca/maintain": "^0.0.27",
-    "@types/jest": "^29.5.0",
-    "esbuild": "^0.17.15",
+    "@seneca/maintain": "^0.0.28",
+    "@types/jest": "^29.5.1",
+    "esbuild": "^0.17.19",
     "esbuild-jest": "^0.5.0",
     "jest": "^29.5.0",
-    "prettier": "^2.8.7",
+    "prettier": "^2.8.8",
     "seneca-msg-test": "^3.4.0",
-    "typescript": "^5.0.3"
+    "typescript": "^5.0.4"
   }
 }
