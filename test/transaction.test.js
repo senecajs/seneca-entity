@@ -277,10 +277,68 @@ describe('transaction', () => {
     */
   })
 
+  
+  test('prior-only-no-ent-ops', async () => {
+    const si = makeSenecaInstance()
+    const transaction = {}
+
+    si
+      .add('sys:entity,transaction:transaction', function (msg, reply) {
+        transaction.tx = { state: 'start', mark: msg.mark, log: [] }
+        reply({ get_handle: () => transaction.tx })
+      })
+
+      .add('sys:entity,transaction:commit', function (msg, reply) {
+        transaction.tx.state = 'end'
+        reply({ done: true, mark: transaction.tx.mark })
+      })
+
+      .add('b:1', function b1A(msg, reply) {
+        reply({A:1,B:msg.B,y:msg.y+'A'})
+      })
+      .add('b:1', function b1B(msg, reply) {
+        this.prior({B:1,y:msg.y+'B'}, reply)
+      })
+      .message('a:1', async function a1(msg) {
+        let tx = await this.entity.transaction()
+        // console.log('TX', tx.did)
+        let out = await tx.post({b:1,y:'S'})
+        await tx.entity.commit()
+        return out
+      })
+      .add('c:1', function a1(msg, reply) {
+        this.entity.transaction()
+          .then(function(tx) {
+            // console.log('TX', tx.did)
+            tx.act({b:1,y:'S'}, function(err, out) {
+              this.entity.commit()
+                .then(function(){
+                  reply(out)
+                })
+                .catch(reply)
+            })
+          })
+          .catch(reply)
+      })
+
+    
+    await si.ready()
+
+    let out = await si.post('a:1')
+    // console.log('QQQ', out)
+    expect(out).toEqual({ A: 1, B: 1, y: 'SBA' })
+
+    out = await si.post('c:1')
+    // console.log('QQQ', out)
+    expect(out).toEqual({ A: 1, B: 1, y: 'SBA' })
+
+  })
+
+
+
   test('start-with-immediate-commit', async () => {
     const si = makeSenecaInstance()
     const transaction = {}
-    const tmp = {}
 
     si.add('sys:entity,transaction:transaction', function (msg, reply) {
       transaction.tx = { state: 'start', mark: msg.mark, log: [] }
@@ -305,6 +363,7 @@ describe('transaction', () => {
     await si.ready()
     await si.post('hello:world')
   })
+
 })
 
 function jj(x) {
