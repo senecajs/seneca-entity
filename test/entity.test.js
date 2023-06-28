@@ -149,6 +149,8 @@ describe('entity', function () {
     expect(zeds.length).toEqual(1)
   })
 
+
+  
   test('tag-load', function (fin) {
     const s0 = Seneca()
       .test(fin)
@@ -164,7 +166,7 @@ describe('entity', function () {
 
     s0.gate()
       .act(
-        'role:entity,cmd:save,base:b0,name:n0',
+        'sys:entity,cmd:save,base:b0,name:n0',
         { ent: { id$: 'e0', f0: 1 } },
         function (err, out) {
           expect(out.data$()).toEqual({
@@ -175,7 +177,7 @@ describe('entity', function () {
         }
       )
       .act(
-        'role:entity,cmd:load,base:b0,name:n0',
+        'sys:entity,cmd:load,base:b0,name:n0',
         { id: 'e0' },
         function (err, out) {
           expect(out.data$()).toEqual({
@@ -186,7 +188,7 @@ describe('entity', function () {
         }
       )
       .act(
-        'role:entity,cmd:load,base:b0,name:n0',
+        'sys:entity,cmd:load,base:b0,name:n0',
         { q: { id: 'e0' } },
         function (err, out) {
           expect(out.data$()).toEqual({
@@ -197,7 +199,7 @@ describe('entity', function () {
         }
       )
       .act(
-        'role:entity,cmd:list,base:b0,name:n0',
+        'sys:entity,cmd:list,base:b0,name:n0',
         { id: 'e0' },
         function (err, out) {
           expect(out[0].data$()).toEqual({
@@ -210,7 +212,7 @@ describe('entity', function () {
 
       // q wins over id
       .act(
-        'role:entity,cmd:list,base:b0,name:n0',
+        'sys:entity,cmd:list,base:b0,name:n0',
         { q: { id: 'e0' }, id: 'e0x' },
         function (err, out) {
           expect(out[0].data$()).toEqual({
@@ -220,16 +222,16 @@ describe('entity', function () {
           })
         }
       )
-      .act('role:entity,cmd:remove,base:b0,name:n0', { id: 'e0' })
+      .act('sys:entity,cmd:remove,base:b0,name:n0', { id: 'e0' })
       .act(
-        'role:entity,cmd:load,base:b0,name:n0',
+        'sys:entity,cmd:load,base:b0,name:n0',
         { id: 'e0' },
         function (err, out) {
           expect(null == out).toBeTruthy()
         }
       )
       .act(
-        'role:entity,cmd:list,base:b0,name:n0',
+        'sys:entity,cmd:list,base:b0,name:n0',
         { q: { id: 'e0' } },
         function (err, out) {
           expect(out.length).toEqual(0)
@@ -247,7 +249,7 @@ describe('entity', function () {
       reply()
     })
 
-    w0.call(si, { role: 'entity', zone: 'z0', base: 'b0', name: 'n0' }, fin)
+    w0.call(si, { sys: 'entity', zone: 'z0', base: 'b0', name: 'n0' }, fin)
   })
 
   test('reify_entity_wrap_with_ent', function (fin) {
@@ -262,7 +264,7 @@ describe('entity', function () {
     w0.call(
       si,
       {
-        role: 'entity',
+        sys: 'entity',
         zone: 'z0',
         base: 'b0',
         name: 'n0',
@@ -698,7 +700,8 @@ describe('entity', function () {
     }
 
     si.use(function store0() {
-      this.store.init(
+      let store = si.export('entity/store')
+      store.init(
         this,
         {},
         {
@@ -716,7 +719,8 @@ describe('entity', function () {
     })
 
     si.use(function store1() {
-      this.store.init(
+      let store = si.export('entity/store')
+      store.init(
         this,
         {},
         {
@@ -735,7 +739,8 @@ describe('entity', function () {
     })
 
     si.use(function store2() {
-      this.store.init(
+      let store = si.export('entity/store')
+      store.init(
         this,
         { map: { foo: '*' } },
         {
@@ -803,30 +808,6 @@ describe('entity', function () {
     fin()
   })
 
-  test('client-server', function (fin) {
-    Seneca()
-      .test(fin)
-      .use(Entity, { server: true })
-      .ready(function () {
-        const s0 = this
-        expect(this.list('role:remote-entity').length).toEqual(4)
-
-        Seneca()
-          .test(fin)
-          .use(Entity, { client: true })
-          .ready(function () {
-            const c0 = this
-
-            this.add('role:remote-entity,cmd:load', function (msg, reply) {
-              reply()
-            })
-              .make$('foo')
-              .load$(0, function (err, out) {
-                c0.close(s0.close.bind(s0, fin))
-              })
-          })
-      })
-  })
 
   test('make-passes-through', function (fin) {
     const si0 = Seneca().test(fin).use(Entity)
@@ -925,23 +906,6 @@ describe('entity', function () {
     fin()
   })
 
-  test('multiple-instances', function (fin) {
-    const si0 = Seneca()
-      .test(fin)
-      .use({ init: Entity, name: 'entity', tag: 'A' }, { client: true })
-      .use({ init: Entity, name: 'entity', tag: 'B' }, { client: false })
-      .use({ init: Entity, name: 'entity', tag: 'C' }, { client: true })
-      .use({ init: Entity, name: 'entity', tag: 'D' }, { client: false })
-
-    si0.ready(function () {
-      const po = this.options().plugin
-      expect(po.entity$A.client).toBeTruthy()
-      expect(po.entity$B.client).toBeFalsy()
-      expect(po.entity$C.client).toBeTruthy()
-      expect(po.entity$D.client).toBeFalsy()
-      fin()
-    })
-  })
 
   test('deep-clone', function (fin) {
     const si0 = Seneca().test(fin).use(Entity)
@@ -1050,7 +1014,7 @@ describe('entity', function () {
         expect(foo.x).toEqual(1)
         expect(foo.entity$).toEqual('-/-/foo')
 
-        si.add('role:entity,cmd:save', function (msg, reply) {
+        si.add('sys:entity,cmd:save', function (msg, reply) {
           msg.ent.y = 2
           return this.prior(msg, reply)
         })
@@ -1102,7 +1066,7 @@ describe('entity', function () {
     })
 
     si.ready(function () {
-      si.add('role:entity,cmd:save', function save_fail(msg, reply) {
+      si.add('sys:entity,cmd:save', function save_fail(msg, reply) {
         throw new Error('save-fail')
       })
 
@@ -1213,7 +1177,7 @@ describe('entity', function () {
 
     si0.ready(function () {
       // Define a prior operation driven by the entity custom$ directive
-      si0.add('role:entity,cmd:save', function save_what(msg, done) {
+      si0.add('sys:entity,cmd:save', function save_what(msg, done) {
         let what = (msg.ent.custom$ && msg.ent.custom$.what) || 'a'
         tmp.saves[what].push(msg.ent.x)
         this.prior(msg, done)
@@ -1256,7 +1220,7 @@ describe('entity', function () {
       .save$(function (err, foo0, meta) {
         expect(null == err).toBeTruthy()
         expect(foo0.x).toEqual(0)
-        expect(meta.pattern).toEqual('cmd:save,role:entity')
+        expect(meta.pattern).toEqual('cmd:save,sys:entity')
         expect(this.id).toEqual(s0.id)
 
         let s1 = Seneca()
@@ -1267,7 +1231,7 @@ describe('entity', function () {
           .save$(function (err, foo1, meta) {
             expect(null == err).toBeTruthy()
             expect(foo1.x).toEqual(1)
-            expect(meta.pattern).toEqual('cmd:save,role:entity')
+            expect(meta.pattern).toEqual('cmd:save,sys:entity')
             expect(this.id).toEqual(s1.id)
 
             let s2 = Seneca()

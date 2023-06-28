@@ -1,6 +1,6 @@
-declare function Store(): {
+declare function Store(plugin_opts: any): {
     cmds: string[];
-    init: (instance: any, opts: any, store: any, cb: any) => {
+    init: (instance: any, store_opts: any, store: any, cb: any) => {
         tag: any;
         desc: string;
     } | undefined;

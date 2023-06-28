@@ -1,4 +1,4 @@
-import { Canon, CanonSpec } from './types';
+import { Canon, CanonSpec } from '../types';
 declare function entargs(this: any, ent: Entity, args: any): any;
 declare class Entity implements Record<string, any> {
     entity$: string;
@@ -8,8 +8,9 @@ declare class Entity implements Record<string, any> {
         promise: boolean;
         get_instance: () => any;
         entargs: typeof entargs;
+        options: any;
     };
-    constructor(canon: any, seneca: any);
+    constructor(canon: any, seneca: any, options: any);
     make$(...args: any[]): any;
     /** Save the entity.
      *  param {object} [data] - Subset of entity field values.
@@ -60,7 +61,7 @@ declare class Entity implements Record<string, any> {
     clone$(): any;
     custom$(_props: any): any;
 }
-declare function MakeEntity(canon: any, seneca: any, opts?: any): Entity;
+declare function MakeEntity(canon: any, seneca: any, opts: any): Entity;
 declare namespace MakeEntity {
     var parsecanon: (str: CanonSpec) => any;
     var canonstr: (canon: Canon) => string;

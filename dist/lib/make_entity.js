@@ -1,13 +1,8 @@
 "use strict";
-/* Copyright (c) 2012-2022 Richard Rodger and other contributors, MIT License */
+/* Copyright (c) 2012-2023 Richard Rodger and other contributors, MIT License */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Entity = exports.MakeEntity = void 0;
 const proto = Object.getPrototypeOf;
-// const error = Eraro({
-//   package: 'seneca',
-//   msgmap: ERRMSGMAP(),
-//   override: true,
-// })
 const toString_map = {
 // '': make_toString(),
 };
@@ -16,7 +11,6 @@ const NO_ENTITY = null;
 // `null` represents no error.
 const NO_ERROR = null;
 function entargs(ent, args) {
-    args.role = 'entity';
     args.ent = ent;
     // TODO: should this be: null != ?
     if (this.canon.name !== null) {
@@ -31,13 +25,14 @@ function entargs(ent, args) {
     return args;
 }
 class Entity {
-    constructor(canon, seneca) {
+    constructor(canon, seneca, options) {
         // NOTE: this will be moved to a per-instance prototype
         this.private$ = {
             canon: null,
             promise: false,
             get_instance: () => null,
             entargs,
+            options: {}
         };
         const private$ = this.private$;
         private$.get_instance = function () {
@@ -45,7 +40,7 @@ class Entity {
         };
         private$.canon = canon;
         private$.entargs = entargs;
-        // private$.promise = false
+        private$.options = options;
         this.private$ = this.private$;
         // use as a quick test to identify Entity objects
         // returns compact string zone/base/name
@@ -126,7 +121,7 @@ class Entity {
         new_canon.base = base == null ? self.private$.canon.base : base;
         new_canon.zone = zone == null ? self.private$.canon.zone : zone;
         const entity = MakeEntity(new_canon, instance, {
-            // const entity: Entity = MakeEntity(new_canon, self.private$.get_instance(), {
+            ...self.private$.options,
             promise,
         });
         for (const p in props) {
@@ -157,7 +152,7 @@ class Entity {
     save$(data, done) {
         const self = this;
         const si = self.private$.get_instance();
-        let entmsg = { cmd: 'save', q: {} };
+        let entmsg = { cmd: 'save', q: {}, ...self.private$.options.pattern_fix };
         let done$ = prepareCmd(self, data, entmsg, done);
         entmsg = self.private$.entargs(self, entmsg);
         const promise = self.private$.promise && !done$;
@@ -176,7 +171,7 @@ class Entity {
         const self = this;
         const si = self.private$.get_instance();
         const promise = self.private$.promise;
-        let entmsg = { cmd: 'native' };
+        let entmsg = { cmd: 'native', ...self.private$.options.pattern_fix };
         let done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = self.private$.entargs(self, entmsg);
         let res = promise && !done
@@ -199,7 +194,7 @@ class Entity {
         }
         const si = self.private$.get_instance();
         const q = normalize_query(query, self);
-        let entmsg = { cmd: 'load', q, qent: self };
+        let entmsg = { cmd: 'load', q, qent: self, ...self.private$.options.pattern_fix };
         let done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = self.private$.entargs(self, entmsg);
         const promise = self.private$.promise && !done$;
@@ -236,7 +231,7 @@ class Entity {
         }
         const si = self.private$.get_instance();
         const q = normalize_query(query, self);
-        let entmsg = { cmd: 'list', q, qent: self };
+        let entmsg = { cmd: 'list', q, qent: self, ...self.private$.options.pattern_fix };
         const done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = self.private$.entargs(self, entmsg);
         const promise = self.private$.promise && !done$;
@@ -268,7 +263,9 @@ class Entity {
         }
         const si = self.private$.get_instance();
         const q = normalize_query(query, self);
-        let entmsg = self.private$.entargs(self, { cmd: 'remove', q, qent: self });
+        let entmsg = self.private$.entargs(self, {
+            cmd: 'remove', q, qent: self, ...self.private$.options.pattern_fix
+        });
         let done$ = prepareCmd(self, undefined, entmsg, done);
         const promise = self.private$.promise && !done$;
         // empty query means take no action
@@ -306,7 +303,9 @@ class Entity {
     close$(done) {
         const self = this;
         const si = self.private$.get_instance();
-        let entmsg = self.private$.entargs(self, { cmd: 'close' });
+        let entmsg = self.private$.entargs(self, {
+            cmd: 'close', ...self.private$.options.pattern_fix
+        });
         let done$ = prepareCmd(self, undefined, entmsg, done);
         const promise = self.private$.promise && !done$;
         self.log$ && self.log$('close');
@@ -550,7 +549,6 @@ function handle_options(entopts, seneca) {
     entopts = entopts || Object.create(null);
     let Jsonic = seneca.util.Jsonic;
     if (entopts.hide) {
-        //_.each(entopts.hide, function (hidden_fields, canon_in) {
         Object.keys(entopts.hide).forEach((hidden_fields) => {
             //, function (hidden_fields, canon_in) {
             const canon_in = entopts.hide[hidden_fields];
@@ -607,7 +605,7 @@ function make_toString(canon_str, hidden_fields_spec, opts, Jsonic) {
 function MakeEntity(canon, seneca, opts) {
     opts = handle_options(opts, seneca);
     const deep = seneca.util.deep;
-    const ent = new Entity(canon, seneca);
+    const ent = new Entity(canon, seneca, opts);
     let canon_str = ent.canon$({ string: true });
     let toString = (toString_map[canon_str] ||
         toString_map[''] ||

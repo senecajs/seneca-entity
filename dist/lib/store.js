@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Store = exports.Intern = void 0;
 const allcmds = ['save', 'load', 'list', 'remove', 'close', 'native'];
-function Store() {
+function Store(plugin_opts) {
     const tag_count_map = {};
     function make_tag(store_name) {
         tag_count_map[store_name] = (tag_count_map[store_name] || 0) + 1;
@@ -14,11 +14,11 @@ function Store() {
         cmds: allcmds.slice(0),
         // opts.map = { canon: [cmds] }
         // canon is in string format zone/base/name, with empty or - indicating undefined
-        init: function (instance, opts, store, cb) {
+        init: function (instance, store_opts, store, cb) {
             const entspecs = [];
-            if (opts.map) {
-                for (const canon in opts.map) {
-                    let cmds = opts.map[canon];
+            if (store_opts.map) {
+                for (const canon in store_opts.map) {
+                    let cmds = store_opts.map[canon];
                     if (cmds === '*') {
                         cmds = allcmds;
                     }
@@ -68,7 +68,7 @@ function Store() {
                 if (void 0 !== zone)
                     entargs.zone = zone;
                 entspec.cmds.forEach(function (cmd) {
-                    const args = Object.assign({ role: 'entity', cmd: cmd }, entargs);
+                    const args = { ...entargs, cmd: cmd, ...plugin_opts.pattern_fix };
                     const orig_cmdfunc = store[cmd];
                     let cmdfunc = orig_cmdfunc;
                     if (null == cmdfunc) {
