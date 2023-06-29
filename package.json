@@ -1,7 +1,7 @@
 {
   "name": "seneca-entity",
   "main": "dist/entity.js",
-  "version": "23.0.0",
+  "version": "23.0.1",
   "type": "commonjs",
   "types": "dist/entity.d.ts",
   "description": "Entity plugin for seneca",
@@ -50,7 +50,7 @@
     "node": ">=14"
   },
   "dependencies": {
-    "seneca-mem-store": "^8.0.1"
+    "seneca-mem-store": "^8.2.0"
   },
   "peerDependencies": {
     "seneca": ">=3",
