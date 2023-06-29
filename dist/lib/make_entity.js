@@ -32,7 +32,7 @@ class Entity {
             promise: false,
             get_instance: () => null,
             entargs,
-            options: {}
+            options: {},
         };
         const private$ = this.private$;
         private$.get_instance = function () {
@@ -194,7 +194,12 @@ class Entity {
         }
         const si = self.private$.get_instance();
         const q = normalize_query(query, self);
-        let entmsg = { cmd: 'load', q, qent: self, ...self.private$.options.pattern_fix };
+        let entmsg = {
+            cmd: 'load',
+            q,
+            qent: self,
+            ...self.private$.options.pattern_fix,
+        };
         let done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = self.private$.entargs(self, entmsg);
         const promise = self.private$.promise && !done$;
@@ -231,7 +236,12 @@ class Entity {
         }
         const si = self.private$.get_instance();
         const q = normalize_query(query, self);
-        let entmsg = { cmd: 'list', q, qent: self, ...self.private$.options.pattern_fix };
+        let entmsg = {
+            cmd: 'list',
+            q,
+            qent: self,
+            ...self.private$.options.pattern_fix,
+        };
         const done$ = prepareCmd(self, undefined, entmsg, done);
         entmsg = self.private$.entargs(self, entmsg);
         const promise = self.private$.promise && !done$;
@@ -264,7 +274,10 @@ class Entity {
         const si = self.private$.get_instance();
         const q = normalize_query(query, self);
         let entmsg = self.private$.entargs(self, {
-            cmd: 'remove', q, qent: self, ...self.private$.options.pattern_fix
+            cmd: 'remove',
+            q,
+            qent: self,
+            ...self.private$.options.pattern_fix,
         });
         let done$ = prepareCmd(self, undefined, entmsg, done);
         const promise = self.private$.promise && !done$;
@@ -304,7 +317,8 @@ class Entity {
         const self = this;
         const si = self.private$.get_instance();
         let entmsg = self.private$.entargs(self, {
-            cmd: 'close', ...self.private$.options.pattern_fix
+            cmd: 'close',
+            ...self.private$.options.pattern_fix,
         });
         let done$ = prepareCmd(self, undefined, entmsg, done);
         const promise = self.private$.promise && !done$;

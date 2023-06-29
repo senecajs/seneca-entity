@@ -149,8 +149,6 @@ describe('entity', function () {
     expect(zeds.length).toEqual(1)
   })
 
-
-  
   test('tag-load', function (fin) {
     const s0 = Seneca()
       .test(fin)
@@ -808,7 +806,6 @@ describe('entity', function () {
     fin()
   })
 
-
   test('make-passes-through', function (fin) {
     const si0 = Seneca().test(fin).use(Entity)
 
@@ -905,7 +902,6 @@ describe('entity', function () {
 
     fin()
   })
-
 
   test('deep-clone', function (fin) {
     const si0 = Seneca().test(fin).use(Entity)
