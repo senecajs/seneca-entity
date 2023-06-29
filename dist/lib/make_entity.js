@@ -235,7 +235,7 @@ class Entity {
             query = null;
         }
         const si = self.private$.get_instance();
-        const q = normalize_query(query, self);
+        const q = normalize_query(query, self, { inject_id: false });
         let entmsg = {
             cmd: 'list',
             q,
@@ -499,16 +499,19 @@ function emptyQuery(q) {
     return null == q || 0 === Object.keys(q).length;
 }
 // Query values can be a scalar id, array of scalar ids, or a query object.
-function normalize_query(qin, ent) {
+function normalize_query(qin, ent, flags) {
     let q = qin;
-    if ((null == qin || 'function' === typeof qin) && ent.id != null) {
-        q = { id: ent.id };
-    }
-    else if ('string' === typeof qin || 'number' === typeof qin) {
-        q = qin === '' ? null : { id: qin };
-    }
-    else if ('function' === typeof qin) {
-        q = null;
+    let inject_id = flags ? false === flags.inject_id ? false : true : true;
+    if (inject_id) {
+        if ((null == qin || 'function' === typeof qin) && ent.id != null) {
+            q = { id: ent.id };
+        }
+        else if ('string' === typeof qin || 'number' === typeof qin) {
+            q = qin === '' ? null : { id: qin };
+        }
+        else if ('function' === typeof qin) {
+            q = null;
+        }
     }
     // TODO: test needed
     // Remove undefined values.

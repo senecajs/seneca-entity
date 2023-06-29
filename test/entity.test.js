@@ -1,5 +1,9 @@
 /* Copyright (c) 2010-2022 Richard Rodger and other contributors, MIT License */
 
+
+// TODO: test for role:entity translates!
+
+
 const Util = require('util')
 
 const Seneca = require('seneca')
@@ -422,7 +426,7 @@ describe('entity', function () {
     const out0m = await foo.load$({ meta$: true })
     expect(out0m.entity$).toBeNull()
     expect(out0m.meta$).toBeDefined()
-    expect(out0m.meta$.action).toMatch(/^entity_load/)
+    expect(out0m.meta$.action).toMatch(/entity_load/)
 
     await new Promise((res, rej) => {
       const out1 = foo.load$(function (err, out2) {
@@ -450,7 +454,7 @@ describe('entity', function () {
     expect(out0m).toBeDefined()
     expect(out0m.id).toBeDefined()
     expect(out0m.meta$).toBeDefined()
-    expect(out0m.meta$.action).toMatch(/^entity_save/)
+    expect(out0m.meta$.action).toMatch(/entity_save/)
 
     await new Promise((res, rej) => {
       const out1 = foo.save$(function (err, out2) {
@@ -476,7 +480,7 @@ describe('entity', function () {
 
     const out0m = await foo.list$({ meta$: true })
     expect(out0m.meta$).toBeDefined()
-    expect(out0m.meta$.action).toMatch(/^entity_list/)
+    expect(out0m.meta$.action).toMatch(/entity_list/)
     expect(jj(out0m)).toEqual([])
 
     await new Promise((res, rej) => {
@@ -503,7 +507,7 @@ describe('entity', function () {
     const out0m = await foo.remove$({ meta$: true })
     expect(out0m.entity$).toBeNull()
     expect(out0m.meta$).toBeDefined()
-    expect(out0m.meta$.action).toMatch(/^entity_remove/)
+    expect(out0m.meta$.action).toMatch(/entity_remove/)
 
     await new Promise((res, rej) => {
       const out1 = foo.remove$(function (err, out2) {
@@ -1248,6 +1252,64 @@ describe('entity', function () {
           })
       })
   })
+
+
+  test('translation-role-entity', async function () {
+    const si = Seneca({ legacy: false }).use('promisify').use('..').test()
+
+    let f0 = await si.entity('foo').save$({f:0})
+    let list = await si.post('role:entity,cmd:list,name:foo')
+    expect(list).toMatchObject([{f:0}])
+
+    si.message('role:entity,cmd:save', async function(msg) {
+      msg.ent.r0 = 2
+      return this.prior(msg)
+    })
+
+    let f1 = await si.entity('foo').save$({f:1})
+    expect(f1).toMatchObject({f:1,r0:2})
+    
+    si.message('role:entity,cmd:save', async function(msg) {
+      msg.ent.r1 = 3
+      return this.prior(msg)
+    })
+
+    let f2 = await si.entity('foo').save$({f:2})
+    expect(f2).toMatchObject({f:2,r0:2,r1:3})
+
+    si.message('sys:entity,cmd:save', async function(msg) {
+      msg.ent.s0 = 4
+      return this.prior(msg)
+    })
+
+    let f3 = await si.entity('foo').save$({f:3})
+    expect(f3).toMatchObject({f:3,r0:2,r1:3,s0:4})
+
+    si.message('sys:entity,cmd:save', async function(msg) {
+      msg.ent.s1 = 5
+      return this.prior(msg)
+    })
+
+    let f4 = await si.entity('foo').save$({f:4})
+    expect(f4).toMatchObject({f:4,r0:2,r1:3,s0:4,s1:5})
+
+    si.message('role:entity,cmd:save', async function(msg) {
+      msg.ent.r2 = 6
+      return this.prior(msg)
+    })
+
+    let f5 = await si.entity('foo').save$({f:5})
+    expect(f5).toMatchObject({f:5,r0:2,r1:3,s0:4,s1:5,r2:6})
+
+    si.message('sys:entity,cmd:save', async function(msg) {
+      msg.ent.s2 = 7
+      return this.prior(msg)
+    })
+
+    let f6 = await si.entity('foo').save$({f:6})
+    expect(f6).toMatchObject({f:6,r0:2,r1:3,s0:4,s1:5,r2:6,s2:7})
+  })
+
 })
 
 function jj(x) {

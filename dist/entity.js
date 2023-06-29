@@ -59,10 +59,10 @@ function preload(context) {
     }
     // Backwards compatibility
     seneca
-        .translate('role:entity,cmd:load', 'sys:entity')
-        .translate('role:entity,cmd:save', 'sys:entity')
-        .translate('role:entity,cmd:list', 'sys:entity')
-        .translate('role:entity,cmd:remove', 'sys:entity');
+        .translate('role:entity,cmd:load', 'sys:entity,role:null')
+        .translate('role:entity,cmd:save', 'sys:entity,role:null')
+        .translate('role:entity,cmd:list', 'sys:entity,role:null')
+        .translate('role:entity,cmd:remove', 'sys:entity,role:null');
     const store = (0, store_1.Store)(options);
     if (options.mem_store) {
         seneca.root.use(require('seneca-mem-store'));
