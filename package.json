@@ -1,7 +1,7 @@
 {
   "name": "seneca-entity",
   "main": "dist/entity.js",
-  "version": "23.0.1",
+  "version": "24.0.0",
   "type": "commonjs",
   "types": "dist/entity.d.ts",
   "description": "Entity plugin for seneca",

@@ -501,7 +501,7 @@ function emptyQuery(q) {
 // Query values can be a scalar id, array of scalar ids, or a query object.
 function normalize_query(qin, ent, flags) {
     let q = qin;
-    let inject_id = flags ? false === flags.inject_id ? false : true : true;
+    let inject_id = flags ? (false === flags.inject_id ? false : true) : true;
     if (inject_id) {
         if ((null == qin || 'function' === typeof qin) && ent.id != null) {
             q = { id: ent.id };
