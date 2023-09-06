@@ -174,7 +174,7 @@ describe('entity', function () {
             id: 'e0',
             f0: 1,
           })
-        }
+        },
       )
       .act(
         'sys:entity,cmd:load,base:b0,name:n0',
@@ -185,7 +185,7 @@ describe('entity', function () {
             id: 'e0',
             f0: 1,
           })
-        }
+        },
       )
       .act(
         'sys:entity,cmd:load,base:b0,name:n0',
@@ -196,7 +196,7 @@ describe('entity', function () {
             id: 'e0',
             f0: 1,
           })
-        }
+        },
       )
       .act(
         'sys:entity,cmd:list,base:b0,name:n0',
@@ -207,7 +207,7 @@ describe('entity', function () {
             id: 'e0',
             f0: 1,
           })
-        }
+        },
       )
 
       // q wins over id
@@ -220,7 +220,7 @@ describe('entity', function () {
             id: 'e0',
             f0: 1,
           })
-        }
+        },
       )
       .act('sys:entity,cmd:remove,base:b0,name:n0', { id: 'e0' })
       .act(
@@ -228,14 +228,14 @@ describe('entity', function () {
         { id: 'e0' },
         function (err, out) {
           expect(null == out).toBeTruthy()
-        }
+        },
       )
       .act(
         'sys:entity,cmd:list,base:b0,name:n0',
         { q: { id: 'e0' } },
         function (err, out) {
           expect(out.length).toEqual(0)
-        }
+        },
       )
 
       .ready(fin)
@@ -271,7 +271,7 @@ describe('entity', function () {
         cmd: 'save',
         ent: { f0: 1 },
       },
-      fin
+      fin,
     )
   })
 
@@ -549,10 +549,10 @@ describe('entity', function () {
     expect(',,foo').toEqual('' + foo.canon$({ array: true }))
     expect(',,foo').toEqual('' + foo.canon$({ array$: true }))
     expect("{ zone: undefined, base: undefined, name: 'foo' }").toEqual(
-      Util.inspect(foo.canon$({ object: true }))
+      Util.inspect(foo.canon$({ object: true })),
     )
     expect(
-      "{ 'zone$': undefined, 'base$': undefined, 'name$': 'foo' }"
+      "{ 'zone$': undefined, 'base$': undefined, 'name$': 'foo' }",
     ).toEqual(Util.inspect(foo.canon$({ object$: true })))
     expect(',,foo').toEqual('' + foo.canon$({}))
 
@@ -638,13 +638,13 @@ describe('entity', function () {
     expect(f3.canon$({ isa: 'zoo/boo/foo' })).toBeTruthy()
     expect(f3.canon$({ isa: ['zoo', 'boo', 'foo'] })).toBeTruthy()
     expect(
-      f3.canon$({ isa: { zone: 'zoo', base: 'boo', name: 'foo' } })
+      f3.canon$({ isa: { zone: 'zoo', base: 'boo', name: 'foo' } }),
     ).toBeTruthy()
 
     expect(!f3.canon$({ isa: 'zar/far/bar' })).toBeTruthy()
     expect(!f3.canon$({ isa: ['zar', 'far', 'bar'] })).toBeTruthy()
     expect(
-      !f3.canon$({ isa: { zone: 'zar', base: 'far', name: 'bar' } })
+      !f3.canon$({ isa: { zone: 'zar', base: 'far', name: 'bar' } }),
     ).toBeTruthy()
 
     fin()
@@ -660,7 +660,7 @@ describe('entity', function () {
 
     let db = await si.post('role:mem-store,cmd:dump')
     let t = Gex(
-      '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
+      '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}',
     ).on(JSON.stringify(db))
     expect(t).toBeTruthy()
 
@@ -671,8 +671,8 @@ describe('entity', function () {
     db = await si2.post('role:mem-store,cmd:dump')
     expect(
       Gex(
-        '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}'
-      ).on(JSON.stringify(db))
+        '{"undefined":{"a":{"*":{"entity$":"-/-/a","x":1,"id":"*"}}},"b":{"a":{"*":{"entity$":"-/b/a","x":2,"id":"*"},"*":{"entity$":"c/b/a","x":3,"id":"*"}}}}',
+      ).on(JSON.stringify(db)),
     ).toBeTruthy()
 
     let nx1 = await si2.entity('a').load$({ x: 1 })
@@ -714,7 +714,7 @@ describe('entity', function () {
             tmp.s0++
             cb()
           },
-        }
+        },
       )
     })
 
@@ -734,7 +734,7 @@ describe('entity', function () {
             tmp.s1++
             cb()
           },
-        }
+        },
       )
     })
 
@@ -754,7 +754,7 @@ describe('entity', function () {
             tmp.s2++
             cb()
           },
-        }
+        },
       )
     })
 
@@ -997,7 +997,7 @@ describe('entity', function () {
     expect(out.toString()).toEqual('$-/-/foo;id=a;{x:1}')
     expect('' + out).toEqual('$-/-/foo;id=a;{x:1}')
     expect(Util.inspect(out)).toEqual(
-      "Entity { 'entity$': '-/-/foo', x: 1, id: 'a' }"
+      "Entity { 'entity$': '-/-/foo', x: 1, id: 'a' }",
     )
   })
 

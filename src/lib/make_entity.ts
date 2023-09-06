@@ -585,7 +585,7 @@ function entityPromise(si: any, entmsg: any) {
                   : out || (out = { entity$: null })
                 ).meta$ = meta)
               : null,
-            out)
+            out),
           )
     })
   })
@@ -666,7 +666,7 @@ function parsecanon(str: CanonSpec) {
     out.name = m[5] === '-' ? void 0 : m[5]
   } else {
     throw new Error(
-      `Invalid entity canon: ${str}; expected format: zone/base/name.`
+      `Invalid entity canon: ${str}; expected format: zone/base/name.`,
     )
   }
 
@@ -702,7 +702,7 @@ function handle_options(entopts: any, seneca: any): any {
         canon_str,
         hidden_fields,
         entopts,
-        Jsonic
+        Jsonic,
       )
     })
   }
@@ -725,7 +725,7 @@ function make_toString(
   canon_str: string | undefined,
   hidden_fields_spec: any | undefined,
   opts: any | undefined,
-  Jsonic: any
+  Jsonic: any,
 ) {
   opts = opts || { jsonic: {} }
 
@@ -773,7 +773,7 @@ function MakeEntity(canon: any, seneca: any, opts: any): Entity {
       undefined,
       undefined,
       undefined,
-      seneca.util.Jsonic
+      seneca.util.Jsonic,
     ))
   ).bind(ent)
 

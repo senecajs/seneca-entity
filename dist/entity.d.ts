@@ -1,5 +1,7 @@
 import { Entity } from './lib/make_entity';
-declare function entity(this: any, options: any): void;
+declare function entity(this: any, _options: any): {
+    name: string;
+};
 declare namespace entity {
     var defaults: {
         mem_store: boolean;
@@ -20,6 +22,7 @@ declare namespace entity {
         };
     };
     var preload: (this: any, context: any) => {
+        name: string;
         exports: {
             store: {
                 cmds: string[];

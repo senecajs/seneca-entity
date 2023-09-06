@@ -115,7 +115,7 @@ function Store(plugin_opts: any) {
                 } else {
                   return closer.prior(close_args, done)
                 }
-              }
+              },
             )
           }
         })
@@ -143,7 +143,7 @@ const Intern: any = {
     cmd: string,
     zone?: string,
     base?: string,
-    name?: string
+    name?: string,
   ) {
     const outfunc = function (this: any, msg: any, reply: any, meta: any) {
       if ('save' !== msg.cmd) {

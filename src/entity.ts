@@ -13,8 +13,13 @@ import { Store } from './lib/store'
 
 
 // Define the entity plugin.
-function entity(this: any, options: any) {
+function entity(this: any, _options: any) {
   // const seneca = this
+
+  return {
+    // Define name, as tools like rollup will rename this function, breaking stuff.
+    name: 'entity'
+  }
 }
 
 
@@ -114,6 +119,10 @@ function preload(this: any, context: any) {
   }
 
   return {
+
+    // Define name, as tools like rollup will rename this function, breaking stuff.
+    name: 'entity',
+
     exports: {
       store: store,
       init: store.init,

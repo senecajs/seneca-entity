@@ -4,8 +4,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const make_entity_1 = require("./lib/make_entity");
 const store_1 = require("./lib/store");
 // Define the entity plugin.
-function entity(options) {
+function entity(_options) {
     // const seneca = this
+    return {
+        // Define name, as tools like rollup will rename this function, breaking stuff.
+        name: 'entity'
+    };
 }
 entity.defaults = {
     mem_store: true,
@@ -75,6 +79,8 @@ function preload(context) {
         };
     }
     return {
+        // Define name, as tools like rollup will rename this function, breaking stuff.
+        name: 'entity',
         exports: {
             store: store,
             init: store.init,

@@ -98,7 +98,7 @@ module.exports = function make_test(si) {
                                               Assert.equal(1, list.length)
 
                                               si.close(fin)
-                                            }
+                                            },
                                           )
                                         })
                                       })
