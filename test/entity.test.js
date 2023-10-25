@@ -1306,6 +1306,27 @@ describe('entity', function () {
     let f6 = await si.entity('foo').save$({ f: 6 })
     expect(f6).toMatchObject({ f: 6, r0: 2, r1: 3, s0: 4, s1: 5, r2: 6, s2: 7 })
   })
+
+  test('directive', async function () {
+    const si = Seneca({ legacy: false }).use('promisify').use('..').test()
+    await si.ready()
+
+    si.message('sys:entity,cmd:save', async function fooSave(msg) {
+      if (msg.foo$) {
+        msg.ent.foo = 'FOO:' + msg.foo$
+      }
+      return this.prior(msg)
+    })
+
+    let b0 = si.entity('bar').data$({ x: 1, directive$: { foo$: 'zed' } })
+    expect({ ...b0.directive$ }).toMatchObject({ foo$: 'zed' })
+
+    let b0s = await b0.save$()
+    expect(b0s.data$()).toMatchObject({
+      x: 1,
+      foo: 'FOO:zed',
+    })
+  })
 })
 
 function jj(x) {

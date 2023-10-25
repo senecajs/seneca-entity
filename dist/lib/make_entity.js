@@ -10,6 +10,12 @@ const toString_map = {
 const NO_ENTITY = null;
 // `null` represents no error.
 const NO_ERROR = null;
+const DisallowAsDirective = {
+    id$: true,
+    custom$: true,
+    directive$: true,
+    merge$: true,
+};
 function entargs(ent, args) {
     args.ent = ent;
     // TODO: should this be: null != ?
@@ -21,6 +27,10 @@ function entargs(ent, args) {
     }
     if (this.canon.zone !== null) {
         args.zone = this.canon.zone;
+    }
+    let directives = Object.keys(ent.directive$).filter((dname) => dname.endsWith('$') && !DisallowAsDirective[dname]);
+    for (let dname of directives) {
+        args[dname] = ent.directive$[dname];
     }
     return args;
 }
@@ -420,6 +430,9 @@ class Entity {
             if (null != data.custom$) {
                 self.custom$(data.custom$);
             }
+            if (null != data.directive$) {
+                self.directive$(data.directive$);
+            }
             return self;
         }
         // Generate a plain data object from entity fields.
@@ -458,10 +471,16 @@ class Entity {
         if (0 < Object.keys(self.custom$).length) {
             clone.custom$(self.custom$);
         }
+        if (0 < Object.keys(self.directive$).length) {
+            clone.directive$(self.directive$);
+        }
         return clone;
     }
     custom$(_props) {
-        return {};
+        return this;
+    }
+    directive$(_directiveMap) {
+        return this;
     }
 }
 exports.Entity = Entity;
@@ -639,6 +658,12 @@ function MakeEntity(canon, seneca, opts) {
     let hidden = Object.create(Object.getPrototypeOf(ent));
     hidden.toString = toString;
     hidden.custom$ = custom$;
+    hidden.directive$ = function (directiveMap) {
+        if (null != directiveMap && 'object' === typeof directiveMap) {
+            Object.assign(this.directive$, deep(directiveMap));
+        }
+        return ent;
+    };
     hidden.private$ = ent.private$;
     hidden.private$.promise = !!opts.promise;
     Object.setPrototypeOf(ent, hidden);

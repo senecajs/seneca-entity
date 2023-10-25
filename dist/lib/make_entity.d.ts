@@ -60,6 +60,7 @@ declare class Entity implements Record<string, any> {
     data$(data?: any, canonkind?: any): any;
     clone$(): any;
     custom$(_props: any): any;
+    directive$(this: any, _directiveMap: Record<string, any>): any;
 }
 declare function MakeEntity(canon: any, seneca: any, opts: any): Entity;
 declare namespace MakeEntity {

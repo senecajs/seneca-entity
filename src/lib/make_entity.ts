@@ -14,6 +14,13 @@ const NO_ENTITY = null
 // `null` represents no error.
 const NO_ERROR = null
 
+const DisallowAsDirective: Record<string, any> = {
+  id$: true,
+  custom$: true,
+  directive$: true,
+  merge$: true,
+}
+
 function entargs(this: any, ent: Entity, args: any) {
   args.ent = ent
 
@@ -27,6 +34,14 @@ function entargs(this: any, ent: Entity, args: any) {
   }
   if (this.canon.zone !== null) {
     args.zone = this.canon.zone
+  }
+
+  let directives = Object.keys(ent.directive$).filter(
+    (dname) => dname.endsWith('$') && !DisallowAsDirective[dname],
+  )
+
+  for (let dname of directives) {
+    args[dname] = (ent as any).directive$[dname]
   }
 
   return args
@@ -515,6 +530,10 @@ class Entity implements Record<string, any> {
         self.custom$(data.custom$)
       }
 
+      if (null != data.directive$) {
+        self.directive$(data.directive$)
+      }
+
       return self
     }
 
@@ -562,11 +581,19 @@ class Entity implements Record<string, any> {
       clone.custom$(self.custom$)
     }
 
+    if (0 < Object.keys(self.directive$).length) {
+      clone.directive$(self.directive$)
+    }
+
     return clone
   }
 
   custom$(_props: any): any {
-    return {}
+    return this
+  }
+
+  directive$(this: any, _directiveMap: Record<string, any>): any {
+    return this
   }
 }
 
@@ -794,6 +821,13 @@ function MakeEntity(canon: any, seneca: any, opts: any): Entity {
 
   hidden.toString = toString
   hidden.custom$ = custom$
+
+  hidden.directive$ = function (this: any, directiveMap: Record<string, any>) {
+    if (null != directiveMap && 'object' === typeof directiveMap) {
+      Object.assign(this.directive$, deep(directiveMap))
+    }
+    return ent
+  }
 
   hidden.private$ = ent.private$
   hidden.private$.promise = !!opts.promise
