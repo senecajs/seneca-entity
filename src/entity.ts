@@ -162,6 +162,10 @@ function generate_id(this: any, msg: any, reply: any) {
 }
 
 
+// Prevent name mangling
+Object.defineProperty(entity, 'name', { value: 'entity' })
+
+
 export type { Entity }
 
 export default entity

@@ -108,6 +108,8 @@ function generate_id(msg, reply) {
     }
     return reply ? reply(actnid()) : actnid();
 }
+// Prevent name mangling
+Object.defineProperty(entity, 'name', { value: 'entity' });
 exports.default = entity;
 if ('undefined' !== typeof (module)) {
     module.exports = entity;

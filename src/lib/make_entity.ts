@@ -487,14 +487,14 @@ class Entity implements Record<string, any> {
         // ].join('/') // TODO: make joiner an option
         (opt && opt.string$ ? '$' : '') + canonstr(canon)
       : opt.array
-      ? [canon.zone, canon.base, canon.name]
-      : opt.array$
-      ? [canon.zone, canon.base, canon.name]
-      : opt.object
-      ? { zone: canon.zone, base: canon.base, name: canon.name }
-      : opt.object$
-      ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
-      : [canon.zone, canon.base, canon.name]
+        ? [canon.zone, canon.base, canon.name]
+        : opt.array$
+          ? [canon.zone, canon.base, canon.name]
+          : opt.object
+            ? { zone: canon.zone, base: canon.base, name: canon.name }
+            : opt.object$
+              ? { zone$: canon.zone, base$: canon.base, name$: canon.name }
+              : [canon.zone, canon.base, canon.name]
   }
 
   // data = object, or true|undef = include $, false = exclude $
