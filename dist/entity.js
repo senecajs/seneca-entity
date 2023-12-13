@@ -32,6 +32,7 @@ entity.defaults = {
 };
 // All functionality should be loaded when defining plugin
 function preload(context) {
+    var _a;
     const seneca = this;
     const options = context.options;
     seneca.util.parsecanon = seneca.util.parsecanon || make_entity_1.MakeEntity.parsecanon;
@@ -71,7 +72,7 @@ function preload(context) {
     if (options.mem_store) {
         seneca.root.use(require('seneca-mem-store'));
     }
-    if (options.log.active) {
+    if ((_a = options.log) === null || _a === void 0 ? void 0 : _a.active) {
         seneca.root.private$.exports.Entity.prototype.log$ = function () {
             // Use this, as make$ will have changed seneca ref.
             const seneca = this.private$.get_instance();

@@ -110,7 +110,7 @@ function preload(this: any, context: any) {
     seneca.root.use(require('seneca-mem-store'))
   }
 
-  if (options.log.active) {
+  if (options.log?.active) {
     seneca.root.private$.exports.Entity.prototype.log$ = function(this: any) {
       // Use this, as make$ will have changed seneca ref.
       const seneca = this.private$.get_instance()
