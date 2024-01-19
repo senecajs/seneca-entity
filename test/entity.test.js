@@ -82,25 +82,23 @@ describe('entity', function () {
     })
   })
 
-
   test('make', async function () {
     const si = Seneca({ legacy: false }).use('..').test()
 
     const f0 = si.entity('foo')
-    const f1 = f0.make$({x:1,y1:1})
-    const f2 = f0.make$({x:2,y2:2})
-    const f3 = f1.make$({x:3,y3:3})
+    const f1 = f0.make$({ x: 1, y1: 1 })
+    const f2 = f0.make$({ x: 2, y2: 2 })
+    const f3 = f1.make$({ x: 3, y3: 3 })
 
     // console.log(f0,f1,f2,f3)
     expect(f0.data$(false)).toEqual({})
-    expect(f1.data$(false)).toEqual({x: 1, y1: 1})
-    expect(f2.data$(false)).toEqual({x: 2, y2: 2})
-    expect(f3.data$(false)).toEqual({x: 3, y3: 3})
-    
+    expect(f1.data$(false)).toEqual({ x: 1, y1: 1 })
+    expect(f2.data$(false)).toEqual({ x: 2, y2: 2 })
+    expect(f3.data$(false)).toEqual({ x: 3, y3: 3 })
+
     await si.close()
   })
 
-  
   test('entity-promise', async () => {
     const si = Seneca({ legacy: false }).use('promisify').use('..').test()
 

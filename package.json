@@ -1,7 +1,7 @@
 {
   "name": "seneca-entity",
   "main": "dist/entity.js",
-  "version": "25.1.1",
+  "version": "25.1.2",
   "type": "commonjs",
   "types": "dist/entity.d.ts",
   "description": "Entity plugin for seneca",
@@ -62,8 +62,8 @@
     "esbuild": "^0.19.11",
     "esbuild-jest": "^0.5.0",
     "jest": "^29.7.0",
-    "prettier": "^3.1.1",
-    "seneca-msg-test": "^3.4.0",
+    "prettier": "^3.2.4",
+    "seneca-msg-test": "^4.1.0",
     "typescript": "^5.3.3"
   }
 }
