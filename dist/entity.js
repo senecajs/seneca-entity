@@ -12,6 +12,7 @@ function entity(_options) {
     };
 }
 entity.defaults = {
+    map: {},
     mem_store: true,
     generate_id,
     pattern_fix: { sys: 'entity' },

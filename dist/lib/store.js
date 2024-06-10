@@ -16,7 +16,8 @@ function Store(plugin_opts) {
         // canon is in string format zone/base/name, with empty or - indicating undefined
         init: function (instance, store_opts, store, cb) {
             const entspecs = [];
-            if (store_opts.map) {
+            const hasCanonMapping = store_opts.map && 0 < Object.keys(store_opts.map).length;
+            if (hasCanonMapping) {
                 for (const canon in store_opts.map) {
                     let cmds = store_opts.map[canon];
                     if (cmds === '*') {
@@ -88,7 +89,7 @@ function Store(plugin_opts) {
                         instance.add(args, cmdfunc);
                     }
                     else if (cmd === 'close') {
-                        instance.add('role:seneca,cmd:close', function (close_args, done) {
+                        instance.add('sys:seneca,cmd:close', function (close_args, done) {
                             const closer = this;
                             if (!store.closed$) {
                                 cmdfunc.call(closer, close_args, function (err) {

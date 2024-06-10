@@ -23,8 +23,10 @@ function SenecaInstance() {
       'mem-store': false,
     },
     plugins: [Entity],
-  }).test()
-
+  })
+        .test()
+        .use('promisify')
+  
   return seneca
 }
 

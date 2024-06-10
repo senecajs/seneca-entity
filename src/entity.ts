@@ -24,6 +24,8 @@ function entity(this: any, _options: any) {
 
 
 entity.defaults = {
+  map: {},
+
   mem_store: true,
   generate_id,
 

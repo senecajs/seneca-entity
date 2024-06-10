@@ -4,6 +4,7 @@ declare function entity(this: any, _options: any): {
 };
 declare namespace entity {
     var defaults: {
+        map: {};
         mem_store: boolean;
         generate_id: typeof generate_id;
         pattern_fix: {
