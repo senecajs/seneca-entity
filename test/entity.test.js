@@ -24,9 +24,9 @@ function SenecaInstance() {
     },
     plugins: [Entity],
   })
-        .test()
-        .use('promisify')
-  
+    .test()
+    .use('promisify')
+
   return seneca
 }
 
