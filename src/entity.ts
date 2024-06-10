@@ -16,6 +16,8 @@ import { Store } from './lib/store'
 function entity(this: any, _options: any) {
   // const seneca = this
 
+  // console.log('ENTITY OPTIONS', _options)
+
   return {
     // Define name, as tools like rollup will rename this function, breaking stuff.
     name: 'entity'
@@ -24,6 +26,8 @@ function entity(this: any, _options: any) {
 
 
 entity.defaults = {
+  map: {},
+
   mem_store: true,
   generate_id,
 
