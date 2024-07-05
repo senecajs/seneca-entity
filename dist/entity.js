@@ -1,6 +1,8 @@
 "use strict";
 /* Copyright (c) 2010-2023 Richard Rodger and other contributors, MIT License */
 Object.defineProperty(exports, "__esModule", { value: true });
+const gubu_1 = require("gubu");
+const valid_1 = require("./valid");
 const make_entity_1 = require("./lib/make_entity");
 const store_1 = require("./lib/store");
 // Define the entity plugin.
@@ -30,6 +32,10 @@ entity.defaults = {
         // Provide action meta object as third argument to callbacks.
         provide: true,
     },
+    ent: (0, gubu_1.Child)({
+        valid: (0, gubu_1.Skip)((0, gubu_1.Any)()), // Gubu
+        valid_json: (0, gubu_1.Skip)({}), // Gubu JSON
+    })
 };
 // All functionality should be loaded when defining plugin
 function preload(context) {
@@ -80,6 +86,7 @@ function preload(context) {
             seneca.log.apply(seneca, arguments);
         };
     }
+    (0, valid_1.buildValidation)(seneca, seneca.private$.entity, options);
     return {
         // Define name, as tools like rollup will rename this function, breaking stuff.
         name: 'entity',

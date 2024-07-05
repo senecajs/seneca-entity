@@ -1,7 +1,8 @@
 "use strict";
 /* Copyright (c) 2012-2023 Richard Rodger and other contributors, MIT License */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Entity = exports.MakeEntity = void 0;
+exports.Entity = void 0;
+exports.MakeEntity = MakeEntity;
 const proto = Object.getPrototypeOf;
 const toString_map = {
 // '': make_toString(),
@@ -165,6 +166,30 @@ class Entity {
         let entmsg = { cmd: 'save', q: {}, ...self.private$.options.pattern_fix };
         let done$ = prepareCmd(self, data, entmsg, done);
         entmsg = self.private$.entargs(self, entmsg);
+        const entityTemplate = si.private$.entity;
+        // console.log('entityTemplate', entityTemplate)
+        const canonRouter = entityTemplate.canonRouter$;
+        // console.log('canonRouter:\n' + canonRouter)
+        if (canonRouter) {
+            const canonOps = canonRouter.find(entmsg);
+            // console.log('canonOps', entmsg, canonOps)
+            if (canonOps && canonOps.shape) {
+                let odata = entmsg.ent.data$(false);
+                // console.log('odata', odata)
+                let sctx = {};
+                if (null == odata.id) {
+                    sctx.skip = { keys: ['id'] };
+                }
+                else {
+                    // TODO: handle merge off case
+                    sctx.skip = { depth: 1 };
+                }
+                let vdata = canonOps.shape(odata, sctx);
+                // console.log('VDATA', vdata, sctx, canonOps.shape.stringify())
+                entmsg.ent.data$(vdata);
+            }
+            // console.log('SAVE', entmsg, canonOps)
+        }
         const promise = self.private$.promise && !done$;
         let res = promise
             ? entityPromise(si, entmsg)
@@ -670,7 +695,6 @@ function MakeEntity(canon, seneca, opts) {
     delete ent.private$;
     return ent;
 }
-exports.MakeEntity = MakeEntity;
 MakeEntity.parsecanon = parsecanon;
 MakeEntity.canonstr = canonstr;
 function jsonic_strify(val, opts, depth) {

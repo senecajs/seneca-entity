@@ -21,6 +21,7 @@ declare namespace entity {
         meta: {
             provide: boolean;
         };
+        ent: import("gubu").Node<unknown>;
     };
     var preload: (this: any, context: any) => {
         name: string;

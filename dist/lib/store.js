@@ -1,7 +1,8 @@
 "use strict";
 /* Copyright (c) 2012-2020 Richard Rodger and other contributors, MIT License */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Store = exports.Intern = void 0;
+exports.Intern = void 0;
+exports.Store = Store;
 const allcmds = ['save', 'load', 'list', 'remove', 'close', 'native'];
 function Store(plugin_opts) {
     const tag_count_map = {};
@@ -120,7 +121,6 @@ function Store(plugin_opts) {
     };
     return store;
 }
-exports.Store = Store;
 const Intern = {
     // Ensure entity objects are instantiated
     reify_entity_wrap: function (cmdfunc, cmd, zone, base, name) {
