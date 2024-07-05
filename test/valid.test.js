@@ -68,5 +68,9 @@ describe('valid', function () {
       expect(e.props).toEqual([ { path: 'a', what: 'type', type: 'number', value: 'A' } ])
     }
 
+    const zed0 = await seneca.entity('zed/qaz').save$({c:true,b:{}})
+    expect(zed0.entity$).toEqual('-/zed/qaz')
+    expect(zed0.data$(false)).toMatchObject({c:true,b:{x:'X'}})
+
   })
 })
