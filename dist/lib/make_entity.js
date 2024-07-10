@@ -1,7 +1,8 @@
 "use strict";
 /* Copyright (c) 2012-2023 Richard Rodger and other contributors, MIT License */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Entity = exports.MakeEntity = void 0;
+exports.Entity = void 0;
+exports.MakeEntity = MakeEntity;
 const proto = Object.getPrototypeOf;
 const toString_map = {
 // '': make_toString(),
@@ -670,7 +671,6 @@ function MakeEntity(canon, seneca, opts) {
     delete ent.private$;
     return ent;
 }
-exports.MakeEntity = MakeEntity;
 MakeEntity.parsecanon = parsecanon;
 MakeEntity.canonstr = canonstr;
 function jsonic_strify(val, opts, depth) {
