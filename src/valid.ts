@@ -46,7 +46,7 @@ function buildValidation(seneca: any, entity: Entity, options: any) {
 
   }
 
-  //console.log('canonRouter:\n' + canonRouter)
+  // console.log('canonRouter:\n' + canonRouter)
 
   ; (entity as any).canonRouter$ = canonRouter
 }

@@ -33,7 +33,7 @@ function buildValidation(seneca, entity, options) {
             shape
         });
     }
-    //console.log('canonRouter:\n' + canonRouter)
+    // console.log('canonRouter:\n' + canonRouter)
     ;
     entity.canonRouter$ = canonRouter;
 }

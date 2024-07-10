@@ -53,6 +53,10 @@ entity.defaults = {
     provide: true,
   },
 
+  // Fail if entity canon does not match an entry in ent option.
+  strict: false,
+
+  // Entity specific options. Use entity canon string (zone/base/name) for key.
   ent: Child({
     valid: Skip(Any()), // Gubu
     valid_json: Skip({}), // Gubu JSON

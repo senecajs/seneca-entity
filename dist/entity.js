@@ -32,6 +32,9 @@ entity.defaults = {
         // Provide action meta object as third argument to callbacks.
         provide: true,
     },
+    // Fail if entity canon does not match an entry in ent option.
+    strict: false,
+    // Entity specific options. Use entity canon string (zone/base/name) for key.
     ent: (0, gubu_1.Child)({
         valid: (0, gubu_1.Skip)((0, gubu_1.Any)()), // Gubu
         valid_json: (0, gubu_1.Skip)({}), // Gubu JSON

@@ -16,24 +16,34 @@ const NO_ERROR = null
 
 const DisallowAsDirective: Record<string, any> = {
   id$: true,
+
+  // Custom references and data. Not stored.
   custom$: true,
-  directive$: true,
+
+  // Merge into existing data.
   merge$: true,
+
+  // Skip validation on these fields.
+  skip$: true,
+
+  // General object for other directives.
+  directive$: true,
 }
 
-function entargs(this: any, ent: Entity, args: any) {
-  args.ent = ent
 
-  // TODO: should this be: null != ?
+// Construct entity message.
+function makeEntMsg(this: any, ent: Entity, entmsg: any) {
+  entmsg.ent = ent
 
+  // TODO: should this be: null != ?  
   if (this.canon.name !== null) {
-    args.name = this.canon.name
+    entmsg.name = this.canon.name
   }
   if (this.canon.base !== null) {
-    args.base = this.canon.base
+    entmsg.base = this.canon.base
   }
   if (this.canon.zone !== null) {
-    args.zone = this.canon.zone
+    entmsg.zone = this.canon.zone
   }
 
   let directives = Object.keys(ent.directive$).filter(
@@ -41,11 +51,39 @@ function entargs(this: any, ent: Entity, args: any) {
   )
 
   for (let dname of directives) {
-    args[dname] = (ent as any).directive$[dname]
+    entmsg[dname] = (ent as any).directive$[dname]
   }
 
-  return args
+  strictCanon(ent, entmsg)
+
+  return entmsg
 }
+
+
+function strictCanon(ent: Entity, entmsg: any) {
+  const options = ent.private$.options
+
+  if (
+    options.strict &&
+    '-/-/-' !== ent.entity$ // template entity
+  ) {
+    let entDefined = options.ent[ent.entity$] || options.ent[ent.entity$.replace(/-\//g, '')]
+    // console.log('STRICT', Object.keys(options.ent), entDefined, ent.entity$)
+    if (!entDefined) {
+      const si = ent.private$.get_instance()
+      const entityTemplate = (si.private$ as any).entity
+      if (entityTemplate) {
+        const canonRouter = entityTemplate.canonRouter$
+        entDefined = canonRouter && canonRouter.find(entmsg)
+      }
+    }
+
+    if (!entDefined) {
+      throw new Error('Entity: unknown entity: ' + ent.entity$)
+    }
+  }
+}
+
 
 class Entity implements Record<string, any> {
   // Canon spec in string format: "zone/base/name".
@@ -59,7 +97,7 @@ class Entity implements Record<string, any> {
     canon: null as any,
     promise: false,
     get_instance: (): any => null,
-    entargs,
+    makeEntMsg,
     options: {} as any,
   }
 
@@ -70,7 +108,7 @@ class Entity implements Record<string, any> {
       return seneca
     }
     private$.canon = canon
-    private$.entargs = entargs
+    private$.makeEntMsg = makeEntMsg
     private$.options = options
 
     this.private$ = this.private$
@@ -78,6 +116,8 @@ class Entity implements Record<string, any> {
     // use as a quick test to identify Entity objects
     // returns compact string zone/base/name
     this.entity$ = this.canon$()
+
+    strictCanon(this, this.canon$({ object: true }))
   }
 
   // Properties without '$' suffix are persisted
@@ -199,38 +239,40 @@ class Entity implements Record<string, any> {
     const si = self.private$.get_instance()
 
     let entmsg = { cmd: 'save', q: {}, ...self.private$.options.pattern_fix }
-    let done$ = prepareCmd(self, data, entmsg, done)
-    entmsg = self.private$.entargs(self, entmsg)
+    const done$ = prepareCmd(self, data, entmsg, done)
+    entmsg = self.private$.makeEntMsg(self, entmsg)
 
     const entityTemplate = (si.private$ as any).entity
-
-    // console.log('entityTemplate', entityTemplate)
-
     const canonRouter = entityTemplate.canonRouter$
-
-    // console.log('canonRouter:\n' + canonRouter)
 
     if (canonRouter) {
       const canonOps = canonRouter.find(entmsg)
-      // console.log('canonOps', entmsg, canonOps)
 
-      if (canonOps && canonOps.shape) {
-        let odata = entmsg.ent.data$(false)
-        // console.log('odata', odata)
+      if (canonOps) {
+        if (canonOps.shape) {
+          let odata = entmsg.ent.data$(false)
 
-        let sctx: any = {}
-        if (null == odata.id) {
-          sctx.skip = { keys: ['id'] }
+          let sctx: any = {}
+          if (null == odata.id) {
+            sctx.skip = { keys: ['id'] }
+          }
+          else {
+            // TODO: handle merge off case
+            sctx.skip = { depth: 1 }
+          }
+
+          let skip$ = entmsg.q?.skip$
+          if (skip$) {
+            skip$ = 'string' === typeof skip$ ? skip$.split(',') : skip$
+            skip$ = Array.isArray(skip$) ? skip$.map((f: any) => '' + f) : []
+            sctx.skip = (sctx.skip || {})
+            sctx.skip.keys = (sctx.skip.keys || [])
+            sctx.skip.keys = sctx.skip.keys.concat(skip$)
+          }
+          let vdata = canonOps.shape(odata, sctx)
+          entmsg.ent.data$(vdata)
         }
-        else {
-          // TODO: handle merge off case
-          sctx.skip = { depth: 1 }
-        }
-        let vdata = canonOps.shape(odata, sctx)
-        // console.log('VDATA', vdata, sctx, canonOps.shape.stringify())
-        entmsg.ent.data$(vdata)
       }
-      // console.log('SAVE', entmsg, canonOps)
     }
 
     const promise = self.private$.promise && !done$
@@ -256,7 +298,7 @@ class Entity implements Record<string, any> {
 
     let entmsg = { cmd: 'native', ...self.private$.options.pattern_fix }
     let done$ = prepareCmd(self, undefined, entmsg, done)
-    entmsg = self.private$.entargs(self, entmsg)
+    entmsg = self.private$.makeEntMsg(self, entmsg)
 
     let res =
       promise && !done
@@ -292,7 +334,7 @@ class Entity implements Record<string, any> {
     }
 
     let done$ = prepareCmd(self, undefined, entmsg, done)
-    entmsg = self.private$.entargs(self, entmsg)
+    entmsg = self.private$.makeEntMsg(self, entmsg)
 
     const promise = self.private$.promise && !done$
 
@@ -347,7 +389,7 @@ class Entity implements Record<string, any> {
     }
 
     const done$ = prepareCmd(self, undefined, entmsg, done)
-    entmsg = self.private$.entargs(self, entmsg)
+    entmsg = self.private$.makeEntMsg(self, entmsg)
 
     const promise = self.private$.promise && !done$
 
@@ -386,7 +428,7 @@ class Entity implements Record<string, any> {
     const si = self.private$.get_instance()
 
     const q = normalize_query(query, self)
-    let entmsg = self.private$.entargs(self, {
+    let entmsg = self.private$.makeEntMsg(self, {
       cmd: 'remove',
       q,
       qent: self,
@@ -440,7 +482,7 @@ class Entity implements Record<string, any> {
     const self = this
     const si = self.private$.get_instance()
 
-    let entmsg = self.private$.entargs(self, {
+    let entmsg = self.private$.makeEntMsg(self, {
       cmd: 'close',
       ...self.private$.options.pattern_fix,
     })
@@ -726,13 +768,15 @@ function parsecanon(str: CanonSpec) {
     out.name = m[5] === '-' ? void 0 : m[5]
   }
   else {
+    // TOOD: should use seneca.use
     throw new Error(
-      `Invalid entity canon: ${str}; expected format: zone/base/name.`,
+      `Entity: invalid entity canon: ${str}; expected format: zone/base/name.`,
     )
   }
 
   return out
 }
+
 
 function canonstr(canon: Canon) {
   canon = canon || { name: '' }
@@ -742,6 +786,7 @@ function canonstr(canon: Canon) {
     null == canon.name || '' === canon.name ? '-' : canon.name,
   ].join('/')
 }
+
 
 function handle_options(entopts: any, seneca: any): any {
   entopts = entopts || Object.create(null)
