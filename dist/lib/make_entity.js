@@ -13,27 +13,54 @@ const NO_ENTITY = null;
 const NO_ERROR = null;
 const DisallowAsDirective = {
     id$: true,
+    // Custom references and data. Not stored.
     custom$: true,
-    directive$: true,
+    // Merge into existing data.
     merge$: true,
+    // Skip validation on these fields.
+    skip$: true,
+    // General object for other directives.
+    directive$: true,
 };
-function entargs(ent, args) {
-    args.ent = ent;
-    // TODO: should this be: null != ?
+// Construct entity message.
+function makeEntMsg(ent, entmsg) {
+    entmsg.ent = ent;
+    // TODO: should this be: null != ?  
     if (this.canon.name !== null) {
-        args.name = this.canon.name;
+        entmsg.name = this.canon.name;
     }
     if (this.canon.base !== null) {
-        args.base = this.canon.base;
+        entmsg.base = this.canon.base;
     }
     if (this.canon.zone !== null) {
-        args.zone = this.canon.zone;
+        entmsg.zone = this.canon.zone;
     }
     let directives = Object.keys(ent.directive$).filter((dname) => dname.endsWith('$') && !DisallowAsDirective[dname]);
     for (let dname of directives) {
-        args[dname] = ent.directive$[dname];
+        entmsg[dname] = ent.directive$[dname];
     }
-    return args;
+    strictCanon(ent, entmsg);
+    return entmsg;
+}
+function strictCanon(ent, entmsg) {
+    const options = ent.private$.options;
+    if (options.strict &&
+        '-/-/-' !== ent.entity$ // template entity
+    ) {
+        let entDefined = options.ent[ent.entity$] || options.ent[ent.entity$.replace(/-\//g, '')];
+        // console.log('STRICT', Object.keys(options.ent), entDefined, ent.entity$)
+        if (!entDefined) {
+            const si = ent.private$.get_instance();
+            const entityTemplate = si.private$.entity;
+            if (entityTemplate) {
+                const canonRouter = entityTemplate.canonRouter$;
+                entDefined = canonRouter && canonRouter.find(entmsg);
+            }
+        }
+        if (!entDefined) {
+            throw new Error('Entity: unknown entity: ' + ent.entity$);
+        }
+    }
 }
 class Entity {
     constructor(canon, seneca, options) {
@@ -42,7 +69,7 @@ class Entity {
             canon: null,
             promise: false,
             get_instance: () => null,
-            entargs,
+            makeEntMsg,
             options: {},
         };
         const private$ = this.private$;
@@ -50,12 +77,13 @@ class Entity {
             return seneca;
         };
         private$.canon = canon;
-        private$.entargs = entargs;
+        private$.makeEntMsg = makeEntMsg;
         private$.options = options;
         this.private$ = this.private$;
         // use as a quick test to identify Entity objects
         // returns compact string zone/base/name
         this.entity$ = this.canon$();
+        strictCanon(this, this.canon$({ object: true }));
     }
     // Properties without '$' suffix are persisted
     // id property is special: created if not present when saving
@@ -161,11 +189,40 @@ class Entity {
      *  param {callback~save$} done - Callback function providing saved entity.
      */
     save$(data, done) {
+        var _a;
         const self = this;
         const si = self.private$.get_instance();
         let entmsg = { cmd: 'save', q: {}, ...self.private$.options.pattern_fix };
-        let done$ = prepareCmd(self, data, entmsg, done);
-        entmsg = self.private$.entargs(self, entmsg);
+        const done$ = prepareCmd(self, data, entmsg, done);
+        entmsg = self.private$.makeEntMsg(self, entmsg);
+        const entityTemplate = si.private$.entity;
+        const canonRouter = entityTemplate.canonRouter$;
+        if (canonRouter) {
+            const canonOps = canonRouter.find(entmsg);
+            if (canonOps) {
+                if (canonOps.shape) {
+                    let odata = entmsg.ent.data$(false);
+                    let sctx = {};
+                    if (null == odata.id) {
+                        sctx.skip = { keys: ['id'] };
+                    }
+                    else {
+                        // TODO: handle merge off case
+                        sctx.skip = { depth: 1 };
+                    }
+                    let skip$ = (_a = entmsg.q) === null || _a === void 0 ? void 0 : _a.skip$;
+                    if (skip$) {
+                        skip$ = 'string' === typeof skip$ ? skip$.split(',') : skip$;
+                        skip$ = Array.isArray(skip$) ? skip$.map((f) => '' + f) : [];
+                        sctx.skip = (sctx.skip || {});
+                        sctx.skip.keys = (sctx.skip.keys || []);
+                        sctx.skip.keys = sctx.skip.keys.concat(skip$);
+                    }
+                    let vdata = canonOps.shape(odata, sctx);
+                    entmsg.ent.data$(vdata);
+                }
+            }
+        }
         const promise = self.private$.promise && !done$;
         let res = promise
             ? entityPromise(si, entmsg)
@@ -184,7 +241,7 @@ class Entity {
         const promise = self.private$.promise;
         let entmsg = { cmd: 'native', ...self.private$.options.pattern_fix };
         let done$ = prepareCmd(self, undefined, entmsg, done);
-        entmsg = self.private$.entargs(self, entmsg);
+        entmsg = self.private$.makeEntMsg(self, entmsg);
         let res = promise && !done
             ? entityPromise(si, entmsg)
             : (si.act(entmsg, done$), promise ? NO_ENTITY : self);
@@ -212,7 +269,7 @@ class Entity {
             ...self.private$.options.pattern_fix,
         };
         let done$ = prepareCmd(self, undefined, entmsg, done);
-        entmsg = self.private$.entargs(self, entmsg);
+        entmsg = self.private$.makeEntMsg(self, entmsg);
         const promise = self.private$.promise && !done$;
         // Empty query gives empty result.
         if (emptyQuery(q)) {
@@ -254,7 +311,7 @@ class Entity {
             ...self.private$.options.pattern_fix,
         };
         const done$ = prepareCmd(self, undefined, entmsg, done);
-        entmsg = self.private$.entargs(self, entmsg);
+        entmsg = self.private$.makeEntMsg(self, entmsg);
         const promise = self.private$.promise && !done$;
         let res = promise
             ? entityPromise(si, entmsg)
@@ -284,7 +341,7 @@ class Entity {
         }
         const si = self.private$.get_instance();
         const q = normalize_query(query, self);
-        let entmsg = self.private$.entargs(self, {
+        let entmsg = self.private$.makeEntMsg(self, {
             cmd: 'remove',
             q,
             qent: self,
@@ -327,7 +384,7 @@ class Entity {
     close$(done) {
         const self = this;
         const si = self.private$.get_instance();
-        let entmsg = self.private$.entargs(self, {
+        let entmsg = self.private$.makeEntMsg(self, {
             cmd: 'close',
             ...self.private$.options.pattern_fix,
         });
@@ -569,7 +626,8 @@ function parsecanon(str) {
         out.name = m[5] === '-' ? void 0 : m[5];
     }
     else {
-        throw new Error(`Invalid entity canon: ${str}; expected format: zone/base/name.`);
+        // TOOD: should use seneca.use
+        throw new Error(`Entity: invalid entity canon: ${str}; expected format: zone/base/name.`);
     }
     return out;
 }

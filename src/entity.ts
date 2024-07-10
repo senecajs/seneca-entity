@@ -7,6 +7,10 @@ import {
 } from './types'
 
 
+import { Child, Skip, Any } from 'gubu'
+
+import { buildValidation } from './valid'
+
 import { MakeEntity, Entity } from './lib/make_entity'
 import { Store } from './lib/store'
 
@@ -48,6 +52,15 @@ entity.defaults = {
     // Provide action meta object as third argument to callbacks.
     provide: true,
   },
+
+  // Fail if entity canon does not match an entry in ent option.
+  strict: false,
+
+  // Entity specific options. Use entity canon string (zone/base/name) for key.
+  ent: Child({
+    valid: Skip(Any()), // Gubu
+    valid_json: Skip({}), // Gubu JSON
+  })
 }
 
 
@@ -119,6 +132,9 @@ function preload(this: any, context: any) {
       seneca.log.apply(seneca, arguments)
     }
   }
+
+  buildValidation(seneca, seneca.private$.entity, options)
+
 
   return {
 

@@ -1,5 +1,5 @@
 import { Canon, CanonSpec } from '../types';
-declare function entargs(this: any, ent: Entity, args: any): any;
+declare function makeEntMsg(this: any, ent: Entity, entmsg: any): any;
 declare class Entity implements Record<string, any> {
     entity$: string;
     mark$?: string;
@@ -7,7 +7,7 @@ declare class Entity implements Record<string, any> {
         canon: any;
         promise: boolean;
         get_instance: () => any;
-        entargs: typeof entargs;
+        makeEntMsg: typeof makeEntMsg;
         options: any;
     };
     constructor(canon: any, seneca: any, options: any);

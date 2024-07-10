@@ -366,8 +366,8 @@ describe('entity', function () {
     expect('-/0/0').toEqual(fmt(si.util.parsecanon('0/0')))
     expect('0/0/0').toEqual(fmt(si.util.parsecanon('0/0/0')))
 
-    expect(() => si.util.parsecanon('')).toThrow('Invalid entity canon')
-    expect(() => si.util.parsecanon('?')).toThrow('Invalid entity canon')
+    expect(() => si.util.parsecanon('')).toThrow('entity canon')
+    expect(() => si.util.parsecanon('?')).toThrow('entity canon')
 
     const foo = si.make$('foo')
     expect('a/b/c').toEqual(fmt(foo.canon$({ parse: 'a/b/c' })))
