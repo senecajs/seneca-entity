@@ -25,7 +25,7 @@ const DisallowAsDirective = {
 // Construct entity message.
 function makeEntMsg(ent, entmsg) {
     entmsg.ent = ent;
-    // TODO: should this be: null != ?  
+    // TODO: should this be: null != ?
     if (this.canon.name !== null) {
         entmsg.name = this.canon.name;
     }
@@ -214,8 +214,8 @@ class Entity {
                     if (skip$) {
                         skip$ = 'string' === typeof skip$ ? skip$.split(',') : skip$;
                         skip$ = Array.isArray(skip$) ? skip$.map((f) => '' + f) : [];
-                        sctx.skip = (sctx.skip || {});
-                        sctx.skip.keys = (sctx.skip.keys || []);
+                        sctx.skip = sctx.skip || {};
+                        sctx.skip.keys = sctx.skip.keys || [];
                         sctx.skip.keys = sctx.skip.keys.concat(skip$);
                     }
                     let vdata = canonOps.shape(odata, sctx);
