@@ -1,7 +1,7 @@
 {
   "name": "seneca-entity",
   "main": "dist/entity.js",
-  "version": "27.1.1",
+  "version": "27.2.0",
   "type": "commonjs",
   "types": "dist/entity.d.ts",
   "description": "Entity plugin for seneca",
@@ -50,6 +50,7 @@
     "node": ">=16"
   },
   "dependencies": {
+    "gubu": "^8.2.1",
     "seneca-mem-store": "^9.2.0"
   },
   "peerDependencies": {
@@ -65,8 +66,5 @@
     "prettier": "^3.3.2",
     "seneca-msg-test": "^4.1.0",
     "typescript": "^5.5.3"
-  },
-  "overrides": {
-    "gubu":"8.0.2"
   }
 }

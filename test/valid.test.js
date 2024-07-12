@@ -39,6 +39,7 @@ describe('valid', function () {
       await seneca.entity('foo').save$({ a: 'A' })
       expect(false).toEqual(true)
     } catch (e) {
+      // console.log(e)
       expect(e.props).toEqual([
         { path: 'a', what: 'type', type: 'number', value: 'A' },
       ])
@@ -145,5 +146,71 @@ describe('valid', function () {
         value: undefined,
       })
     }
+  })
+
+  test('method', async function () {
+    const seneca = Seneca()
+      .test()
+      .use(Entity, {
+        ent: {
+          '-/-/foo': {},
+          'qaz/zed/bar': {
+            valid_json: {
+              a: 'Number',
+              x: 2,
+            },
+          },
+          'wax/-/-': {
+            valid_json: {
+              b: 'Number',
+            },
+          },
+        },
+      })
+
+    const foo0 = seneca.entity('foo')
+    expect(foo0.valid$()).toEqual(true)
+
+    const nim0 = seneca.entity('nim')
+    expect(nim0.valid$()).toEqual(true)
+
+    const bar0 = seneca.entity('qaz/zed/bar').data$({ a: 1 })
+    expect(bar0.valid$()).toEqual(true)
+    expect(bar0.data$(false)).toEqual({ a: 1, x: 2 })
+
+    const wax0 = seneca.entity('wax/wex/wix').data$({ b: 3 })
+    expect(wax0.valid$()).toEqual(true)
+    expect(wax0.data$(false)).toEqual({ b: 3 })
+
+    const bar1 = seneca.entity('qaz/zed/bar').data$({ a: 'A' })
+    expect(bar1.valid$()).toEqual(false)
+    expect(bar1.data$(false)).toEqual({ a: 'A' })
+
+    try {
+      bar1.valid$({ throws: true })
+      expect(true).equal(false)
+    } catch (e) {
+      // console.log(e)
+      expect(e.props).toEqual([
+        { path: 'a', what: 'type', type: 'number', value: 'A' },
+      ])
+    }
+
+    const errs0 = bar1.valid$({ errors: true })
+    // console.log(errs0)
+    expect(errs0[0]).toMatchObject({
+      key: 'a',
+      type: 'number',
+      value: 'A',
+      path: 'a',
+      why: 'type',
+      check: 'none',
+      args: {},
+      mark: 1050,
+      text:
+        'Validation failed for property "a" with string "A" because ' +
+        'the string is not of type number.',
+      use: {},
+    })
   })
 })

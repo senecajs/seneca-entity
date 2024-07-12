@@ -5,7 +5,7 @@ import { Gubu } from 'gubu'
 import { Entity, MakeEntity } from './lib/make_entity'
 
 
-function buildValidation(seneca: any, entity: Entity, options: any) {
+function buildValidation(_seneca: any, entity: Entity, options: any) {
   // console.log('VALID OPTS')
   // console.dir(options, { depth: null })
 
@@ -23,16 +23,14 @@ function buildValidation(seneca: any, entity: Entity, options: any) {
     const spec = canonMap[cstr]
 
     let shape
-    let vopts = { prefix: cstr }
+    let vopts = { name: 'Entity: ' + cstr }
     if (spec.valid_json) {
-      shape = Gubu.build(spec.valid_json) // , vopts) // , { prefix: cstr })
+      shape = Gubu.build(spec.valid_json, vopts)
     }
     else if (spec.valid) {
       // let valid = ('function' === typeof spec.valid && !Gubu.isShape(spec.valid)) ?
       let valid = ('function' === typeof spec.valid && !spec.valid.gubu) ?
         spec.valid() : spec.valid
-
-      // console.log('VALID', valid)
 
       shape = Gubu(valid, vopts)
       // console.log('SHAPE', shape.spec())

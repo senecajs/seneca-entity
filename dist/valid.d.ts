@@ -1,3 +1,3 @@
 import { Entity } from './lib/make_entity';
-declare function buildValidation(seneca: any, entity: Entity, options: any): void;
+declare function buildValidation(_seneca: any, entity: Entity, options: any): void;
 export { buildValidation };

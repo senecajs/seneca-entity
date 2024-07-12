@@ -4,7 +4,7 @@ exports.buildValidation = buildValidation;
 const patrun_1 = require("patrun");
 const gubu_1 = require("gubu");
 const make_entity_1 = require("./lib/make_entity");
-function buildValidation(seneca, entity, options) {
+function buildValidation(_seneca, entity, options) {
     // console.log('VALID OPTS')
     // console.dir(options, { depth: null })
     const canonRouter = (0, patrun_1.Patrun)();
@@ -16,15 +16,14 @@ function buildValidation(seneca, entity, options) {
         const canon = make_entity_1.MakeEntity.parsecanon(cstr);
         const spec = canonMap[cstr];
         let shape;
-        let vopts = { prefix: cstr };
+        let vopts = { name: 'Entity: ' + cstr };
         if (spec.valid_json) {
-            shape = gubu_1.Gubu.build(spec.valid_json); // , vopts) // , { prefix: cstr })
+            shape = gubu_1.Gubu.build(spec.valid_json, vopts);
         }
         else if (spec.valid) {
             // let valid = ('function' === typeof spec.valid && !Gubu.isShape(spec.valid)) ?
             let valid = ('function' === typeof spec.valid && !spec.valid.gubu) ?
                 spec.valid() : spec.valid;
-            // console.log('VALID', valid)
             shape = (0, gubu_1.Gubu)(valid, vopts);
             // console.log('SHAPE', shape.spec())
         }

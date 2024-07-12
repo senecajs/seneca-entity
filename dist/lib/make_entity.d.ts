@@ -12,6 +12,11 @@ declare class Entity implements Record<string, any> {
     };
     constructor(canon: any, seneca: any, options: any);
     make$(...args: any[]): any;
+    valid$(opts?: {
+        throws?: boolean;
+        errors?: boolean;
+        entmsg?: any;
+    }): boolean | any[];
     /** Save the entity.
      *  param {object} [data] - Subset of entity field values.
      *  param {callback~save$} done - Callback function providing saved entity.

@@ -66,7 +66,7 @@ function strictCanon(ent: Entity, entmsg: any) {
     '-/-/-' !== ent.entity$ // template entity
   ) {
     let entDefined =
-      options.ent[ent.entity$] || options.ent[ent.entity$.replace(/-\//g, '')]
+      options.ent[ent.entity$] || options.ent[ent.entity$.replace(/[-\/]/g, '')]
     // console.log('STRICT', Object.keys(options.ent), entDefined, ent.entity$)
     if (!entDefined) {
       const si = ent.private$.get_instance()
@@ -227,6 +227,65 @@ class Entity implements Record<string, any> {
     return entity
   }
 
+  valid$(opts?: {
+    throws?: boolean
+    errors?: boolean
+    entmsg?: any
+  }): boolean | any[] {
+    const self = this
+    const throws = opts?.throws
+
+    const si = self.private$.get_instance()
+    const entmsg = self.private$.makeEntMsg(self, opts?.entmsg || {})
+
+    const entityTemplate = (si.private$ as any).entity
+    const canonRouter = entityTemplate.canonRouter$
+
+    if (canonRouter) {
+      const canonOps = canonRouter.find(entmsg)
+
+      if (canonOps) {
+        if (canonOps.shape) {
+          let odata = entmsg.ent.data$(false)
+
+          let sctx: any = {}
+          if (null == odata.id) {
+            sctx.skip = { keys: ['id'] }
+          } else {
+            // TODO: handle merge off case
+            sctx.skip = { depth: 1 }
+          }
+
+          let skip$ = entmsg.q?.skip$
+          if (skip$) {
+            skip$ = 'string' === typeof skip$ ? skip$.split(',') : skip$
+            skip$ = Array.isArray(skip$) ? skip$.map((f: any) => '' + f) : []
+            sctx.skip = sctx.skip || {}
+            sctx.skip.keys = sctx.skip.keys || []
+            sctx.skip.keys = sctx.skip.keys.concat(skip$)
+          }
+
+          if (opts?.errors || !throws) {
+            sctx.err = []
+          }
+
+          let vdata = canonOps.shape(odata, sctx)
+
+          if (sctx.err && 0 < sctx.err.length) {
+            return true === opts?.errors ? sctx.err : false
+          }
+          entmsg.ent.data$(vdata)
+        }
+      }
+    }
+
+    if (opts?.errors) {
+      return []
+    }
+
+    return true
+  }
+
   /** Save the entity.
    *  param {object} [data] - Subset of entity field values.
    *  param {callback~save$} done - Callback function providing saved entity.
@@ -239,6 +298,9 @@ class Entity implements Record<string, any> {
     const done$ = prepareCmd(self, data, entmsg, done)
     entmsg = self.private$.makeEntMsg(self, entmsg)
 
+    self.valid$({ throws: true, entmsg })
+
+    /*
     const entityTemplate = (si.private$ as any).entity
     const canonRouter = entityTemplate.canonRouter$
 
@@ -270,6 +332,7 @@ class Entity implements Record<string, any> {
         }
       }
     }
+    */
 
     const promise = self.private$.promise && !done$
 

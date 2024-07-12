@@ -47,7 +47,7 @@ function strictCanon(ent, entmsg) {
     if (options.strict &&
         '-/-/-' !== ent.entity$ // template entity
     ) {
-        let entDefined = options.ent[ent.entity$] || options.ent[ent.entity$.replace(/-\//g, '')];
+        let entDefined = options.ent[ent.entity$] || options.ent[ent.entity$.replace(/[-\/]/g, '')];
         // console.log('STRICT', Object.keys(options.ent), entDefined, ent.entity$)
         if (!entDefined) {
             const si = ent.private$.get_instance();
@@ -184,17 +184,12 @@ class Entity {
             self.log$('make', entity.canon$({ string: true }), entity);
         return entity;
     }
-    /** Save the entity.
-     *  param {object} [data] - Subset of entity field values.
-     *  param {callback~save$} done - Callback function providing saved entity.
-     */
-    save$(data, done) {
+    valid$(opts) {
         var _a;
         const self = this;
+        const throws = opts === null || opts === void 0 ? void 0 : opts.throws;
         const si = self.private$.get_instance();
-        let entmsg = { cmd: 'save', q: {}, ...self.private$.options.pattern_fix };
-        const done$ = prepareCmd(self, data, entmsg, done);
-        entmsg = self.private$.makeEntMsg(self, entmsg);
+        const entmsg = self.private$.makeEntMsg(self, (opts === null || opts === void 0 ? void 0 : opts.entmsg) || {});
         const entityTemplate = si.private$.entity;
         const canonRouter = entityTemplate.canonRouter$;
         if (canonRouter) {
@@ -218,11 +213,66 @@ class Entity {
                         sctx.skip.keys = sctx.skip.keys || [];
                         sctx.skip.keys = sctx.skip.keys.concat(skip$);
                     }
+                    if ((opts === null || opts === void 0 ? void 0 : opts.errors) || !throws) {
+                        sctx.err = [];
+                    }
                     let vdata = canonOps.shape(odata, sctx);
+                    if (sctx.err && 0 < sctx.err.length) {
+                        return true === (opts === null || opts === void 0 ? void 0 : opts.errors) ? sctx.err : false;
+                    }
                     entmsg.ent.data$(vdata);
                 }
             }
         }
+        if (opts === null || opts === void 0 ? void 0 : opts.errors) {
+            return [];
+        }
+        return true;
+    }
+    /** Save the entity.
+     *  param {object} [data] - Subset of entity field values.
+     *  param {callback~save$} done - Callback function providing saved entity.
+     */
+    save$(data, done) {
+        const self = this;
+        const si = self.private$.get_instance();
+        let entmsg = { cmd: 'save', q: {}, ...self.private$.options.pattern_fix };
+        const done$ = prepareCmd(self, data, entmsg, done);
+        entmsg = self.private$.makeEntMsg(self, entmsg);
+        self.valid$({ throws: true, entmsg });
+        /*
+        const entityTemplate = (si.private$ as any).entity
+        const canonRouter = entityTemplate.canonRouter$
+    
+        if (canonRouter) {
+          const canonOps = canonRouter.find(entmsg)
+    
+          if (canonOps) {
+            if (canonOps.shape) {
+              let odata = entmsg.ent.data$(false)
+    
+              let sctx: any = {}
+              if (null == odata.id) {
+                sctx.skip = { keys: ['id'] }
+              } else {
+                // TODO: handle merge off case
+                sctx.skip = { depth: 1 }
+              }
+    
+              let skip$ = entmsg.q?.skip$
+              if (skip$) {
+                skip$ = 'string' === typeof skip$ ? skip$.split(',') : skip$
+                skip$ = Array.isArray(skip$) ? skip$.map((f: any) => '' + f) : []
+                sctx.skip = sctx.skip || {}
+                sctx.skip.keys = sctx.skip.keys || []
+                sctx.skip.keys = sctx.skip.keys.concat(skip$)
+              }
+              let vdata = canonOps.shape(odata, sctx)
+              entmsg.ent.data$(vdata)
+            }
+          }
+        }
+        */
         const promise = self.private$.promise && !done$;
         let res = promise
             ? entityPromise(si, entmsg)
