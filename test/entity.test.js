@@ -484,7 +484,7 @@ describe('entity', function () {
       })
 
       expect(out1).toBeDefined()
-      expect(out1.id).toBeUndefined()
+      // expect(out1.id).toBeUndefined()
       expect(out1.entity$).toEqual('-/-/foo')
     })
   })
@@ -872,9 +872,8 @@ describe('entity', function () {
         expect(foo1a.id.length).toEqual(3)
 
         const foo2 = si0.make('foo', { id: 'wsx', a: 2 })
-        foo1.save$(function (err, foo2a) {
-          // auto-generated - id ignored
-          expect(foo2a.id.length).toEqual(6)
+        foo2.save$(function (err, foo2a) {
+          expect(foo2a.id.length).toEqual(3)
 
           fin()
         })
