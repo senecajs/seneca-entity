@@ -168,8 +168,17 @@ describe('valid', function () {
         },
       })
 
+    const not0 = seneca.entity('not')
+    expect(not0.valid$()).toEqual(true)
+
+    const not0shape = not0.valid$({ shape: true })
+    expect(not0shape).toEqual(undefined)
+
     const foo0 = seneca.entity('foo')
     expect(foo0.valid$()).toEqual(true)
+
+    const foo0shape = foo0.valid$({ shape: true })
+    expect(foo0shape).toEqual(undefined)
 
     const nim0 = seneca.entity('nim')
     expect(nim0.valid$()).toEqual(true)
@@ -177,6 +186,10 @@ describe('valid', function () {
     const bar0 = seneca.entity('qaz/zed/bar').data$({ a: 1 })
     expect(bar0.valid$()).toEqual(true)
     expect(bar0.data$(false)).toEqual({ a: 1, x: 2 })
+
+    expect(bar0.valid$({ shape: true }).stringify()).toEqual(
+      '{"a":"Number","x":"2"}',
+    )
 
     const wax0 = seneca.entity('wax/wex/wix').data$({ b: 3 })
     expect(wax0.valid$()).toEqual(true)

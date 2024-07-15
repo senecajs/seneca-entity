@@ -230,8 +230,9 @@ class Entity implements Record<string, any> {
   valid$(opts?: {
     throws?: boolean
     errors?: boolean
+    shape?: boolean
     entmsg?: any
-  }): boolean | any[] {
+  }): undefined | boolean | any[] {
     const self = this
     const throws = opts?.throws
 
@@ -243,6 +244,10 @@ class Entity implements Record<string, any> {
 
     if (canonRouter) {
       const canonOps = canonRouter.find(entmsg)
+
+      if (opts?.shape) {
+        return canonOps?.shape
+      }
 
       if (canonOps) {
         if (canonOps.shape) {
@@ -281,6 +286,10 @@ class Entity implements Record<string, any> {
 
     if (opts?.errors) {
       return []
+    }
+
+    if (opts?.shape) {
+      return undefined
     }
 
     return true

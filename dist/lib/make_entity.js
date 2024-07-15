@@ -194,6 +194,9 @@ class Entity {
         const canonRouter = entityTemplate.canonRouter$;
         if (canonRouter) {
             const canonOps = canonRouter.find(entmsg);
+            if (opts === null || opts === void 0 ? void 0 : opts.shape) {
+                return canonOps === null || canonOps === void 0 ? void 0 : canonOps.shape;
+            }
             if (canonOps) {
                 if (canonOps.shape) {
                     let odata = entmsg.ent.data$(false);
@@ -226,6 +229,9 @@ class Entity {
         }
         if (opts === null || opts === void 0 ? void 0 : opts.errors) {
             return [];
+        }
+        if (opts === null || opts === void 0 ? void 0 : opts.shape) {
+            return undefined;
         }
         return true;
     }
