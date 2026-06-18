@@ -1,25 +1,10 @@
-![Seneca Entity](http://senecajs.org/files/assets/seneca-logo.png)
+![Seneca](http://senecajs.org/files/assets/seneca-logo.png)
+> A [Seneca.js][] plugin
 
-> _Seneca Entity_ is a plugin for [Seneca](http://senecajs.org)
-
-Provides a simple Object-Relation Mapping over Seneca messages as a
-convenience API for manipulating data.
-
-Any data store can then be accessed using the full power of Seneca
-messages.
-
-[![npm version](https://img.shields.io/npm/v/seneca-entity.svg)](https://npmjs.com/package/seneca-entity)
-[![build](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml/badge.svg)](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml)
-[![Coverage Status](https://coveralls.io/repos/github/senecajs/seneca-entity/badge.svg?branch=main)](https://coveralls.io/github/senecajs/seneca-entity?branch=main)
-[![Known Vulnerabilities](https://snyk.io/test/github/senecajs/seneca-entity/badge.svg)](https://snyk.io/test/github/senecajs/seneca-entity)
-[![DeepScan grade](https://deepscan.io/api/teams/5016/projects/19453/branches/505563/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=19453&bid=505563)
-[![Maintainability](https://api.codeclimate.com/v1/badges/9d54b38a991fe7b92a43/maintainability)](https://codeclimate.com/github/senecajs/seneca-entity/maintainability)
-
-
-# seneca-entity
+# @seneca/entity
 
 | ![Voxgig](https://www.voxgig.com/res/img/vgt01r.png) | This open source module is sponsored and supported by [Voxgig](https://www.voxgig.com). |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
+|---|---|
 
 ## Install
 
@@ -35,8 +20,7 @@ $ yarn add seneca-entity
 
 ### TypeScript
 
-Implemented using TypeScript. Minimal types are provided by the package. 
-
+Implemented using TypeScript. Minimal types are provided by the package.
 
 ## Quick Example
 
@@ -136,20 +120,51 @@ action patterns. Or you may find that [denormalizing your
 data](https://livebook.manning.com/book/the-tao-of-microservices/chapter-4/)
 is more fun than you think.
 
-
 ## More Examples
+
+See [test/](test/) for usage examples.
+
+## Motivation
+
+Provides a simple Object-Relation Mapping over Seneca messages as a convenience API for manipulating data. Any data store can be accessed using the full power of Seneca messages.
+
+## Support
+
+If you're using this module and need help, you can:
+
+- Post a [github issue][]
+- Tweet to [@senecajs][]
+- Ask on the [Gitter][gitter-url]
 
 ## API
 
+Seneca Entity provides action patterns:
 
+- `role:entity,cmd:load` - `.load$()`
+- `role:entity,cmd:save` - `.save$()`
+- `role:entity,cmd:list` - `.list$()`
+- `role:entity,cmd:remove` - `.remove$()`
+
+See [Understanding Data Entities](https://senecajs.org/docs/tutorials/understanding-data-entities.html) for full documentation.
 
 ## Contributing
 
+The [Senecajs org][] encourages open participation. If you feel you can help in any way, be it with documentation, examples, extra testing, or new features please get in touch.
+
+### Running tests
+
+```sh
+npm run test
+```
+
 ## Background
 
+Seneca Entity is inspired in part by the [ActiveRecord](https://www.martinfowler.com/eaaCatalog/activeRecord.html) pattern.
 
-
-## License
-Copyright (c) 2012-2022, Richard Rodger and other contributors.
-Licensed under [MIT](./LICENSE).
-
+[![npm version](https://img.shields.io/npm/v/seneca-entity.svg)](https://npmjs.com/package/seneca-entity)
+[![build](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml/badge.svg)](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml)
+[![Coverage Status](https://coveralls.io/repos/github/senecajs/seneca-entity/badge.svg?branch=main)](https://coveralls.io/github/senecajs/seneca-entity?branch=main)
+[![Known Vulnerabilities](https://snyk.io/test/github/senecajs/seneca-entity/badge.svg)](https://snyk.io/test/github/senecajs/seneca-entity)
+[![DeepScan grade](https://deepscan.io/api/teams/5016/projects/19453/branches/505563/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=19453&bid=505563)
+[![Maintainability](https://api.codeclimate.com/v1/badges/9d54b38a991fe7b92a43/maintainability)](https://codeclimate.com/github/senecajs/seneca-entity/maintainability)
+[ActiveRecord](https://www.martinfowler.com/eaaCatalog/activeRecord.html)

@@ -1,5 +1,5 @@
 {
-  "name": "seneca-entity",
+  "name": "@seneca/entity",
   "main": "dist/entity.js",
   "version": "28.1.0",
   "type": "commonjs",
@@ -20,7 +20,7 @@
     "Wyatt Preul (https://github.com/geek)",
     "Shane Lacey (https://github.com/shanel262)",
     "Emer Rutherford (https://github.com/eeswr)",
-    "Nicolás Fantone (https://github.com/nfantone)",
+    "Nicol\u00e1s Fantone (https://github.com/nfantone)",
     "Leonardo Cunha (https://github.com/LeonNimoy)"
   ],
   "files": [
