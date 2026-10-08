@@ -78,6 +78,52 @@ describe('valid', function () {
     expect(zed0.data$(false)).toMatchObject({ c: true, b: { x: 'X' } })
   })
 
+  test('shape-from-another-gubu-copy', async function () {
+    // A shape built by another copy of Gubu (Seneca.util.Gubu can be one)
+    // carries that copy's marker, so this plugin's Gubu does not recognize
+    // it as a shape. It must be used as it is, not wrapped again.
+    const shape = Gubu({ a: Number })
+    const foreign = Object.assign((val, ctx) => shape(val, ctx), {
+      gubu: { gubu$: Symbol('another-gubu'), v$: '0.0.0' },
+    })
+
+    const seneca = Seneca()
+      .test()
+      .use(Entity, {
+        ent: {
+          '-/-/foo': { valid: foreign },
+          '-/-/bar': { valid: () => Gubu({ b: String }) },
+        },
+      })
+
+    const foo0 = await seneca.entity('foo').save$({ a: 1 })
+    expect(foo0.data$(false)).toMatchObject({ a: 1 })
+
+    try {
+      await seneca.entity('foo').save$({ a: 'A' })
+      expect(false).toEqual(true)
+    } catch (e) {
+      expect(e.props).toEqual([
+        { path: 'a', what: 'type', type: 'number', value: 'A' },
+      ])
+    }
+
+    // A factory function may return a shape.
+    const bar0 = await seneca.entity('bar').save$({ b: 'B' })
+    expect(bar0.data$(false)).toMatchObject({ b: 'B' })
+
+    try {
+      await seneca.entity('bar').save$({ b: 1 })
+      expect(false).toEqual(true)
+    } catch (e) {
+      expect(e.props).toEqual([
+        { path: 'b', what: 'type', type: 'string', value: 1 },
+      ])
+    }
+
+    await seneca.close()
+  })
+
   test('skip', async function () {
     const seneca = Seneca()
       .test()
