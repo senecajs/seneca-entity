@@ -1,170 +1,197 @@
 ![Seneca](http://senecajs.org/files/assets/seneca-logo.png)
-> A [Seneca.js][] plugin
+> A [Seneca.js](https://www.npmjs.com/package/seneca) plugin
 
 # @seneca/entity
+
+The Seneca entity plugin: a data API in the style of ActiveRecord,
+built on Seneca messages. `seneca.entity('person')` gives you objects
+with `save$`, `load$`, `list$` and `remove$` methods, and each method
+is a message (`sys:entity,cmd:save`) answered by a store plugin, so
+stores, validation, business rules and remote services plug in through
+ordinary Seneca patterns. An in-memory store is included. Works with
+Seneca 3.x and Seneca 4 (from 4.0.0-rc5), on Node.js 18 or later
+(Seneca 4 needs 22 or later).
+
+[![npm version](https://img.shields.io/npm/v/seneca-entity.svg)](https://npmjs.com/package/seneca-entity)
+[![build](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml/badge.svg)](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml)
+[![Known Vulnerabilities](https://snyk.io/test/github/senecajs/seneca-entity/badge.svg)](https://snyk.io/test/github/senecajs/seneca-entity)
+[![DeepScan grade](https://deepscan.io/api/teams/5016/projects/19453/branches/505563/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=19453&bid=505563)
+[![Maintainability](https://api.codeclimate.com/v1/badges/9d54b38a991fe7b92a43/maintainability)](https://codeclimate.com/github/senecajs/seneca-entity/maintainability)
 
 | ![Voxgig](https://www.voxgig.com/res/img/vgt01r.png) | This open source module is sponsored and supported by [Voxgig](https://www.voxgig.com). |
 |---|---|
 
 ## Install
 
-With _npm_:
-```
-$ npm install seneca-entity
-```
-
-With _yarn_:
-```
-$ yarn add seneca-entity
+```sh
+npm install seneca @seneca/entity
 ```
 
-### TypeScript
-
-Implemented using TypeScript. Minimal types are provided by the package.
+Versions up to 28.1.0 were published as `seneca-entity`; from the next
+version the package is `@seneca/entity`. `seneca.use('entity')` finds
+the plugin under either name. TypeScript declarations are included.
 
 ## Quick Example
-
-Please visit [senecajs.org](http://senecajs.org) for a more complete
-overview and documentation of the Seneca framework.
-
-Read the [Understanding Data Entities](https://senecajs.org/docs/tutorials/understanding-data-entities.html) tutorial for a step-by-step introduction to Seneca data entities.
 
 ```js
 const Seneca = require('seneca')
 
-const seneca = Seneca() // Create a new instance of Seneca.
-  .use('entity')        // Use the seneca-entity plugin (Seneca will require it).
-  
-// Create an reusable instance of the `person` entity.
-const Person = seneca.entity('person')
+async function main() {
+  // seneca.use('entity') finds the @seneca/entity package.
+  const seneca = Seneca({ log: 'warn' }).use('entity')
 
-// Create a specific person instance.
-let alice = Person.make$()
+  // A template for person entities; make$ creates new ones.
+  const Person = seneca.entity('person')
 
-// Set some fields (assumes a NoSQL database, or a predefined table).
-// Properties with a final `$` are reserved for the Entity API methods.
-alice.name = 'Alice'
-alice.location = 'Wonderland'
+  // save$ stores the entity (in memory by default) and returns it with an id.
+  const alice = await Person.make$({ name: 'Alice', location: 'Wonderland' }).save$()
 
-// Save your data. Seneca entity provides a default in-memory store,
-// which is very useful for fast unit tests.
-alice = await alice.save$()
+  // load$ by id; an entity with an id is updated when saved.
+  const found = await Person.load$(alice.id)
+  found.location = 'Looking Glass'
+  await found.save$()
 
-// The `alice` entity now has an `id` field.
-let alsoAlice = await Person.load$(alice.id)
-alsoAlice.location = 'Looking Glass'
+  await Person.make$({ name: 'Lily', game: 'chess' }).save$()
 
-// The `alsoAlice` entity will be updated, not created, because
-// it has an `id` field. The save$ method both creates and updates.
-await alsoAlice.save$()
+  // list$ with a query: fields must match; $ directives shape the result.
+  console.log(await Person.list$({ sort$: { name: 1 } }))
+  console.log(await Person.list$({ game: 'chess' }))
 
-// Entity methods can be chained (until they return a Promise).
-let lily = await Person
-    .make$({
-      name: 'Lily',
-      location: 'Looking Glass'
-    })
-    .save$()
+  await seneca.close()
+}
 
-// The data$ method exports a JSON serializable verson of the entity
-// as a plain object.
-console.log(lily.data$())
-
-// The data$ method can alternatively set multiple fields.
-await lily
-  .data$({
-    game: 'chess'
-  })
-  .save$()
-
-// List all the person entities.
-let people = await Person.list$()
-
-// List only those person entities with field `game` equal to the string "chess".
-let players = await Person.list$({game: 'chess'})
+main()
 ```
 
-Seneca Entity is inspired in part by the
-[ActiveRecord](https://www.martinfowler.com/eaaCatalog/activeRecord.html)
-pattern as implemented by [Ruby on
-Rails](https://guides.rubyonrails.org/active_record_basics.html).
-
-Seneca Entity is **not** a full [Object Relation
-Mapping](https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping). It
-is a convenience API over the Seneca action patterns:
-
-* `role:entity,cmd:load` - `.load$()`
-* `role:entity,cmd:save` - `.save$()`
-* `role:entity,cmd:list` - `.list$()`
-* `role:entity,cmd:remove` - `.remove$()`
-
-This means that you can extend the "ORM" using the same message
-manipulation as with all Seneca messages, including sending them over
-the network to other microservices.
-
-In particular, you can:
-
-* Support pretty much any kind of database for a standard set of basic operations, extending the query syntax if necessary - [@seneca/s3-store](senecajs/seneca-s3-store)
-* Easily define reusable business logic that assumes standard entities, but is still extensible - [@seneca/user](senecajs/seneca-user)
-* Add cross-cutting concerns without polluting your business logic - [@seneca/allow](senecajs/seneca-allow)
-* Customize specific operations for specific entities by adding your own action patterns - `seneca.message('role:entity,cmd:save,name:person', async function(msg) { ... })`
-* Expose most REST or GraphQL APIs as "databases" - [@seneca/trello-provider](senecajs/seneca-trello-provider)
-* Use different databases for different entities, see [Mapping Entities to Data Stores](https://senecajs.org/docs/tutorials/understanding-data-entities.html#mapping-entities-to-data-stores)
-* Namespace and isolate entities as desired; entities have not just a _name_, but also an optional _base_ (table namespace) and _zone_ (good for strict multi-tenancy), to use as you see fit.
-
-**BUT**, Seneca entity does not natively implement relations, and
-loads only the top level entity. Since relation mapping often leads to
-inefficient queries, this is not such a bad thing. When relations are
-needed, you can implement them manually by customizing the appropriate
-action patterns. Or you may find that [denormalizing your
-data](https://livebook.manning.com/book/the-tao-of-microservices/chapter-4/)
-is more fun than you think.
+```
+[
+  Entity {
+    'entity$': '-/-/person',
+    name: 'Alice',
+    location: 'Looking Glass',
+    id: '86fwbo'
+  },
+  Entity {
+    'entity$': '-/-/person',
+    name: 'Lily',
+    game: 'chess',
+    id: 'tvksft'
+  }
+]
+[
+  Entity {
+    'entity$': '-/-/person',
+    name: 'Lily',
+    game: 'chess',
+    id: 'tvksft'
+  }
+]
+```
 
 ## More Examples
 
-See [test/](test/) for usage examples.
+* [Getting started with entities](docs/tutorials/getting-started.md):
+  save, load, query and remove, with promises and callbacks.
+* [Writing a store plugin](docs/tutorials/writing-a-store-plugin.md):
+  connect your own storage.
+* How-to guides: [query, sort and page](docs/how-to/query-sort-and-page.md),
+  [validate entity data](docs/how-to/validate-entity-data.md),
+  [use promises and async actions](docs/how-to/use-promises-and-async-actions.md),
+  [share entities over a transport](docs/how-to/share-entities-over-a-transport.md),
+  [configure the default store](docs/how-to/configure-the-default-store.md),
+  [customize operations with priors](docs/how-to/customize-operations-with-priors.md),
+  [test a store plugin](docs/how-to/test-a-store-plugin-with-store-test.md),
+  [migrate from Seneca 3](docs/how-to/migrate-from-seneca-3.md).
+* Runnable programs: [docs/examples](docs/examples/). The full index
+  is [docs/README.md](docs/README.md).
 
 ## Motivation
 
-Provides a simple Object-Relation Mapping over Seneca messages as a convenience API for manipulating data. Any data store can be accessed using the full power of Seneca messages.
+Most services need to store and find data, and most of that work is
+the same four operations. This plugin gives them a small, uniform API
+whose operations are messages, so the choice of database, the routing
+of kinds of data to different stores, validation, caching and access
+rules can all be changed with patterns instead of code. It is not an
+ORM: there are no relations or joins. See
+[How entity methods map to actions and stores](docs/explanation/entities-actions-and-stores.md)
+and [The canon model](docs/explanation/canon-model.md).
 
 ## Support
 
-If you're using this module and need help, you can:
-
-- Post a [github issue][]
-- Tweet to [@senecajs][]
-- Ask on the [Gitter][gitter-url]
+* Questions and bugs: [GitHub issues](https://github.com/senecajs/seneca-entity/issues).
+* Seneca itself: the [Seneca documentation](https://github.com/senecajs/seneca/tree/master/docs).
+* This plugin is sponsored and supported by [Voxgig](https://www.voxgig.com).
 
 ## API
 
-Seneca Entity provides action patterns:
+The complete reference is in [docs/reference](docs/README.md#reference).
 
-- `role:entity,cmd:load` - `.load$()`
-- `role:entity,cmd:save` - `.save$()`
-- `role:entity,cmd:list` - `.list$()`
-- `role:entity,cmd:remove` - `.remove$()`
+| Instance method | Purpose |
+| --------------- | ------- |
+| `seneca.entity([zone], [base], [name], [props])` | Create an entity whose methods return promises. |
+| `seneca.make$(...)`, `seneca.make(...)` | Create an entity whose methods take callbacks. |
+| `seneca.util.parsecanon(canon)` | Parse a `zone/base/name` string. |
 
-See [Understanding Data Entities](https://senecajs.org/docs/tutorials/understanding-data-entities.html) for full documentation.
+| Entity method | Purpose |
+| ------------- | ------- |
+| `save$([data])` | Create (no `id`) or update (with `id`) the entity in its store. |
+| `load$([query])` | Load the first match, or reload by `id`. |
+| `list$([query])` | List the matches. |
+| `remove$([query])` | Remove the first match (every match with `all$: true`). |
+| `make$`, `data$`, `fields$`, `clone$`, `is$`, `canon$`, `valid$`, `custom$`, `directive$`, `native$` | See [Entity API](docs/reference/entity-api.md). |
+
+| Topic | Reference |
+| ----- | --------- |
+| Query objects and `$` directives (`sort$`, `limit$`, `skip$`, `fields$`, `all$`, `id$`, `merge$`, `upsert$`, ...) | [Query directives](docs/reference/query-directives.md) |
+| Action patterns (`sys:entity` with `cmd` `save`, `load`, `list`, `remove` and `native`; the `role:entity` translations) and exports (`entity/init`, `entity/generate_id`, `Entity`) | [Messages](docs/reference/messages.md) |
+| Plugin options (`mem_store`, `ent`, `strict`, `generate_id`, ...) | [Options](docs/reference/options.md) |
+| Writing stores (`entity/init`, commands, `map`) | [Store protocol](docs/reference/store-protocol.md) |
+| Errors | [Errors](docs/reference/errors.md) |
 
 ## Contributing
 
-The [Senecajs org][] encourages open participation. If you feel you can help in any way, be it with documentation, examples, extra testing, or new features please get in touch.
-
-### Running tests
+The [Senecajs org](https://github.com/senecajs/) encourages open
+participation: documentation, examples, tests and features are all
+welcome. To work on the plugin:
 
 ```sh
-npm run test
+npm install       # .npmrc sets legacy-peer-deps while Seneca 4 is a prerelease
+npm run build     # compile src/ to dist/ (tsc)
+npm test          # jest, with coverage
 ```
+
+The tests run on Node.js 24 and 22 against the Seneca 4 prerelease
+(the `seneca@^4.0.0-rc5` development dependency). To test against
+another Seneca version, install it without saving, run the tests, and
+restore the development dependency afterwards:
+
+```sh
+npm install --no-save seneca@3   # or the path of a seneca tarball
+npm test
+npm install
+```
+
+The programs in [docs/examples](docs/examples/) must run to completion
+(`node docs/examples/<dir>/<file>.js`). `npm run maintain` runs the
+`@seneca/maintain` repository checks.
+
+Changes to the GitHub Actions workflow are provided as patches in
+`.patches/`, because they cannot be pushed without the `workflow`
+permission; see `.patches/README.md` for how to apply them.
 
 ## Background
 
-Seneca Entity is inspired in part by the [ActiveRecord](https://www.martinfowler.com/eaaCatalog/activeRecord.html) pattern.
-
-[![npm version](https://img.shields.io/npm/v/seneca-entity.svg)](https://npmjs.com/package/seneca-entity)
-[![build](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml/badge.svg)](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml)
-[![Coverage Status](https://coveralls.io/repos/github/senecajs/seneca-entity/badge.svg?branch=main)](https://coveralls.io/github/senecajs/seneca-entity?branch=main)
-[![Known Vulnerabilities](https://snyk.io/test/github/senecajs/seneca-entity/badge.svg)](https://snyk.io/test/github/senecajs/seneca-entity)
-[![DeepScan grade](https://deepscan.io/api/teams/5016/projects/19453/branches/505563/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=19453&bid=505563)
-[![Maintainability](https://api.codeclimate.com/v1/badges/9d54b38a991fe7b92a43/maintainability)](https://codeclimate.com/github/senecajs/seneca-entity/maintainability)
+Entities were part of Seneca core until Seneca 1.2.0 (2016), when they
+moved into this plugin; Seneca 3.0.0 moved the store logic here as
+well. The API is inspired in part by the
 [ActiveRecord](https://www.martinfowler.com/eaaCatalog/activeRecord.html)
+pattern. Versions up to 28.1.0 were published as `seneca-entity`; from
+the next version the package is `@seneca/entity`. Changes are listed in
+[CHANGES.md](CHANGES.md).
+
+| Plugin | Seneca | Node.js |
+| ------ | ------ | ------- |
+| 28.2.0 | 3.x (tested with 3.38) and 4 (tested with 4.0.0-rc5 and 4.0.0) | 18 or later (tested on 22 and 24; Seneca 4 needs 22 or later) |
+| 28.1.0 | 3.x; on Seneca 4 a validation shape built with `Seneca.util.Gubu` fails | 16 or later |
+
+Licensed under the MIT license; see [LICENSE](LICENSE).
