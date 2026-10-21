@@ -10,7 +10,7 @@ is a message (`sys:entity,cmd:save`) answered by a store plugin, so
 stores, validation, business rules and remote services plug in through
 ordinary Seneca patterns. An in-memory store is included. Works with
 Seneca 4 (4.0.0, and the 4.0.0-rc5 prerelease) and Seneca 3 from 3.38,
-on Node.js 18 or later (Seneca 4 needs 22 or later).
+on Node.js 18 or later (Seneca 4.0.0 requires 24 or later).
 
 [![npm version](https://img.shields.io/npm/v/@seneca/entity.svg)](https://npmjs.com/package/@seneca/entity)
 [![build](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml/badge.svg)](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml)
@@ -207,7 +207,7 @@ pattern. Versions up to 28.1.0 were published as `seneca-entity`; from
 
 | Plugin | Seneca | Node.js |
 | ------ | ------ | ------- |
-| 29.0.0 | 3 from 3.38 (tested with 3.38.0) and 4 (tested with 4.0.0 and 4.0.0-rc5) | 18 or later (tested on 22; Seneca 4 needs 22 or later) |
+| 29.0.0 | 3 from 3.38 (tested with 3.38.0) and 4 (tested with 4.0.0 and 4.0.0-rc5) | 18 or later (tested on 22; Seneca 4.0.0 requires 24 or later) |
 | 28.1.0 | 3.x; on 3.38 and on 4.0.0-rc5 a `valid` shape built with `Seneca.util.Gubu` fails every save; does not load on 4.0.0 (`plugin_gubu_shape`) | 16 or later |
 
 Licensed under the MIT license; see [LICENSE](LICENSE).

@@ -133,7 +133,7 @@ used to control built in plugins, is accepted but not read by Seneca 4.
 ## Node.js
 
 The plugin requires Node.js 18 or later and is tested on 22 and 24.
-Seneca 4 itself requires Node.js 22 or later.
+Seneca 4.0.0 itself requires Node.js 24 or later.
 
 ## Package names
 

@@ -13,7 +13,7 @@ covers them.
 ## 1. Install
 
 Node.js 18 or later (22 or 24 recommended), and Seneca 4 (4.0.0-rc5 or
-later, which needs Node.js 22 or later) or Seneca 3 from 3.38. In a
+later; 4.0.0 requires Node.js 24 or later) or Seneca 3 from 3.38. In a
 new directory:
 
 ```sh

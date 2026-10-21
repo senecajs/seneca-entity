@@ -8,9 +8,10 @@ this page covers what affects entity code. The background is in
 
 ## 1. Update the packages
 
-Seneca 4 needs Node.js 22 or later. Use version 29.0.0 or later of
-this plugin, published as `@seneca/entity`. Versions up to 28.1.0 were
-published as `seneca-entity`; 28.1.0 does not load on Seneca 4.0.0.
+Seneca 4.0.0 requires Node.js 24 or later. Use version 29.0.0 or
+later of this plugin, published as `@seneca/entity`. Versions up to
+28.1.0 were published as `seneca-entity`; 28.1.0 does not load on
+Seneca 4.0.0.
 
 ```sh
 npm install seneca@^4.0.0-rc5 @seneca/entity
