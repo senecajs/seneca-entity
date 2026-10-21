@@ -7,8 +7,6 @@ import {
 } from './types'
 
 
-import { Child, Skip, Any } from 'gubu'
-
 import { buildValidation } from './valid'
 
 import { MakeEntity, Entity } from './lib/make_entity'
@@ -20,6 +18,15 @@ import { Store } from './lib/store'
 function entity(this: any, _options: any) {
   // const seneca = this
 
+  // An error thrown by preload stops it before the exports are set, and
+  // mem-store, which it loads, then fails first with a misleading error.
+  // So the error preload finds (a validation spec that cannot be read) is
+  // thrown here, and Seneca reports it as plugin_define_failed.
+  const preloadError = this.private$.entity?.preloadError$
+  if (preloadError) {
+    throw preloadError
+  }
+
   return {
     // Define name, as tools like rollup will rename this function, breaking stuff.
     name: 'entity'
@@ -27,7 +34,9 @@ function entity(this: any, _options: any) {
 }
 
 
-entity.defaults = {
+// The option shape is built with the builders Seneca passes in `valid`:
+// shape on Seneca 4, Gubu on Seneca 3. Seneca 4 rejects Gubu shapes.
+entity.defaults = ({ valid }: { valid: any }) => ({
   map: {},
 
   mem_store: true,
@@ -57,11 +66,11 @@ entity.defaults = {
   strict: false,
 
   // Entity specific options. Use entity canon string (zone/base/name) for key.
-  ent: Child({
-    valid: Skip(Any()), // Gubu
-    valid_json: Skip({}), // Gubu JSON
+  ent: valid.Child({
+    valid: valid.Skip(valid.Any()), // Shape, or a shape spec
+    valid_json: valid.Skip({}), // Shape spec as JSON
   })
-}
+})
 
 
 // All functionality should be loaded when defining plugin
@@ -122,7 +131,7 @@ function preload(this: any, context: any) {
 
 
   if (options.mem_store) {
-    seneca.root.use(require('seneca-mem-store'))
+    seneca.root.use(require('@seneca/mem-store'))
   }
 
   if (options.log?.active) {
@@ -133,7 +142,12 @@ function preload(this: any, context: any) {
     }
   }
 
-  buildValidation(seneca, seneca.private$.entity, options)
+  seneca.private$.entity.preloadError$ = undefined
+  try {
+    buildValidation(seneca, seneca.private$.entity, options)
+  } catch (err) {
+    seneca.private$.entity.preloadError$ = err
+  }
 
 
   return {

@@ -3,7 +3,9 @@ declare function entity(this: any, _options: any): {
     name: string;
 };
 declare namespace entity {
-    var defaults: {
+    var defaults: ({ valid }: {
+        valid: any;
+    }) => {
         map: {};
         mem_store: boolean;
         generate_id: typeof generate_id;
@@ -22,7 +24,7 @@ declare namespace entity {
             provide: boolean;
         };
         strict: boolean;
-        ent: import("gubu").Node<unknown>;
+        ent: any;
     };
     var preload: (this: any, context: any) => {
         name: string;

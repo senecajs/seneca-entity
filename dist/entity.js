@@ -1,19 +1,29 @@
 "use strict";
 /* Copyright (c) 2010-2023 Richard Rodger and other contributors, MIT License */
 Object.defineProperty(exports, "__esModule", { value: true });
-const gubu_1 = require("gubu");
 const valid_1 = require("./valid");
 const make_entity_1 = require("./lib/make_entity");
 const store_1 = require("./lib/store");
 // Define the entity plugin.
 function entity(_options) {
     // const seneca = this
+    var _a;
+    // An error thrown by preload stops it before the exports are set, and
+    // mem-store, which it loads, then fails first with a misleading error.
+    // So the error preload finds (a validation spec that cannot be read) is
+    // thrown here, and Seneca reports it as plugin_define_failed.
+    const preloadError = (_a = this.private$.entity) === null || _a === void 0 ? void 0 : _a.preloadError$;
+    if (preloadError) {
+        throw preloadError;
+    }
     return {
         // Define name, as tools like rollup will rename this function, breaking stuff.
         name: 'entity'
     };
 }
-entity.defaults = {
+// The option shape is built with the builders Seneca passes in `valid`:
+// shape on Seneca 4, Gubu on Seneca 3. Seneca 4 rejects Gubu shapes.
+entity.defaults = ({ valid }) => ({
     map: {},
     mem_store: true,
     generate_id,
@@ -35,11 +45,11 @@ entity.defaults = {
     // Fail if entity canon does not match an entry in ent option.
     strict: false,
     // Entity specific options. Use entity canon string (zone/base/name) for key.
-    ent: (0, gubu_1.Child)({
-        valid: (0, gubu_1.Skip)((0, gubu_1.Any)()), // Gubu
-        valid_json: (0, gubu_1.Skip)({}), // Gubu JSON
+    ent: valid.Child({
+        valid: valid.Skip(valid.Any()), // Shape, or a shape spec
+        valid_json: valid.Skip({}), // Shape spec as JSON
     })
-};
+});
 // All functionality should be loaded when defining plugin
 function preload(context) {
     var _a;
@@ -80,7 +90,7 @@ function preload(context) {
         .translate('role:entity,cmd:remove', 'sys:entity,role:null');
     const store = (0, store_1.Store)(options);
     if (options.mem_store) {
-        seneca.root.use(require('seneca-mem-store'));
+        seneca.root.use(require('@seneca/mem-store'));
     }
     if ((_a = options.log) === null || _a === void 0 ? void 0 : _a.active) {
         seneca.root.private$.exports.Entity.prototype.log$ = function () {
@@ -89,7 +99,13 @@ function preload(context) {
             seneca.log.apply(seneca, arguments);
         };
     }
-    (0, valid_1.buildValidation)(seneca, seneca.private$.entity, options);
+    seneca.private$.entity.preloadError$ = undefined;
+    try {
+        (0, valid_1.buildValidation)(seneca, seneca.private$.entity, options);
+    }
+    catch (err) {
+        seneca.private$.entity.preloadError$ = err;
+    }
     return {
         // Define name, as tools like rollup will rename this function, breaking stuff.
         name: 'entity',

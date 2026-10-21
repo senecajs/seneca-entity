@@ -3,19 +3,44 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildValidation = buildValidation;
 const patrun_1 = require("patrun");
-const gubu_1 = require("gubu");
 const make_entity_1 = require("./lib/make_entity");
-// A Gubu shape is a function carrying a `gubu` marker property. Duck
-// typing is used instead of `Gubu.isShape`, which only recognizes shapes
-// built by the same copy of Gubu. Shapes built by another copy or version
-// (for example `Seneca.util.Gubu`, Gubu 9 on Seneca 4) must be used as
-// they are: re-wrapping them with `Gubu(shape)` fails validation with
-// "the object is not of type function".
+// A shape is a function carrying a marker property: `shape` for shapes
+// built by shape (Seneca 4), `gubu` for shapes built by Gubu (Seneca 3).
+// Duck typing is used instead of `isShape`, which only recognizes shapes
+// built by the same copy of the library. Shapes built by another copy or
+// version must be used as they are: re-wrapping them fails validation
+// with "the object is not of type function".
 function isShape(v) {
-    return 'function' === typeof v && null != v.gubu;
+    return 'function' === typeof v && (null != v.shape || null != v.gubu);
 }
-function buildValidation(_seneca, entity, options) {
+// Builder nodes carry a marker in `$`: `shape$` or `gubu$`. A spec that
+// holds nodes of the other library is not understood by the validator
+// (every save fails), so the path of the first one is reported instead.
+function findForeignNode(spec, marker, path = '', seen = new Set()) {
+    if (null == spec || 'object' !== typeof spec || seen.has(spec)) {
+        return null;
+    }
+    seen.add(spec);
+    if (null != spec.$ &&
+        'object' === typeof spec.$ &&
+        Object.prototype.hasOwnProperty.call(spec.$, marker)) {
+        return path || '(root)';
+    }
+    for (const key of Object.keys(spec)) {
+        const found = findForeignNode(spec[key], marker, path ? path + '.' + key : key, seen);
+        if (null != found) {
+            return found;
+        }
+    }
+    return null;
+}
+function buildValidation(seneca, entity, options) {
     const canonRouter = (0, patrun_1.Patrun)();
+    // The validator of the Seneca instance: shape on Seneca 4, Gubu on
+    // Seneca 3.
+    const Valid = seneca.valid;
+    const isShapeLib = null != Valid({}).shape;
+    const foreignMarker = isShapeLib ? 'gubu$' : 'shape$';
     const canonMap = options.ent || {};
     const canons = Object.keys(canonMap);
     for (let cI = 0; cI < canons.length; cI++) {
@@ -25,7 +50,7 @@ function buildValidation(_seneca, entity, options) {
         let shape;
         let vopts = { name: 'Entity: ' + cstr };
         if (spec.valid_json) {
-            shape = gubu_1.Gubu.build(spec.valid_json, vopts);
+            shape = Valid.build(spec.valid_json, vopts);
         }
         else if (spec.valid) {
             let valid = spec.valid;
@@ -33,7 +58,16 @@ function buildValidation(_seneca, entity, options) {
             if ('function' === typeof valid && !isShape(valid)) {
                 valid = valid();
             }
-            shape = isShape(valid) ? valid : (0, gubu_1.Gubu)(valid, vopts);
+            if (!isShape(valid)) {
+                const at = findForeignNode(valid, foreignMarker);
+                if (null != at) {
+                    throw new Error(`Entity: ${cstr}: the valid option is built with ` +
+                        `${isShapeLib ? 'Gubu' : 'shape'} builders (at ${at}), but ` +
+                        `this Seneca validates with ${isShapeLib ? 'shape' : 'Gubu'}, ` +
+                        `which does not read them. Build the spec with seneca.valid.`);
+                }
+            }
+            shape = isShape(valid) ? valid : Valid(valid, vopts);
         }
         canonRouter.add(canon, {
             shape,

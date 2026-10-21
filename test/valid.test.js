@@ -3,7 +3,8 @@
 const Seneca = require('seneca')
 const Entity = require('../')
 
-const Gubu = Seneca.util.Gubu
+// The validator Seneca uses: shape on Seneca 4, Gubu on Seneca 3.
+const Valid = Seneca.valid
 
 describe('valid', function () {
   test('happy', async function () {
@@ -17,7 +18,7 @@ describe('valid', function () {
             }),
           },
           '-/bar/foo': {
-            valid: Gubu({
+            valid: Valid({
               a: Number,
               b: { x: String },
             }),
@@ -78,12 +79,15 @@ describe('valid', function () {
     expect(zed0.data$(false)).toMatchObject({ c: true, b: { x: 'X' } })
   })
 
-  test('shape-from-another-gubu-copy', async function () {
-    // A shape built by another copy of Gubu (Seneca.util.Gubu can be one)
-    // carries that copy's marker, so this plugin's Gubu does not recognize
-    // it as a shape. It must be used as it is, not wrapped again.
-    const shape = Gubu({ a: Number })
-    const foreign = Object.assign((val, ctx) => shape(val, ctx), {
+  test('shape-from-another-copy', async function () {
+    // A shape built by another copy of shape or Gubu carries that copy's
+    // marker, so Seneca's validator does not recognize it as a shape. It
+    // must be used as it is, not wrapped again.
+    const shape = Valid({ a: Number })
+    const foreignShape = Object.assign((val, ctx) => shape(val, ctx), {
+      shape: { shape$: Symbol('another-shape'), v$: '0.0.0' },
+    })
+    const foreignGubu = Object.assign((val, ctx) => shape(val, ctx), {
       gubu: { gubu$: Symbol('another-gubu'), v$: '0.0.0' },
     })
 
@@ -91,21 +95,24 @@ describe('valid', function () {
       .test()
       .use(Entity, {
         ent: {
-          '-/-/foo': { valid: foreign },
-          '-/-/bar': { valid: () => Gubu({ b: String }) },
+          '-/-/foo': { valid: foreignShape },
+          '-/-/qux': { valid: foreignGubu },
+          '-/-/bar': { valid: () => Valid({ b: String }) },
         },
       })
 
-    const foo0 = await seneca.entity('foo').save$({ a: 1 })
-    expect(foo0.data$(false)).toMatchObject({ a: 1 })
+    for (const name of ['foo', 'qux']) {
+      const ent0 = await seneca.entity(name).save$({ a: 1 })
+      expect(ent0.data$(false)).toMatchObject({ a: 1 })
 
-    try {
-      await seneca.entity('foo').save$({ a: 'A' })
-      expect(false).toEqual(true)
-    } catch (e) {
-      expect(e.props).toEqual([
-        { path: 'a', what: 'type', type: 'number', value: 'A' },
-      ])
+      try {
+        await seneca.entity(name).save$({ a: 'A' })
+        expect(false).toEqual(true)
+      } catch (e) {
+        expect(e.props).toEqual([
+          { path: 'a', what: 'type', type: 'number', value: 'A' },
+        ])
+      }
     }
 
     // A factory function may return a shape.
@@ -123,6 +130,54 @@ describe('valid', function () {
 
     await seneca.close()
   })
+
+  test('foreign-builder-nodes', function () {
+    // Builder nodes of the other library (Gubu nodes for shape, shape nodes
+    // for Gubu) are not read by Seneca's validator, so the spec is refused
+    // when the validation is built, instead of failing every save.
+    const { buildValidation } = require('../dist/valid')
+    const marker = null != Valid({}).shape ? 'gubu$' : 'shape$'
+    const node = { $: { [marker]: Symbol(marker), v$: '0.0.0' }, t: 'number' }
+
+    expect(() =>
+      buildValidation(
+        { valid: Valid },
+        {},
+        { ent: { '-/-/foo': { valid: { a: { b: node } } } } },
+      ),
+    ).toThrow(
+      /^Entity: -\/-\/foo: the valid option is built with (Gubu|shape) builders \(at a\.b\)/,
+    )
+
+    // Prepared shapes are used as they are.
+    const entity = {}
+    buildValidation({ valid: Valid }, entity, {
+      ent: { '-/-/foo': { valid: Valid({ a: Number }) } },
+    })
+    expect(entity.canonRouter$.list().length).toEqual(1)
+  })
+
+  test('foreign-builder-nodes-fail-at-load', function () {
+    // The plugin definition throws the error found by preload, which is
+    // fatal at startup (plugin_define_failed).
+    const script = `
+      const Seneca = require('seneca')
+      const Entity = require(${JSON.stringify(require.resolve('..'))})
+      const marker = null != Seneca.valid({}).shape ? 'gubu$' : 'shape$'
+      const node = { $: { [marker]: Symbol(marker), v$: '0.0.0' }, t: 'number' }
+      Seneca({ death_delay: 1, debug: { deprecation: false } })
+        .use(Entity, { ent: { '-/-/foo': { valid: { a: node } } } })
+    `
+    const out = require('node:child_process').spawnSync(
+      process.execPath,
+      ['-e', script],
+      { cwd: __dirname, encoding: 'utf8', timeout: 20000 },
+    )
+    expect(out.status).not.toEqual(0)
+    expect(out.stdout + out.stderr).toMatch(
+      /plugin_define_failed.*Entity: -\/-\/foo: the valid option is built with/,
+    )
+  }, 30000)
 
   test('skip', async function () {
     const seneca = Seneca()
