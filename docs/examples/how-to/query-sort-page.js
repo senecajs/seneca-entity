@@ -28,7 +28,7 @@ async function main() {
   // load$ with a query returns the first match; sort$ decides which
   console.log('cheapest: ', (await Product.load$({ sort$: { price: 1 } })).name)
 
-  // Comparison operators: supported by seneca-mem-store, not by every store
+  // Comparison operators: supported by @seneca/mem-store, not by every store
   console.log('price>=30:', (await Product.list$({ price: { $gte: 30 } })).map((p) => p.name))
 
   // Count by listing: there is no count operation in the entity API

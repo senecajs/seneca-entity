@@ -28,7 +28,7 @@ const alice = await seneca.entity('person').make$({ name: 'Alice' }).save$()
    into an entity (`outward_res_entity`); the promise resolves with it.
 
 The result is a new object. Whether the store also changes the entity
-it received is up to the store: seneca-mem-store sets its `id`, the
+it received is up to the store: @seneca/mem-store sets its `id`, the
 store in the tutorial does not, and over a transport the caller's
 object is never touched. Treat the result as the truth: a save is a
 message, and the reply is what the store says is true now.
@@ -88,7 +88,7 @@ Consequences:
 The entity API covers create, read, update, delete and simple queries.
 It does not define relations, joins, transactions, migrations or a
 query language, and it does not try to hide the store's own query
-features (seneca-mem-store's `$gte` style constraints, for example, are
+features (@seneca/mem-store's `$gte` style constraints, for example, are
 the store's, not the API's). The reason is the message model: what the
 API guarantees is what every store can answer, and anything richer is
 better expressed as a message of its own (`role:shop,cmd:report`) whose
@@ -102,9 +102,9 @@ A new entity has no `id`; the store assigns one on the first save. The
 default generator (option `generate_id`, export `entity/generate_id`)
 produces a random 6 character string, which stores without natural ids
 use. The application can choose the id of a new entity with `id$`;
-seneca-mem-store then fails with `entity-id-exists` if the id is taken.
+@seneca/mem-store then fails with `entity-id-exists` if the id is taken.
 An entity that has an `id` is saved under it: normally an update, and
-with seneca-mem-store a new record if none has that id. Whether a store
+with @seneca/mem-store a new record if none has that id. Whether a store
 checks for taken ids, and what it does with an unknown `id`, is up to
 the store.
 

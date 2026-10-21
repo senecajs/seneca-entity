@@ -9,7 +9,7 @@ prefix, which comes from the `pattern_fix` option.
 The entity plugin itself adds no actions. The store plugins add them,
 through the initializer described in the
 [Store protocol](store-protocol.md): one action per command and
-mapped canon. With the default store (seneca-mem-store, loaded by the
+mapped canon. With the default store (@seneca/mem-store, loaded by the
 `mem_store` option) the patterns are:
 
 | Pattern | Sent by | Message properties | Reply |
@@ -18,10 +18,10 @@ mapped canon. With the default store (seneca-mem-store, loaded by the
 | `sys:entity,cmd:load` | `load$` | `qent` (template entity), `q` (query), `name`, `base`, `zone` | The first matching entity or `null`. |
 | `sys:entity,cmd:list` | `list$` | `qent`, `q`, `name`, `base`, `zone` | Array of entities. |
 | `sys:entity,cmd:remove` | `remove$` | `qent`, `q`, `name`, `base`, `zone` | `null`, or the removed entity with `load$: true`. |
-| `sys:entity,cmd:native` | `native$` | `ent`, `name`, `base`, `zone` | The store's native handle (seneca-mem-store: its data object). |
+| `sys:entity,cmd:native` | `native$` | `ent`, `name`, `base`, `zone` | The store's native handle (@seneca/mem-store: its data object). |
 
 A store mapped to a canon adds the canon parts to the pattern:
-`seneca.use('mem-store', { map: { '-/-/log': '*' } })` adds
+`seneca.use('@seneca/mem-store', { map: { '-/-/log': '*' } })` adds
 `sys:entity,cmd:save,name:log` and so on, which are more specific than
 the default store's patterns and therefore win for that kind.
 
@@ -90,7 +90,7 @@ it is deprecated.
 
 ## Default store actions
 
-seneca-mem-store, when loaded, adds these actions for its own purposes:
+@seneca/mem-store, when loaded, adds these actions for its own purposes:
 
 | Pattern | Message | Reply |
 | ------- | ------- | ----- |

@@ -4,7 +4,9 @@ Runnable programs that accompany the [tutorials](../tutorials/) and
 [how-to guides](../how-to/). Each file loads the plugin from this
 repository (`require('../../..')`, which is the package's `dist/` build);
 in your own project use `require('@seneca/entity')` or
-`seneca.use('entity')` instead.
+`seneca.use('@seneca/entity')` instead (not `seneca.use('entity')`,
+which finds an installed seneca-entity package first; see the
+[README](../../README.md#install)).
 
 | Directory | Page |
 | --------- | ---- |

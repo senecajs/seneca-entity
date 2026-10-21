@@ -12,21 +12,25 @@ covers them.
 
 ## 1. Install
 
-Node.js 18 or later (22 or 24 recommended), and Seneca 3.x or Seneca 4
-(4.0.0-rc5 or later). In a new directory:
+Node.js 18 or later (22 or 24 recommended), and Seneca 4 (4.0.0-rc5 or
+later, which needs Node.js 22 or later) or Seneca 3 from 3.38. In a
+new directory:
 
 ```sh
 npm init -y
 npm install seneca @seneca/entity
 ```
 
-The plugin brings seneca-mem-store, an in-memory store, so nothing
+The plugin brings @seneca/mem-store, an in-memory store, so nothing
 else is needed to begin. (Versions up to 28.1.0 of the plugin were
-published as `seneca-entity`; the package is `@seneca/entity` from the
-next version.) The programs below load the plugin with
+published as `seneca-entity`; the package is `@seneca/entity` from
+29.0.0.) The programs below load the plugin by package, with
 `require('@seneca/entity')`; the files in `docs/examples` of this
 repository use `require('../../..')` instead, to load the repository's
-own build.
+own build. To load it by name, write `seneca.use('@seneca/entity')`,
+not `seneca.use('entity')`: npm may also have installed the old
+seneca-entity package, as it does with Seneca 3.38, and the short name
+finds that one first (see the [README](../../README.md#install)).
 
 ## 2. Save and load
 
@@ -34,7 +38,7 @@ Create `save-and-load.js`:
 
 ```js
 const Seneca = require('seneca')
-const Entity = require('@seneca/entity') // or: seneca.use('entity')
+const Entity = require('@seneca/entity') // or: seneca.use('@seneca/entity')
 
 async function main() {
   const seneca = Seneca({ log: 'warn' }).use(Entity)
@@ -103,7 +107,7 @@ What happened:
   the API (`save$`, `entity$`); never use that suffix for fields.
 * `save$` sent a `sys:entity,cmd:save` message. The store created a
   record, gave it an `id`, and replied with a new entity object. Always
-  use that result: seneca-mem-store also sets `id` on the object you
+  use that result: @seneca/mem-store also sets `id` on the object you
   called `save$` on, but other stores do not, and over a network
   transport the caller's object is never changed.
 * A second `save$` on an entity that has an `id` updates the record.

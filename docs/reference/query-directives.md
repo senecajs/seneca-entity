@@ -12,27 +12,27 @@ and are never stored.
 | ---- | ------- | ------- | --------- |
 | omitted or `null` | reload by the entity's own `id`; `null` without a message when the entity has no id | every entity of the kind | remove by the entity's own `id`; `null` without a message when the entity has no id |
 | `''` (empty string) or `{}` | `null` without a message | every entity of the kind | `null` without a message |
-| string or number | `{ id: value }` | passed to the store as it is: seneca-mem-store treats a string as an id, and finds nothing for a number (use `{ id: 7 }` or `[7]`) | `{ id: value }` |
-| array | passed to the store as it is (seneca-mem-store: a list of ids; `load$` returns the first one found) | passed to the store as it is (seneca-mem-store: a list of ids) | passed to the store as it is (seneca-mem-store: removes the first one found; an array cannot carry `all$`) |
+| string or number | `{ id: value }` | passed to the store as it is: @seneca/mem-store treats a string as an id, and finds nothing for a number (use `{ id: 7 }` or `[7]`) | `{ id: value }` |
+| array | passed to the store as it is (@seneca/mem-store: a list of ids; `load$` returns the first one found) | passed to the store as it is (@seneca/mem-store: a list of ids) | passed to the store as it is (@seneca/mem-store: removes the first one found; an array cannot carry `all$`) |
 | object | field conditions and directives | field conditions and directives | field conditions and directives |
 
 Query properties whose value is `undefined` are removed before the
 message is sent. A field condition whose value is an array matches any
-of the values with seneca-mem-store (`{ name: ['kiwi', 'fig'] }`).
+of the values with @seneca/mem-store (`{ name: ['kiwi', 'fig'] }`).
 Comparison operators (`{ price: { $gte: 30 } }` with `$ne`, `$gt`,
-`$gte`, `$lt`, `$lte`, `$in`, `$nin`) are a seneca-mem-store feature,
+`$gte`, `$lt`, `$lte`, `$in`, `$nin`) are a @seneca/mem-store feature,
 not part of the entity API; other stores have their own query
 extensions.
 
 ## Directives in queries
 
 Which directives a store honours is up to the store. The table shows
-the behaviour of seneca-mem-store, the reference implementation, which
+the behaviour of @seneca/mem-store, the reference implementation, which
 is what the other official stores follow.
 
 | Directive | Operations | Effect |
 | --------- | ---------- | ------ |
-| `sort$` | `list$`, `load$`, `remove$` | `{ field: 1 }` ascending, `{ field: -1 }` descending. seneca-mem-store sorts by the first field only. Applied before `skip$` and `limit$`. |
+| `sort$` | `list$`, `load$`, `remove$` | `{ field: 1 }` ascending, `{ field: -1 }` descending. @seneca/mem-store sorts by the first field only. Applied before `skip$` and `limit$`. |
 | `skip$` | `list$`, `load$`, `remove$` | Number of matching entities to skip (an offset for paging). Ignored when not a positive number. |
 | `limit$` | `list$`, `load$`, `remove$` | Maximum number of entities to return. Ignored when `0`, negative or not a number. |
 | `fields$` | `load$`, `list$` | Array of field names to return. `id` is always included. |
@@ -55,8 +55,8 @@ there.
 | Directive | Effect |
 | --------- | ------ |
 | `id$` | Chosen id for a new entity. The store saves the entity with this id instead of generating one. Also accepted as a property of the entity (`ent.id$ = 'x'`), in `make$` props and in `data$`. |
-| `merge$` | `false` replaces the stored data with the entity's fields instead of merging into it (seneca-mem-store merges by default; its `merge` option changes the default). Also accepted as `ent.merge$`. |
-| `upsert$` | Array of field names. When a stored entity has the same values for these fields, it is updated; otherwise a new one is created (seneca-mem-store). Only for entities without an `id`. |
+| `merge$` | `false` replaces the stored data with the entity's fields instead of merging into it (@seneca/mem-store merges by default; its `merge` option changes the default). Also accepted as `ent.merge$`. |
+| `upsert$` | Array of field names. When a stored entity has the same values for these fields, it is updated; otherwise a new one is created (@seneca/mem-store). Only for entities without an `id`. |
 | `skip$` | Array (or comma separated string) of field names that may be absent when the entity is validated against its `ent.<canon>.valid` shape. Present values are still checked. See [Validate entity data](../how-to/validate-entity-data.md). |
 | `meta$` | As in queries: attach the meta data to the promise result. |
 

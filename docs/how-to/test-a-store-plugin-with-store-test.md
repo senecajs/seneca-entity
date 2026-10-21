@@ -32,12 +32,12 @@ const lab = (exports.lab = Lab.script())
 function makeSeneca() {
   return Seneca({ log: 'silent' })
     .test()
-    .use('entity', { mem_store: false }) // no default store: test yours alone
-    .use('..')                           // the store plugin, from the repository root
+    .use('@seneca/entity', { mem_store: false }) // no default store: test yours alone
+    .use('..')                                   // the store plugin, from the repository root
 }
 
 StoreTest.test.init(lab, {
-  seneca: Seneca({ log: 'silent' }).test().use('entity', { mem_store: false }),
+  seneca: Seneca({ log: 'silent' }).test().use('@seneca/entity', { mem_store: false }),
   name: 'map-store', // the plugin name of your store
 })
 StoreTest.test.keyvalue(lab, { seneca: makeSeneca() })
@@ -47,7 +47,10 @@ StoreTest.limitstest({ seneca: makeSeneca(), script: lab })
 ```
 
 Give each suite its own instance: the suites clear and create data in
-the same entity kinds (`foo`, `zen/moon/bar` and others).
+the same entity kinds (`foo`, `zen/moon/bar` and others). Load the
+entity plugin by its full name, `@seneca/entity`: the short name
+`entity` finds an installed seneca-entity package first (see
+[Seneca 3 and Seneca 4: package names](../explanation/seneca-3-and-4.md#package-names)).
 
 ## 3. Choose the suites your store supports
 
