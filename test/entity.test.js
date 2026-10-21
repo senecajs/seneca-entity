@@ -792,8 +792,10 @@ describe('entity', function () {
 
   test('entity.mapping', function (fin) {
     const si = SenecaInstance()
-    si.use('mem-store', { map: { '-/-/foo': '*' } })
-    si.use('mem-store', { map: { '-/-/bar': '*' } })
+    // By package name: 'mem-store' finds an installed seneca-mem-store 9
+    // first, which does not load on Seneca 4.
+    si.use('@seneca/mem-store', { map: { '-/-/foo': '*' } })
+    si.use('@seneca/mem-store', { map: { '-/-/bar': '*' } })
 
     si.ready(function () {
       const plugins = si.plugins()
