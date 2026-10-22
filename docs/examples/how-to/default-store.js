@@ -7,13 +7,15 @@ async function main() {
     // Do not load the default in-memory store automatically.
     .use(Entity, { mem_store: false })
     // Store for everything that has no more specific store (the default).
-    .use({ name: 'mem-store', tag: 'main' })
+    // Load it by package name: 'mem-store' would find an installed
+    // seneca-mem-store first, which does not load on Seneca 4.0.0.
+    .use({ name: '@seneca/mem-store', tag: 'main' })
     // A second store for one entity kind: only -/-/log messages reach it.
-    .use({ name: 'mem-store', tag: 'logs' }, { map: { '-/-/log': '*' } })
+    .use({ name: '@seneca/mem-store', tag: 'logs' }, { map: { '-/-/log': '*' } })
 
   await new Promise((resolve) => seneca.ready(resolve))
 
-  console.log('plugins:', Object.keys(seneca.plugins()).filter((n) => n.startsWith('mem-store')))
+  console.log('plugins:', Object.keys(seneca.list_plugins()).filter((n) => n.startsWith('mem-store')))
 
   await seneca.entity('person').make$({ name: 'Alice' }).save$()
   await seneca.entity('log').make$({ event: 'login' }).save$()

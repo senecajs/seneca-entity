@@ -9,10 +9,10 @@ with `save$`, `load$`, `list$` and `remove$` methods, and each method
 is a message (`sys:entity,cmd:save`) answered by a store plugin, so
 stores, validation, business rules and remote services plug in through
 ordinary Seneca patterns. An in-memory store is included. Works with
-Seneca 3.x and Seneca 4 (from 4.0.0-rc5), on Node.js 18 or later
-(Seneca 4 needs 22 or later).
+Seneca 4 (4.0.0, and the 4.0.0-rc5 prerelease) and Seneca 3 from 3.38,
+on Node.js 18 or later (Seneca 4.0.0 requires 24 or later).
 
-[![npm version](https://img.shields.io/npm/v/seneca-entity.svg)](https://npmjs.com/package/seneca-entity)
+[![npm version](https://img.shields.io/npm/v/@seneca/entity.svg)](https://npmjs.com/package/@seneca/entity)
 [![build](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml/badge.svg)](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml)
 [![Known Vulnerabilities](https://snyk.io/test/github/senecajs/seneca-entity/badge.svg)](https://snyk.io/test/github/senecajs/seneca-entity)
 [![DeepScan grade](https://deepscan.io/api/teams/5016/projects/19453/branches/505563/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=19453&bid=505563)
@@ -27,18 +27,34 @@ Seneca 3.x and Seneca 4 (from 4.0.0-rc5), on Node.js 18 or later
 npm install seneca @seneca/entity
 ```
 
-Versions up to 28.1.0 were published as `seneca-entity`; from the next
-version the package is `@seneca/entity`. `seneca.use('entity')` finds
-the plugin under either name. TypeScript declarations are included.
+Versions up to 28.1.0 were published as `seneca-entity`; from 29.0.0
+the package is `@seneca/entity` (28.2.0 was prepared but not
+published). The default store, `@seneca/mem-store`, is installed with
+it. TypeScript declarations are included.
+
+Load the plugin by package, `seneca.use(require('@seneca/entity'))`,
+or by its full name, `seneca.use('@seneca/entity')`. Avoid
+`seneca.use('entity')` until the plugins that declare a peer
+dependency on the old name are republished: seneca-transport 8.3 (a
+dependency of Seneca 3.38), @seneca/user 6.4, @seneca/owner 6.4 and
+seneca-msg-test 4.1, for example. To satisfy them npm installs
+seneca-entity 28.1.0 next to @seneca/entity, and `seneca.use('entity')`
+tries `seneca-entity` before `@seneca/entity`, so it loads 28.1.0. On
+Seneca 4.0.0 that stops the instance at startup (`plugin_gubu_shape`);
+on Seneca 3.38 and 4.0.0-rc5 you get the old version. Likewise, when
+you load the store yourself, load it as `@seneca/mem-store`, not
+`mem-store`: seneca-entity 28.1.0 brings seneca-mem-store 9.4.0, which
+does not load on Seneca 4.0.0 either.
 
 ## Quick Example
 
 ```js
 const Seneca = require('seneca')
+const Entity = require('@seneca/entity')
 
 async function main() {
-  // seneca.use('entity') finds the @seneca/entity package.
-  const seneca = Seneca({ log: 'warn' }).use('entity')
+  // Load the plugin by package (see Install).
+  const seneca = Seneca({ log: 'warn' }).use(Entity)
 
   // A template for person entities; make$ creates new ones.
   const Person = seneca.entity('person')
@@ -186,12 +202,12 @@ moved into this plugin; Seneca 3.0.0 moved the store logic here as
 well. The API is inspired in part by the
 [ActiveRecord](https://www.martinfowler.com/eaaCatalog/activeRecord.html)
 pattern. Versions up to 28.1.0 were published as `seneca-entity`; from
-the next version the package is `@seneca/entity`. Changes are listed in
+29.0.0 the package is `@seneca/entity`. Changes are listed in
 [CHANGES.md](CHANGES.md).
 
 | Plugin | Seneca | Node.js |
 | ------ | ------ | ------- |
-| 28.2.0 | 3.x (tested with 3.38) and 4 (tested with 4.0.0-rc5 and 4.0.0) | 18 or later (tested on 22 and 24; Seneca 4 needs 22 or later) |
-| 28.1.0 | 3.x; on Seneca 4 a validation shape built with `Seneca.util.Gubu` fails | 16 or later |
+| 29.0.0 | 3 from 3.38 (tested with 3.38.0) and 4 (tested with 4.0.0 and 4.0.0-rc5) | 18 or later (tested on 22; Seneca 4.0.0 requires 24 or later) |
+| 28.1.0 | 3.x; on 3.38 and on 4.0.0-rc5 a `valid` shape built with `Seneca.util.Gubu` fails every save; does not load on 4.0.0 (`plugin_gubu_shape`) | 16 or later |
 
 Licensed under the MIT license; see [LICENSE](LICENSE).

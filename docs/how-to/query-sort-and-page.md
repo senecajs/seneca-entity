@@ -10,7 +10,7 @@ The query object given to `list$`, `load$` and `remove$` has two kinds
 of properties: fields (no `$`), which must equal the stored values, and
 directives (ending in `$`), which shape the result. What a directive
 does is decided by the store; the behaviour shown is that of
-seneca-mem-store, which the official stores follow.
+@seneca/mem-store, which the official stores follow.
 
 ## 1. Filter by field values
 
@@ -41,7 +41,7 @@ await Product.list$({ name: ['kiwi', 'fig'] })
 ## 3. Sort
 
 `sort$` is an object with the field name and the direction, `1` for
-ascending and `-1` for descending. seneca-mem-store uses the first
+ascending and `-1` for descending. @seneca/mem-store uses the first
 field only.
 
 ```js
@@ -80,7 +80,7 @@ await Product.load$({ sort$: { price: 1 } })   // the cheapest product
 
 ## 7. Store specific operators
 
-seneca-mem-store understands comparison operators in field values:
+@seneca/mem-store understands comparison operators in field values:
 
 ```js
 await Product.list$({ price: { $gte: 30 } })

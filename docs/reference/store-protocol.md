@@ -3,7 +3,7 @@
 How a store plugin connects to the entity plugin. A store is an
 ordinary Seneca plugin that implements the entity commands as plain
 functions and registers them with the initializer exported by the
-entity plugin. [seneca-mem-store](https://github.com/senecajs/seneca-mem-store)
+entity plugin. [@seneca/mem-store](https://github.com/senecajs/seneca-mem-store)
 is the reference implementation; the tutorial
 [Writing a store plugin](../tutorials/writing-a-store-plugin.md) builds
 one from scratch.
@@ -24,7 +24,7 @@ init(seneca, options, store, function (err, tag, desc) { ... })   // legacy call
 
 The return value (or the callback arguments) gives the store `tag`, a
 number counting the stores of the same name (or the plugin tag when the
-store was loaded with one, `seneca.use({ name: 'mem-store', tag: 'main' })`),
+store was loaded with one, `seneca.use({ name: '@seneca/mem-store', tag: 'main' })`),
 and `desc`, a description string `name~tag~canon[~canon...]` for logs.
 Returning the tag from the plugin definition (`return { name, tag }`)
 registers the store under `name$tag` as well.
@@ -65,8 +65,8 @@ an action with the pattern `sys:entity,cmd:<command>` plus `zone`,
 `base` and `name` for the parts of the canon that are set:
 
 ```js
-seneca.use('mem-store')                                  // all canons: sys:entity,cmd:save etc.
-seneca.use('mem-store', { map: { '-/-/log': '*' } })     // sys:entity,cmd:save,name:log etc.
+seneca.use('@seneca/mem-store')                          // all canons: sys:entity,cmd:save etc.
+seneca.use('@seneca/mem-store', { map: { '-/-/log': '*' } }) // sys:entity,cmd:save,name:log etc.
 seneca.use(MyStore, { map: { 'shop/-/-': ['save', 'load', 'list', 'remove'] } })  // zone:shop, four commands
 ```
 

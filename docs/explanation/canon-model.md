@@ -14,7 +14,7 @@ zone / base / name
   part you always have.
 * `base` groups kinds, like a schema or a namespace of tables:
   `shop/product`, `shop/order`. Stores usually map base and name to
-  their own structure (seneca-mem-store keeps `data[base][name][id]`;
+  their own structure (@seneca/mem-store keeps `data[base][name][id]`;
   a SQL store might use `base` as the schema and `name` as the table).
 * `zone` separates whole data sets that have the same shape: tenants,
   regions, environments. `eu/shop/order` and `us/shop/order` are
@@ -51,7 +51,7 @@ The same mechanism serves business logic. A prior on
 
 ## Zone and storage
 
-The zone is a routing concept. seneca-mem-store does not include it in
+The zone is a routing concept. @seneca/mem-store does not include it in
 its storage key, so `eu/shop/order` and `us/shop/order` entities that
 reach the same mem-store instance share a table. Multi-tenancy by zone
 therefore means one store instance per zone (each mapped with

@@ -16,6 +16,13 @@ npm install seneca-transport
 Seneca 3 includes seneca-transport and loads it by default; loading it
 explicitly as below works there too.
 
+seneca-transport 8.3 declares a peer dependency on the old package
+name, `seneca-entity`, so npm also installs seneca-entity 28.1.0 (and
+seneca-mem-store 9.4.0). Load the entity plugin as `@seneca/entity`,
+as below, not as `entity`, which would load seneca-entity 28.1.0; on
+Seneca 4.0.0 that stops the instance at startup (see
+[Seneca 3 and Seneca 4: package names](../explanation/seneca-3-and-4.md#package-names)).
+
 ## 2. Expose the entity messages from the service
 
 The service has the entity plugin and a store, and listens for every

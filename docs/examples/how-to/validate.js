@@ -2,18 +2,19 @@
 const Seneca = require('seneca')
 const Entity = require('../../..') // in your own project: require('@seneca/entity')
 
-// Gubu is bundled with Seneca; Seneca.util.Gubu is the copy Seneca uses.
-const Gubu = Seneca.util.Gubu
+// Seneca's validator: shape on Seneca 4, Gubu on Seneca 3, with the same
+// builders (Open, Skip, Required, ...).
+const Valid = Seneca.valid
 
 async function main() {
   const seneca = Seneca({ log: 'warn' }).use(Entity, {
     ent: {
-      // A Gubu shape: used as it is. List id so that saved entities,
+      // A prepared shape: used as it is. List id so that saved entities,
       // which carry an id, pass the (closed) shape when updated.
       '-/-/person': {
-        valid: Gubu({ id: String, name: String, age: Number }),
+        valid: Valid({ id: String, name: String, age: Number }),
       },
-      // A function returning the specification: wrapped by the plugin.
+      // A function returning the specification: built by the plugin.
       '-/shop/product': {
         valid: () => ({ name: String, price: Number, tags: [String] }),
       },

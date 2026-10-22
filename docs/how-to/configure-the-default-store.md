@@ -8,7 +8,7 @@ different stores. The complete program is
 ## What the default is
 
 With the default option `mem_store: true`, the entity plugin loads
-[seneca-mem-store](https://github.com/senecajs/seneca-mem-store) on the
+[@seneca/mem-store](https://github.com/senecajs/seneca-mem-store) on the
 root instance while it loads itself. The store registers
 `sys:entity,cmd:save` (and `load`, `list`, `remove`, `native`) without
 any canon properties, so it handles every entity. The data lives in
@@ -17,8 +17,8 @@ prototypes, not for production.
 
 ## 1. Configure the default in-memory store
 
-Give seneca-mem-store options through the instance options, under its
-plugin name:
+Give @seneca/mem-store options through the instance options, under its
+plugin name, `mem-store`:
 
 ```js
 Seneca({ plugin: { 'mem-store': { merge: false } } }).use('@seneca/entity')
@@ -37,8 +37,15 @@ store a tag and options of your choosing:
 ```js
 const seneca = Seneca()
   .use('@seneca/entity', { mem_store: false })
-  .use({ name: 'mem-store', tag: 'main' })
+  .use({ name: '@seneca/mem-store', tag: 'main' })
 ```
+
+Use the package name, `@seneca/mem-store`. Where npm has installed
+seneca-entity 28.1.0 for a plugin's peer dependency, it has also
+installed seneca-mem-store 9.4.0, and the short name `mem-store` finds
+that package first; it does not load on Seneca 4.0.0 (see
+[Seneca 3 and Seneca 4: package names](../explanation/seneca-3-and-4.md#package-names)).
+The store still registers as `mem-store`, here `mem-store$main`.
 
 ## 3. Use another store as the default
 
@@ -69,8 +76,8 @@ which are more specific than the default store's:
 ```js
 const seneca = Seneca()
   .use('@seneca/entity', { mem_store: false })
-  .use({ name: 'mem-store', tag: 'main' })
-  .use({ name: 'mem-store', tag: 'logs' }, { map: { '-/-/log': '*' } })
+  .use({ name: '@seneca/mem-store', tag: 'main' })
+  .use({ name: '@seneca/mem-store', tag: 'logs' }, { map: { '-/-/log': '*' } })
 ```
 
 `log` entities now go to the second store and everything else to the
@@ -89,9 +96,9 @@ await seneca.entity('log').native$() // the store that handles log entities
 
 `native$` is answered by the store that handles the entity's kind, so
 it is a quick way to see which store is in charge. With
-seneca-mem-store it returns that store's data object,
+@seneca/mem-store it returns that store's data object,
 `{ [base]: { [name]: { [id]: data } } }`. The zone is not part of
-seneca-mem-store's key; see
+@seneca/mem-store's key; see
 [The canon model](../explanation/canon-model.md#zone-and-storage).
 
 ## The program's output

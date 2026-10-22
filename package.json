@@ -1,7 +1,7 @@
 {
   "name": "@seneca/entity",
   "main": "dist/entity.js",
-  "version": "28.2.0",
+  "version": "29.0.0",
   "type": "commonjs",
   "types": "dist/entity.d.ts",
   "description": "Entity plugin for seneca",
@@ -20,7 +20,7 @@
     "Wyatt Preul (https://github.com/geek)",
     "Shane Lacey (https://github.com/shanel262)",
     "Emer Rutherford (https://github.com/eeswr)",
-    "Nicol\u00e1s Fantone (https://github.com/nfantone)",
+    "Nicolás Fantone (https://github.com/nfantone)",
     "Leonardo Cunha (https://github.com/LeonNimoy)"
   ],
   "files": [
@@ -52,12 +52,11 @@
     "node": ">=18"
   },
   "dependencies": {
-    "gubu": "^9.0.0",
-    "patrun": "^7.2.7",
-    "seneca-mem-store": "^9.4.0"
+    "@seneca/mem-store": "^10.0.0",
+    "patrun": "^7.2.7"
   },
   "peerDependencies": {
-    "seneca": ">=3||>=4.0.0-rc2",
+    "seneca": ">=3.38||>=4.0.0-rc5",
     "seneca-promisify": ">=3"
   },
   "devDependencies": {
