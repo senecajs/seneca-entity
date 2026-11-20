@@ -12,13 +12,11 @@ covers them.
 
 ## 1. Install
 
-Node.js 18 or later (22 or 24 recommended), and Seneca 4 (4.0.0-rc5 or
-later; 4.0.0 requires Node.js 24 or later) or Seneca 3 from 3.38. In a
-new directory:
+Node.js 24 or later and Seneca 4. In a new directory:
 
 ```sh
 npm init -y
-npm install seneca @seneca/entity
+npm install seneca@^4 @seneca/entity
 ```
 
 The plugin brings @seneca/mem-store, an in-memory store, so nothing
@@ -29,8 +27,8 @@ published as `seneca-entity`; the package is `@seneca/entity` from
 repository use `require('../../..')` instead, to load the repository's
 own build. To load it by name, write `seneca.use('@seneca/entity')`,
 not `seneca.use('entity')`: npm may also have installed the old
-seneca-entity package, as it does with Seneca 3.38, and the short name
-finds that one first (see the [README](../../README.md#install)).
+seneca-entity package for another plugin, and the short name can load
+that one (see the [README](../../README.md#install)).
 
 ## 2. Save and load
 

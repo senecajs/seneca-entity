@@ -1,4 +1,22 @@
+/// <reference types="seneca" preserve="true" />
 import { Entity } from './lib/make_entity';
+declare module 'seneca' {
+    interface Instance {
+        /**
+         * Make an entity in callback mode. Arguments: `(name)`, `(base, name)`,
+         * `(zone, base, name)` or a canon string `'zone/base/name'`, optionally
+         * followed by an object of field values.
+         */
+        make$(...args: any[]): any;
+        /** Alias of `make$`. */
+        make(...args: any[]): any;
+        /**
+         * Make an entity in promise mode: its operations (`save$`, `load$`,
+         * `list$`, `remove$`) return promises. Same arguments as `make$`.
+         */
+        entity(...args: any[]): any;
+    }
+}
 declare function entity(this: any, _options: any): {
     name: string;
 };

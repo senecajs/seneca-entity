@@ -19,12 +19,12 @@ The programs from the tutorials and guides are in [examples](examples/).
 | Guide | Covers |
 | ----- | ------ |
 | [Query, sort and page](how-to/query-sort-and-page.md) | Field conditions, lists of ids, `sort$`, `skip$`, `limit$`, `fields$`, counting. |
-| [Validate entity data](how-to/validate-entity-data.md) | Shapes per entity kind with `seneca.valid` (shape on Seneca 4, Gubu on Seneca 3), defaults, partial updates, `skip$`, `strict`. |
+| [Validate entity data](how-to/validate-entity-data.md) | Shapes per entity kind with `seneca.valid` (shape), defaults, partial updates, `skip$`, `strict`. |
 | [Use entities with promises and in async actions](how-to/use-promises-and-async-actions.md) | Promise mode, `this.entity`, errors, callback mode results, `meta$`. |
-| [Share entities over a transport](how-to/share-entities-over-a-transport.md) | A data service and its clients with seneca-transport; what travels. |
+| [Share entities over a transport](how-to/share-entities-over-a-transport.md) | A data service and its clients with @seneca/transport; what travels. |
 | [Configure the default store](how-to/configure-the-default-store.md) | The in-memory store, replacing it, mapping kinds to stores. |
 | [Customize operations with priors](how-to/customize-operations-with-priors.md) | Defaults, checks, result filtering and hints, without changing the store. |
-| [Test a store plugin with seneca-store-test](how-to/test-a-store-plugin-with-store-test.md) | The standard store suites with lab. |
+| [Test a store plugin with @seneca/store-test](how-to/test-a-store-plugin-with-store-test.md) | The standard store suites with lab. |
 | [Migrate from Seneca 3](how-to/migrate-from-seneca-3.md) | What changes for entity code in Seneca 4: package names, validation shapes, errors, options, stores. |
 
 ## Reference
@@ -44,7 +44,7 @@ The programs from the tutorials and guides are in [examples](examples/).
 | ----------- | ----- |
 | [The canon model](explanation/canon-model.md) | Zone, base and name, and why entity kinds are routing keys. |
 | [How entity methods map to actions and stores](explanation/entities-actions-and-stores.md) | From `save$` to the store and back; why stores are plugins; what travels; modes. |
-| [Seneca 3 and Seneca 4](explanation/seneca-3-and-4.md) | What differs between the two for entity code. |
+| [Seneca 3 and Seneca 4](explanation/seneca-3-and-4.md) | What changed for entity code from Seneca 3 and seneca-entity 28. |
 
 ## Feature index
 
@@ -93,7 +93,7 @@ The plugin has no command line interface.
 | `entity/store` (`cmds`, `init`) | [Store protocol: the initializer](reference/store-protocol.md#the-initializer) | |
 | `entity/generate_id` | [Store protocol: ids](reference/store-protocol.md#ids) | [Writing a store plugin](tutorials/writing-a-store-plugin.md#3-save) |
 | `Entity` (the entity class) | [Entity API: the Entity class](reference/entity-api.md#the-entity-class) | |
-| Module export (plugin function, `defaults`, `preload`), TypeScript type `Entity` | [Entity API: the module](reference/entity-api.md#the-module) | |
+| Module export (plugin function, `defaults`, `preload`), TypeScript type `Entity` and the `Instance` augmentation | [Entity API: the module](reference/entity-api.md#the-module) | |
 
 ### Entity methods and properties
 
@@ -121,9 +121,9 @@ The plugin has no command line interface.
 | ----- | --------- |
 | `Entity: invalid entity canon` | [Errors: thrown by the entity API](reference/errors.md#thrown-by-the-entity-api) |
 | `Entity: unknown entity` (`strict`) | [Errors: thrown by the entity API](reference/errors.md#thrown-by-the-entity-api) |
-| `ShapeError` (Seneca 4), `GubuError` (Seneca 3) (validation) | [Errors: thrown by the entity API](reference/errors.md#thrown-by-the-entity-api) |
+| `ShapeError` (validation) | [Errors: thrown by the entity API](reference/errors.md#thrown-by-the-entity-api) |
 | `invalid_plugin_option` | [Errors: raised when a plugin loads](reference/errors.md#raised-when-a-plugin-loads) |
-| `plugin_define_failed` (`valid` built with the other library's builders) | [Errors: raised when a plugin loads](reference/errors.md#raised-when-a-plugin-loads) |
+| `plugin_define_failed` (`valid` built with Gubu builders) | [Errors: raised when a plugin loads](reference/errors.md#raised-when-a-plugin-loads) |
 | `plugin_gubu_shape` (seneca-entity 28.1.0 or seneca-mem-store 9.4.0 on Seneca 4.0.0) | [Errors: raised when a plugin loads](reference/errors.md#raised-when-a-plugin-loads) |
 | `store_cmd_missing` | [Errors: raised when a plugin loads](reference/errors.md#raised-when-a-plugin-loads) |
 | `act_not_found` (no store) | [Errors: replied by actions](reference/errors.md#replied-by-actions) |

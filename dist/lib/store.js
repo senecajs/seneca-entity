@@ -16,6 +16,7 @@ function Store(plugin_opts) {
         // opts.map = { canon: [cmds] }
         // canon is in string format zone/base/name, with empty or - indicating undefined
         init: function (instance, store_opts, store, cb) {
+            var _a, _b;
             const entspecs = [];
             const hasCanonMapping = store_opts.map && 0 < Object.keys(store_opts.map).length;
             if (hasCanonMapping) {
@@ -30,10 +31,12 @@ function Store(plugin_opts) {
             else {
                 entspecs.push({ canon: '-/-/-', cmds: allcmds });
             }
-            // TODO: messy!
-            const plugin_tag = instance.fixedargs &&
-                instance.fixedargs.plugin$ &&
-                instance.fixedargs.plugin$.tag;
+            // The fixed message properties of the store's plugin delegate hold
+            // the plugin tag. Seneca 4 names them fixedmsg; fixedargs is the
+            // deprecated alias (SENECA_DEP_FIXEDARGS), read only when fixedmsg
+            // is absent.
+            const fixedmsg = (_a = instance.fixedmsg) !== null && _a !== void 0 ? _a : instance.fixedargs;
+            const plugin_tag = (_b = fixedmsg === null || fixedmsg === void 0 ? void 0 : fixedmsg.plugin$) === null || _b === void 0 ? void 0 : _b.tag;
             // plugin_tag cannot be a strict null equal
             const tag = plugin_tag == null || plugin_tag === '-'
                 ? make_tag(store.name)

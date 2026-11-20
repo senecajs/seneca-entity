@@ -9,11 +9,11 @@ async function main() {
   // exposing every entity message (pattern sys:entity) over HTTP.
   // Expected errors would be logged; keep the output readable.
   const service = Seneca({ tag: 'service', log: 'silent' })
-    .use('seneca-transport')
+    .use('@seneca/transport')
     .use(Entity)
     .listen({ type: 'web', port: 8270, pin: 'sys:entity' })
 
-  await new Promise((resolve) => service.ready(resolve))
+  await service.ready()
 
   // A rule that lives in the service: people need a name.
   service.message('sys:entity,cmd:save,name:person', async function (msg) {
@@ -25,11 +25,11 @@ async function main() {
 
   // The client: entity plugin without a store; entity messages go to the service.
   const client = Seneca({ tag: 'client', log: 'silent' })
-    .use('seneca-transport')
+    .use('@seneca/transport')
     .use(Entity, { mem_store: false })
     .client({ type: 'web', port: 8270, pin: 'sys:entity' })
 
-  await new Promise((resolve) => client.ready(resolve))
+  await client.ready()
 
   // The same API; the data lives in the service.
   const saved = await client.entity('person').make$({ name: 'Alice', born: new Date(0) }).save$()
@@ -55,13 +55,6 @@ async function main() {
   }
 
   await client.close()
-
-  // seneca-transport 8.3.0 stops its HTTP listener in a role:seneca,cmd:close
-  // hook. Seneca 3 and Seneca 4.0.0 call that hook when closing; 4.0.0-rc5
-  // does not, so call it here or the process does not exit.
-  if ('4.0.0-rc5' === service.version) {
-    await service.post('role:seneca,cmd:close')
-  }
   await service.close()
 }
 

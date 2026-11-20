@@ -5,7 +5,7 @@ Runnable programs that accompany the [tutorials](../tutorials/) and
 repository (`require('../../..')`, which is the package's `dist/` build);
 in your own project use `require('@seneca/entity')` or
 `seneca.use('@seneca/entity')` instead (not `seneca.use('entity')`,
-which finds an installed seneca-entity package first; see the
+which can load an installed seneca-entity package; see the
 [README](../../README.md#install)).
 
 | Directory | Page |
@@ -15,12 +15,12 @@ which finds an installed seneca-entity package first; see the
 | `how-to/query-sort-page.js` | [Query, sort and page](../how-to/query-sort-and-page.md) |
 | `how-to/validate.js` | [Validate entity data](../how-to/validate-entity-data.md) |
 | `how-to/promises-async-actions.js` | [Use entities with promises and in async actions](../how-to/use-promises-and-async-actions.md) |
-| `how-to/transport.js` | [Share entities over a transport](../how-to/share-entities-over-a-transport.md) (needs `seneca-transport`, a development dependency of this repository; uses port 8270) |
+| `how-to/transport.js` | [Share entities over a transport](../how-to/share-entities-over-a-transport.md) (needs `@seneca/transport`, a development dependency of this repository; uses port 8270) |
 | `how-to/default-store.js` | [Configure the default store](../how-to/configure-the-default-store.md) |
 | `how-to/priors.js` | [Customize operations with priors](../how-to/customize-operations-with-priors.md) |
 
 Run them from the repository root after `npm install` and `npm run build`,
-with Node.js 22 or later, for example:
+with Node.js 24 or later, for example:
 
 ```sh
 node docs/examples/getting-started/01-save-and-load.js

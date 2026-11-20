@@ -2,12 +2,10 @@
 
 How to reject invalid data before it reaches the store, using
 validation shapes in the `ent` option. The shapes are built and checked
-by Seneca's validator, `seneca.valid`:
-[shape](https://github.com/rjrodger/shape) on Seneca 4.0.0,
-[Gubu](https://github.com/rjrodger/gubu) 9 on Seneca 3.38 and
-4.0.0-rc5. shape is the renamed successor of Gubu, with the same
-builders and messages, so the shapes below work on both. The complete
-program is
+by Seneca's validator, `seneca.valid`, which is
+[shape](https://github.com/rjrodger/shape) on Seneca 4. shape is the
+renamed successor of [Gubu](https://github.com/rjrodger/gubu), with
+the same builders and messages. The complete program is
 [docs/examples/how-to/validate.js](../examples/how-to/validate.js).
 
 ## 1. Define a shape per entity kind
@@ -19,8 +17,7 @@ The `ent` option is keyed by canon string. Each entry can have a
 const Seneca = require('seneca')
 const Entity = require('@seneca/entity')
 
-// Seneca's validator: shape on Seneca 4, Gubu on Seneca 3, with the same
-// builders (Open, Skip, Required, ...).
+// Seneca's validator, shape, with the builders Open, Skip, Required, ...
 const Valid = Seneca.valid
 
 const seneca = Seneca({ log: 'warn' }).use(Entity, {
@@ -44,10 +41,10 @@ const seneca = Seneca({ log: 'warn' }).use(Entity, {
 
 * A prepared shape (`Seneca.valid({...})`, or `seneca.valid({...})`
   on an instance) is used as it is. Shapes built by any copy or version
-  of shape or Gubu work, such as `Gubu({...})` from the gubu package on
-  Seneca 4.0.0; such a shape throws the errors of its own library.
-  (`Seneca.util.Gubu` builds shapes too, but on Seneca 4.0.0 it is a
-  deprecated alias of shape; use `Seneca.valid`.)
+  of shape or Gubu work, such as `Gubu({...})` from the gubu package;
+  such a shape throws the errors of its own library.
+  (`Seneca.util.Gubu` builds shapes too, but it is a deprecated alias
+  of shape; use `Seneca.valid`.)
 * A plain specification object, or a function returning one, is built
   by the plugin with the instance's validator, `seneca.valid`, and
   named after the canon, so its error messages start with
@@ -55,15 +52,14 @@ const seneca = Seneca({ log: 'warn' }).use(Entity, {
   specification object between kinds; the function may also return a
   prepared shape.
 * Builders inside a specification (`{ note: Valid.Skip(String) }`)
-  must come from `seneca.valid` or `Seneca.valid` (on Seneca 4.0.0 the
-  shape package works too). The validator does not read builders of
-  the other library, such as `Required` imported from the gubu package
-  on Seneca 4.0.0: the plugin refuses such a specification when it
+  must come from `seneca.valid` or `Seneca.valid` (the shape package
+  works too). The validator does not read Gubu builders, such as
+  `Required` imported from the gubu package: the plugin refuses such a specification when it
   loads, with an error that names the canon and the path, and the
   instance stops (`plugin_define_failed`, see
   [Errors](../reference/errors.md#raised-when-a-plugin-loads)).
 * `valid_json` is the JSON form produced by `shape.jsonify()`, built
-  with `seneca.valid.build`; it is the same on Seneca 3 and 4. Types
+  with `seneca.valid.build`; shape and Gubu share the form. Types
   are strings (`'String'`, `'Number'`), values are defaults
   (`quantity: 1` means a number, default 1), and builders are written
   as strings (`'Skip(String)'`, `$$: 'Open'`).
@@ -93,8 +89,7 @@ Validation runs inside `save$`, before any message is sent, and the
 error is thrown. With `await` it becomes a rejection; in callback mode
 it is thrown synchronously from the `save$` call, so wrap the call in
 `try`/`catch` rather than checking `err` in the callback. The error is
-a `ShapeError` on Seneca 4.0.0 and a `GubuError` on Seneca 3.38 and
-4.0.0-rc5, with the same `message`, `code` (`'shape'`) and `props`. `err.props` lists each
+a `ShapeError`, with `code` `'shape'`. `err.props` lists each
 failure with its path, the check that failed, the expected type and
 the value (see [Errors](../reference/errors.md)). This message has no
 `Entity: -/-/person:` prefix because the `person` shape was prepared
@@ -118,7 +113,7 @@ const order = await seneca.entity('shop/order').make$({ product: 'kiwi' }).save$
 const product = seneca.entity('shop/product').make$({ name: 'fig', price: 'cheap' })
 product.valid$()                    // false
 product.valid$({ errors: true })    // [ { path: 'price', why: 'type', ... } ]
-product.valid$({ throws: true })    // throws the ShapeError (GubuError on Seneca 3)
+product.valid$({ throws: true })    // throws the ShapeError
 seneca.entity('shop/order').valid$({ shape: true }).stringify()
 // {"product":"String","quantity":"1","note":"\"\""}
 ```

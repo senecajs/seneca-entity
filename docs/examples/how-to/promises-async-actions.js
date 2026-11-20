@@ -20,7 +20,7 @@ async function main() {
     return { order: order.data$(false) }
   })
 
-  await new Promise((resolve) => seneca.ready(resolve))
+  await seneca.ready()
 
   await seneca.entity('shop/product').make$({ name: 'kiwi', price: 2 }).save$()
 

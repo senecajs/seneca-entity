@@ -25,10 +25,9 @@ of operations) are in promise mode too. `seneca.make$` creates entities
 in callback mode instead; see
 [Entity API: modes and return values](../reference/entity-api.md#modes-and-return-values).
 
-Promise mode is part of the entity plugin. It works on Seneca 3
-without seneca-promisify, which Seneca 3 needs only for `seneca.post`,
-`seneca.message` and promise returning `ready` and `close`. On Seneca 4
-those are built in.
+Promise mode is part of the entity plugin. `seneca.post`,
+`seneca.message` and promise returning `ready` and `close` are built
+into Seneca 4, so no other plugin is needed.
 
 ## 2. Use entities inside async actions
 
@@ -69,10 +68,7 @@ try {
 }
 ```
 
-On Seneca 4 the error is the original one. On Seneca 3 it is wrapped
-(`seneca: Action cmd:order,role:shop failed: unknown product: durian.`)
-with the original as `err.orig`; write `(err.orig || err).message` when
-code must run on both.
+The error is the original one, not wrapped by Seneca.
 
 ## 4. Convert callback mode entities before awaiting
 
@@ -121,14 +117,13 @@ const [count, cheapest] = await Promise.all([
 ])
 ```
 
-## 7. Wait for plugins to load on Seneca 4.0.0-rc5
+## 7. Wait for plugins to load
 
-`await seneca.ready()` does not resolve on an instance that has already
-finished loading in Seneca 4.0.0-rc5 (fixed in 4.0.0). The callback
-form works on every version:
+`await seneca.ready()` resolves when every plugin has loaded, also on
+an instance that has already finished loading:
 
 ```js
-await new Promise((resolve) => seneca.ready(resolve))
+await seneca.ready()
 ```
 
 ## The program's output

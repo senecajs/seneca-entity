@@ -32,7 +32,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/senecajs/seneca-entity.git"
+    "url": "git+https://github.com/senecajs/seneca-entity.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "test": "jest --coverage",
@@ -43,33 +46,27 @@
     "prettier": "prettier --write --no-semi --single-quote src/**/*.ts test/*.js",
     "reset": "npm run clean && npm i && npm run build && npm test",
     "clean": "rm -rf node_modules dist package-lock.json yarn.lock",
-    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
-    "repo-publish": "npm run clean && npm i --registry=https://registry.npmjs.org && npm run repo-publish-quick",
-    "repo-publish-quick": "npm run prettier && npm run build && npm test && npm run repo-tag && npm publish --access public --registry=https://registry.npmjs.org",
     "maintain": "maintain"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=24"
   },
   "dependencies": {
     "@seneca/mem-store": "^10.0.0",
     "patrun": "^7.2.7"
   },
   "peerDependencies": {
-    "seneca": ">=3.38||>=4.0.0-rc5",
-    "seneca-promisify": ">=3"
+    "seneca": "^4.0.0"
   },
   "devDependencies": {
     "@seneca/maintain": "^0.1.0",
+    "@seneca/transport": "^9.0.0",
     "@types/jest": "^29.5.12",
     "esbuild": "^0.23.0",
     "esbuild-jest": "^0.5.0",
     "jest": "^29.7.0",
     "prettier": "^3.3.2",
-    "seneca": "^4.0.0-rc5",
-    "seneca-msg-test": "^4.1.0",
-    "seneca-promisify": "^3.7.2",
-    "seneca-transport": "^8.3.0",
-    "typescript": "^5.5.3"
+    "seneca": "^4.0.0",
+    "typescript": "~5.9.3"
   }
 }

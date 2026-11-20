@@ -11,11 +11,10 @@ Seneca({ plugin: { entity: { mem_store: false } } }).use('@seneca/entity')
 
 The options are validated when the plugin loads, against the option
 shape that the plugin's `defaults` function builds with the builders
-Seneca passes to it (shape on Seneca 4.0.0, Gubu on Seneca 3.38 and
-4.0.0-rc5). An option that is not listed here, or a value of the wrong
-type, is a plugin load error, which is fatal by default (the instance
-does not start). Plugin options are read from `use` and from the
-`plugin.entity` instance option, on Seneca 3 and 4.
+Seneca passes to it (shape). An option that is not listed here, or a
+value of the wrong type, is a plugin load error, which is fatal by
+default (the instance does not start). Plugin options are read from
+`use` and from the `plugin.entity` instance option.
 
 ## Options
 
@@ -26,8 +25,8 @@ does not start). Plugin options are read from `use` and from the
 | `pattern_fix` | object | `{ sys: 'entity' }` | Properties added to every entity message and to the patterns registered by stores. The default makes the patterns `sys:entity,cmd:save`, `sys:entity,cmd:load` and so on. The `role:entity` translations always target `sys:entity`. |
 | `strict` | boolean | `false` | When `true`, creating an entity whose canon matches no key of `ent` throws `Entity: unknown entity: <canon>`. |
 | `ent` | object | `{}` | Per entity settings, keyed by canon string (`zone/base/name`, `-` for an unset part, for example `-/-/person` or `-/shop/product`). Each value is an object with the optional keys `valid` and `valid_json` described below. Other keys are rejected. |
-| `ent.<canon>.valid` | shape, object or function | none | Validation shape for entities of this canon: a prepared shape (built with `seneca.valid` or `Seneca.valid`, or by any copy or version of shape or Gubu), used as it is; a plain specification object, built with the instance's validator (`seneca.valid`); or a function returning either. A specification that holds builders of the other library (Gubu builders on Seneca 4.0.0, shape builders on Seneca 3.38 and 4.0.0-rc5) is refused when the plugin loads (`plugin_define_failed`). See [Validate entity data](../how-to/validate-entity-data.md). |
-| `ent.<canon>.valid_json` | object | none | Validation shape in JSON form (as produced by `shape.jsonify()`), built with `seneca.valid.build`; the form is the same on Seneca 3 and 4. Suitable for configuration files. Takes precedence over `valid` when both are set. |
+| `ent.<canon>.valid` | shape, object or function | none | Validation shape for entities of this canon: a prepared shape (built with `seneca.valid` or `Seneca.valid`, or by any copy or version of shape or Gubu), used as it is; a plain specification object, built with the instance's validator (`seneca.valid`); or a function returning either. A specification that holds Gubu builders (for example imported from the gubu package), which Seneca 4's validator does not read, is refused when the plugin loads (`plugin_define_failed`). See [Validate entity data](../how-to/validate-entity-data.md). |
+| `ent.<canon>.valid_json` | object | none | Validation shape in JSON form (as produced by `shape.jsonify()`), built with `seneca.valid.build`; shape and Gubu share the form. Suitable for configuration files. Takes precedence over `valid` when both are set. |
 | `meta.provide` | boolean | `true` | Pass the action meta data as the third argument of entity method callbacks (`function (err, result, meta)`). `false` drops the third argument. The setting is stored on the shared `Entity` class: once an instance with `false` has made an entity, callbacks of every entity in the process receive `(err, result)` only. |
 | `log.active` | boolean | `false` | Add a `log$` method to entities (`ent.log$(...)` logs through the Seneca instance that created the entity) and log a `make` entry, at debug level, for every `make$` call. The method is added to the shared `Entity` class, so it applies to the entities of every instance in the process. |
 | `jsonic.depth` | number | `7` | Reserved. Accepted and validated, but the string form of an entity (`String(ent)`) uses fixed limits: 11 items per object or array, two levels of nesting below the entity, 111 characters for the field part. |
@@ -57,6 +56,6 @@ does not start). Plugin options are read from `use` and from the
   the plugin loads, or
   `seneca.use('@seneca/entity', { mem_store: false }).use('@seneca/mem-store', { merge: false })`.
   Use the full package names: the short names `entity` and `mem-store`
-  find the old `seneca-entity` and `seneca-mem-store` packages first
+  can load the old `seneca-entity` and `seneca-mem-store` packages
   when they are installed (see
   [Seneca 3 and Seneca 4: package names](../explanation/seneca-3-and-4.md#package-names)).

@@ -12,7 +12,7 @@ function makeSeneca() {
 
 test('save, load, list, remove', async () => {
   const seneca = makeSeneca()
-  await new Promise((resolve) => seneca.ready(resolve))
+  await seneca.ready()
 
   const Foo = seneca.entity('foo')
   const foo0 = await Foo.make$({ a: 1 }).save$()
@@ -34,7 +34,7 @@ test('save, load, list, remove', async () => {
 
 test('directives', async () => {
   const seneca = makeSeneca()
-  await new Promise((resolve) => seneca.ready(resolve))
+  await seneca.ready()
 
   const Bar = seneca.entity('bar')
   for (const n of [3, 1, 2]) {

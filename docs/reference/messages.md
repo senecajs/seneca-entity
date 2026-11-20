@@ -83,8 +83,7 @@ so priors written for either form work together.
 
 A store's `close` command is attached to `sys:seneca,cmd:close` as a
 prior, so it runs when `seneca.close()` is called, once per store
-instance (a `closed$` flag prevents a second call). On Seneca 3 the
-pattern is translated to `role:seneca,cmd:close` by the core. The entity
+instance (a `closed$` flag prevents a second call). The entity
 method `close$` sends `sys:entity,cmd:close`, which no store registers;
 it is deprecated.
 

@@ -42,8 +42,8 @@ const seneca = Seneca()
 
 Use the package name, `@seneca/mem-store`. Where npm has installed
 seneca-entity 28.1.0 for a plugin's peer dependency, it has also
-installed seneca-mem-store 9.4.0, and the short name `mem-store` finds
-that package first; it does not load on Seneca 4.0.0 (see
+installed seneca-mem-store 9.4.0, and the short name `mem-store` can
+pick that package, which does not load on Seneca 4 (see
 [Seneca 3 and Seneca 4: package names](../explanation/seneca-3-and-4.md#package-names)).
 The store still registers as `mem-store`, here `mem-store$main`.
 

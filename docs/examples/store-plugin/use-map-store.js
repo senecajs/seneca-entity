@@ -9,7 +9,7 @@ async function main() {
     .use(Entity, { mem_store: false }) // no default store
     .use(MapStore)
 
-  await new Promise((resolve) => seneca.ready(resolve))
+  await seneca.ready()
 
   console.log('store actions:', seneca.list('sys:entity').map((p) => p.cmd).join(','))
 
