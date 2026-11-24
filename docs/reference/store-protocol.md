@@ -121,6 +121,6 @@ whose value is an entity are replaced by that entity's `id` in `data$`.
 
 ## Testing a store
 
-[seneca-store-test](https://github.com/senecajs/seneca-store-test)
+[@seneca/store-test](https://github.com/senecajs/seneca-store-test)
 provides the standard suites used by the official stores. See
-[Test a store plugin with seneca-store-test](../how-to/test-a-store-plugin-with-store-test.md).
+[Test a store plugin with @seneca/store-test](../how-to/test-a-store-plugin-with-store-test.md).

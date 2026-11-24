@@ -25,7 +25,6 @@ function SenecaInstance() {
     plugins: [Entity],
   })
     .test()
-    .use('promisify')
 
   return seneca
 }
@@ -50,7 +49,7 @@ describe('entity', function () {
   })
 
   test('happy-mem-promise', async function () {
-    const si = Seneca({ legacy: false }).use('promisify').use('..').test()
+    const si = Seneca({ legacy: false }).use('..').test()
 
     const fooent = si.entity('foo')
 
@@ -102,7 +101,7 @@ describe('entity', function () {
   })
 
   test('entity-promise', async () => {
-    const si = Seneca({ legacy: false }).use('promisify').use('..').test()
+    const si = Seneca({ legacy: false }).use('..').test()
 
     const bar0 = si.entity('bar').data$({ a: 1 })
     expect('' + bar0).toEqual('$-/-/bar;id=;{a:1}')
@@ -292,6 +291,131 @@ describe('entity', function () {
       },
       fin,
     )
+  })
+
+  // The store reads the plugin tag from the fixed message properties of
+  // the store's plugin delegate: fixedmsg on Seneca 4, falling back to the
+  // deprecated alias fixedargs only when fixedmsg is absent (D6).
+  function fakeStoreInstance(fixed) {
+    const reads = []
+    const added = []
+    const instance = {
+      add: (pattern) => added.push(pattern),
+      die: (code) => {
+        throw new Error(code)
+      },
+    }
+    for (const name of Object.keys(fixed)) {
+      Object.defineProperty(instance, name, {
+        get() {
+          reads.push(name)
+          return fixed[name]
+        },
+      })
+    }
+    return { instance, reads, added }
+  }
+
+  function fakeStoreDef(name) {
+    const cmd = function (msg, reply) {
+      reply()
+    }
+    return {
+      name,
+      save: cmd,
+      load: cmd,
+      list: cmd,
+      remove: cmd,
+      close: cmd,
+      native: cmd,
+    }
+  }
+
+  test('store-init-tag-fixedmsg', function () {
+    const store = Store.Store({ pattern_fix: { sys: 'entity' } })
+    const { instance, reads, added } = fakeStoreInstance({
+      fixedmsg: { plugin$: { name: 'fake-store', tag: 'm0' } },
+      fixedargs: { plugin$: { name: 'fake-store', tag: 'a0' } },
+    })
+
+    const out = store.init(instance, {}, fakeStoreDef('fake-store'))
+    expect(out).toEqual({ tag: 'm0', desc: 'fake-store~m0~-/-/-' })
+
+    // fixedargs is not read when fixedmsg is present, so the deprecated
+    // alias does not warn.
+    expect(reads).toEqual(['fixedmsg'])
+    expect(added.length).toEqual(6)
+  })
+
+  test('store-init-tag-fixedargs-fallback', function () {
+    const store = Store.Store({ pattern_fix: { sys: 'entity' } })
+    const { instance, reads } = fakeStoreInstance({
+      fixedargs: { plugin$: { name: 'fake-store', tag: 'a1' } },
+    })
+
+    const out = store.init(instance, {}, fakeStoreDef('fake-store'))
+    expect(out).toEqual({ tag: 'a1', desc: 'fake-store~a1~-/-/-' })
+    expect(reads).toEqual(['fixedargs'])
+  })
+
+  test('store-init-tag-generated', function (fin) {
+    const store = Store.Store({ pattern_fix: { sys: 'entity' } })
+
+    // No fixed properties, or an untagged plugin: the store numbers its
+    // instances.
+    const t0 = store.init(
+      fakeStoreInstance({}).instance,
+      {},
+      fakeStoreDef('fake-store-t'),
+    )
+    const t1 = store.init(
+      fakeStoreInstance({ fixedmsg: { plugin$: { tag: '-' } } }).instance,
+      {},
+      fakeStoreDef('fake-store-t'),
+    )
+    expect([t0.tag, t1.tag]).toEqual([1, 2])
+
+    // The callback form receives the tag and the description.
+    store.init(
+      fakeStoreInstance({ fixedmsg: { plugin$: { tag: 'c0' } } }).instance,
+      { map: { 'z0/b0/n0': ['load'] } },
+      fakeStoreDef('fake-store-t'),
+      function (err, tag, desc) {
+        expect(err).toEqual(null)
+        expect(tag).toEqual('c0')
+        expect(desc).toEqual('fake-store-t~c0~z0/b0/n0')
+        fin()
+      },
+    )
+  })
+
+  test('store-init-tag-real-instance', async function () {
+    // On the installed Seneca, whether its core exposes fixedmsg or only
+    // fixedargs: a store plugin loaded with a tag gets that tag.
+    const metas = []
+    function tagstore(options) {
+      const meta = this.export('entity/init')(
+        this,
+        options,
+        fakeStoreDef('tagstore'),
+      )
+      metas.push(meta)
+      return { name: 'tagstore', tag: meta.tag }
+    }
+
+    const si = Seneca({ legacy: false })
+      .test()
+      .use(Entity, { mem_store: false })
+      .use({ name: 'tagstore', tag: 't0', define: tagstore })
+      .use({ name: 'tagstore', define: tagstore })
+    await si.ready()
+
+    expect(metas.map((m) => m.desc)).toEqual([
+      'tagstore~t0~-/-/-',
+      'tagstore~1~-/-/-',
+    ])
+    expect(si.has_plugin('tagstore', 't0')).toBeTruthy()
+    await si.close()
   })
 
   test('generate_id', function (fin) {
@@ -670,7 +794,7 @@ describe('entity', function () {
   })
 
   test('mem-store-import-export', async function () {
-    let si = Seneca({ legacy: false }).use('promisify').use('..').test()
+    let si = Seneca({ legacy: false }).use('..').test()
 
     // NOTE: zone is NOT saved! by design!
     let x1 = await si.entity('a', { x: 1 }).save$()
@@ -684,7 +808,7 @@ describe('entity', function () {
     expect(t).toBeTruthy()
 
     let out = await si.post('role:mem-store,cmd:export')
-    let si2 = SenecaInstance().use('promisify')
+    let si2 = SenecaInstance()
 
     await si2.post('role:mem-store,cmd:import', { json: out.json })
     db = await si2.post('role:mem-store,cmd:dump')
@@ -798,7 +922,7 @@ describe('entity', function () {
     si.use('@seneca/mem-store', { map: { '-/-/bar': '*' } })
 
     si.ready(function () {
-      const plugins = si.plugins()
+      const plugins = si.list_plugins()
 
       expect(!plugins['mem-store$4']).toBeTruthy()
       expect(plugins['mem-store$3']).toBeTruthy()
@@ -814,8 +938,8 @@ describe('entity', function () {
 
   test('mem store disabled by user', function (fin) {
     const si = SenecaInstance()
-    expect(!si.hasplugin('seneca-mem-store')).toBeTruthy()
-    expect(!si.plugins()['seneca-mem-store']).toBeTruthy()
+    expect(!si.has_plugin('seneca-mem-store')).toBeTruthy()
+    expect(!si.list_plugins()['seneca-mem-store']).toBeTruthy()
 
     fin()
   })
@@ -1010,7 +1134,7 @@ describe('entity', function () {
   })
 
   test('direct', async () => {
-    const si = Seneca({ legacy: false }).test().use('promisify').use(Entity)
+    const si = Seneca({ legacy: false }).test().use(Entity)
 
     let out = await si.post('sys:entity,cmd:save,name:foo,ent:{id$:a,x:1}')
     expect(out).toEqual({ id: 'a', x: 1, entity$: '-/-/foo' })
@@ -1272,7 +1396,7 @@ describe('entity', function () {
   })
 
   test('translation-role-entity', async function () {
-    const si = Seneca({ legacy: false }).use('promisify').use('..').test()
+    const si = Seneca({ legacy: false }).use('..').test()
 
     let f0 = await si.entity('foo').save$({ f: 0 })
     let list = await si.post('role:entity,cmd:list,name:foo')
@@ -1328,7 +1452,7 @@ describe('entity', function () {
   })
 
   test('directive', async function () {
-    const si = Seneca({ legacy: false }).use('promisify').use('..').test()
+    const si = Seneca({ legacy: false }).use('..').test()
     await si.ready()
 
     si.message('sys:entity,cmd:save', async function fooSave(msg) {

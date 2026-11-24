@@ -237,7 +237,7 @@ query says `all$: true`.
 
 `native` returns whatever lets callers bypass the entity API: a
 database connection or client. `close` releases resources; the entity
-plugin calls it once, when `seneca.close()` runs, on Seneca 3 and 4.
+plugin calls it once, when `seneca.close()` runs.
 
 ## 7. Use the store
 
@@ -253,7 +253,7 @@ async function main() {
     .use(Entity, { mem_store: false }) // no default store
     .use(MapStore)
 
-  await new Promise((resolve) => seneca.ready(resolve))
+  await seneca.ready()
 
   console.log('store actions:', seneca.list('sys:entity').map((p) => p.cmd).join(','))
 
@@ -324,7 +324,7 @@ function makeSeneca() {
 
 test('save, load, list, remove', async () => {
   const seneca = makeSeneca()
-  await new Promise((resolve) => seneca.ready(resolve))
+  await seneca.ready()
 
   const Foo = seneca.entity('foo')
   const foo0 = await Foo.make$({ a: 1 }).save$()
@@ -354,10 +354,10 @@ test('save, load, list, remove', async () => {
 ```
 
 (The file also has a `directives` test for `sort$`, `skip$`, `limit$`,
-`id$` and `all$`.) Then run the standard suites of seneca-store-test,
+`id$` and `all$`.) Then run the standard suites of @seneca/store-test,
 as the official stores do; this store passes the `init`, `keyvalue`,
 `basic`, `sort` and `limits` suites (76 tests). See
-[Test a store plugin with seneca-store-test](../how-to/test-a-store-plugin-with-store-test.md).
+[Test a store plugin with @seneca/store-test](../how-to/test-a-store-plugin-with-store-test.md).
 
 ## What you built
 

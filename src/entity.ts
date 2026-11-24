@@ -1,5 +1,9 @@
 /* Copyright (c) 2010-2023 Richard Rodger and other contributors, MIT License */
 
+// Loads the Seneca types for the Instance augmentation below, here and in
+// the emitted declaration file (preserve keeps the directive there).
+/// <reference types="seneca" preserve="true" />
+
 
 import {
   EntityState,
@@ -11,6 +15,33 @@ import { buildValidation } from './valid'
 
 import { MakeEntity, Entity } from './lib/make_entity'
 import { Store } from './lib/store'
+
+
+// Seneca 4 declares Instance as a closed interface, so the members this
+// plugin adds with seneca.decorate (see preload) are declared here, in the
+// main types. Any import of @seneca/entity applies them, including
+// `import type {} from '@seneca/entity'`. They return `any`, as members of
+// the open Seneca 3 Instance type did, so that code which uses entity
+// results as its own types keeps compiling.
+declare module 'seneca' {
+  interface Instance {
+    /**
+     * Make an entity in callback mode. Arguments: `(name)`, `(base, name)`,
+     * `(zone, base, name)` or a canon string `'zone/base/name'`, optionally
+     * followed by an object of field values.
+     */
+    make$(...args: any[]): any
+
+    /** Alias of `make$`. */
+    make(...args: any[]): any
+
+    /**
+     * Make an entity in promise mode: its operations (`save$`, `load$`,
+     * `list$`, `remove$`) return promises. Same arguments as `make$`.
+     */
+    entity(...args: any[]): any
+  }
+}
 
 
 

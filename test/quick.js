@@ -1,7 +1,8 @@
 const Seneca = require('seneca')
 const Entity = require('..')
 
-const Gubu = Seneca.util.Gubu
+// The validator Seneca provides (shape on Seneca 4).
+const Shape = Seneca.valid
 
 async function run() {
   let valid_foo = {
@@ -13,13 +14,13 @@ async function run() {
     c: 'C',
   }
 
-  let valid_foo_gubu = Gubu(valid_foo)
-  console.log('valid_foo_gubu', valid_foo_gubu.stringify())
+  let valid_foo_shape = Shape(valid_foo)
+  console.log('valid_foo_shape', valid_foo_shape.stringify())
 
-  let valid_foo_json = valid_foo_gubu.jsonify()
+  let valid_foo_json = valid_foo_shape.jsonify()
   console.log('valid_foo_json', valid_foo_json)
 
-  console.log('JSONIFY', Gubu.build(valid_foo_json).stringify())
+  console.log('JSONIFY', Shape.build(valid_foo_json).stringify())
 
   let s0 = Seneca()
     .test()
@@ -28,7 +29,7 @@ async function run() {
         '-/-/foo': {
           valid_json: valid_foo_json,
           // valid: valid_foo
-          // valid: valid_foo_gubu
+          // valid: valid_foo_shape
         },
       },
     })

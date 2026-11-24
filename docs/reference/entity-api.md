@@ -77,7 +77,7 @@ save data contains `meta$: true`.
 
 | Method | Arguments | Result |
 | ------ | --------- | ------ |
-| `save$([data], [callback])` | `data`: fields to set before saving plus directives (`id$`, `merge$`, `upsert$`, `skip$`, `meta$`). | The saved entity, a new object with the `id` set. A new entity (no `id`) is created; an entity with an `id` is updated (merged into the stored data by default). Runs the `ent.<canon>.valid` validation first and throws a validation error on failure (a `ShapeError` on Seneca 4.0.0, a `GubuError` on Seneca 3.38 and 4.0.0-rc5; see [Errors](errors.md#thrown-by-the-entity-api)). |
+| `save$([data], [callback])` | `data`: fields to set before saving plus directives (`id$`, `merge$`, `upsert$`, `skip$`, `meta$`). | The saved entity, a new object with the `id` set. A new entity (no `id`) is created; an entity with an `id` is updated (merged into the stored data by default). Runs the `ent.<canon>.valid` validation first and throws a validation error on failure (a `ShapeError`; see [Errors](errors.md#thrown-by-the-entity-api)). |
 | `load$([query], [callback])` | id, query object, or nothing to reload by the entity's own `id`. | The first matching entity, or `null`. |
 | `list$([query], [callback])` | Query object, array of ids, or nothing for every entity of the kind. | Array of entities (possibly empty). |
 | `remove$([query], [callback])` | As `load$`. `all$: true` removes every match; `load$: true` returns the removed entity. | `null`, or the removed entity with `load$`. |
@@ -110,8 +110,8 @@ features work depends on the store.
 | `canon$({ change: {...} })` | Deprecated: changes the canon parts in place. |
 | `valid$()` | `true` when the entity data matches its `ent.<canon>.valid` shape, or when there is no shape; `false` otherwise. Defaults defined by the shape are written into the entity when valid. |
 | `valid$({ errors: true })` | Array of error descriptions (`{ path, why, type, value, text, ... }`, plus `pathArr` on Seneca 4.0.0); empty when valid or when there is no shape. |
-| `valid$({ throws: true })` | Throws the validation error (`ShapeError` on Seneca 4.0.0, `GubuError` on Seneca 3.38 and 4.0.0-rc5) when invalid. |
-| `valid$({ shape: true })` | The shape for the canon (built with `seneca.valid`, or the prepared shape given as `valid`), or `undefined`. Its `stringify()` output is the same on Seneca 3 and 4 (`{"a":"Number"}`). |
+| `valid$({ throws: true })` | Throws the validation error (a `ShapeError`) when invalid. |
+| `valid$({ shape: true })` | The shape for the canon (built with `seneca.valid`, or the prepared shape given as `valid`), or `undefined`. Its `stringify()` output is the JSON form (`{"a":"Number"}`). |
 | `custom$(props)` | Deep copies `props` into `ent.custom$`; returns the entity. `ent.custom$` is also readable as an object (`ent.custom$.key`). |
 | `directive$(map)` | Deep copies `map` into `ent.directive$`; returns the entity. Keys must end in `$`. |
 | `log$(...args)` | Present once any instance has loaded the plugin with option `log.active` (the method is added to the shared `Entity` class): logs through the instance that created the entity, at debug level. |
@@ -158,8 +158,7 @@ process, since the class is shared.
 The package's main module exports the plugin definition function
 (named `entity`), with its `defaults` and `preload` properties.
 `defaults` is a function, `({ valid }) => options`, that Seneca calls
-with the builders of its validator (shape on Seneca 4.0.0, Gubu on
-Seneca 3.38 and 4.0.0-rc5) to build the option shape (see
+with the builders of its validator, shape, to build the option shape (see
 [Options](options.md)):
 
 ```js
@@ -169,4 +168,9 @@ seneca.use(Entity, { mem_store: false })
 
 TypeScript: the module's default export is the plugin function, and the
 `Entity` type is exported too (`import type { Entity } from '@seneca/entity'`).
+The main types also add `make$`, `make` and `entity` to Seneca's
+`Instance` interface (a `declare module 'seneca'` augmentation, with
+return type `any`), so `seneca.entity('person')` compiles in any
+project that imports `@seneca/entity`, including with
+`import type {} from '@seneca/entity'`.
 The files under `dist/lib` are internal and may change without notice.

@@ -5,7 +5,7 @@ const Entity = require('../../..') // in your own project: require('@seneca/enti
 async function main() {
   // Expected errors would be logged at level warn; keep the output readable.
   const seneca = Seneca({ log: 'silent' }).use(Entity)
-  await new Promise((resolve) => seneca.ready(resolve))
+  await seneca.ready()
 
   // Add a timestamp to every saved entity of every kind.
   seneca.message('sys:entity,cmd:save', async function (msg) {

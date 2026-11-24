@@ -1,7 +1,7 @@
 # Share entities over a transport
 
 How to keep the data in one service and use the entity API from
-others, with [seneca-transport](https://github.com/senecajs/seneca-transport).
+others, with [@seneca/transport](https://github.com/senecajs/seneca-transport).
 The complete program, which runs both sides in one process, is
 [docs/examples/how-to/transport.js](../examples/how-to/transport.js).
 
@@ -10,17 +10,15 @@ The complete program, which runs both sides in one process, is
 Seneca 4 has no network transport of its own:
 
 ```sh
-npm install seneca-transport
+npm install seneca@^4 @seneca/entity @seneca/transport
 ```
 
-Seneca 3 includes seneca-transport and loads it by default; loading it
-explicitly as below works there too.
-
-seneca-transport 8.3 declares a peer dependency on the old package
-name, `seneca-entity`, so npm also installs seneca-entity 28.1.0 (and
-seneca-mem-store 9.4.0). Load the entity plugin as `@seneca/entity`,
-as below, not as `entity`, which would load seneca-entity 28.1.0; on
-Seneca 4.0.0 that stops the instance at startup (see
+Use `@seneca/transport` 9 or later, the transport for Seneca 4. The
+older `seneca-transport` package belongs to Seneca 3. Its 8.x versions
+declare a peer dependency on the old entity package, `seneca-entity`,
+so npm would also install seneca-entity 28.1.0 (and seneca-mem-store
+9.4.0), which do not load on Seneca 4. Load the plugins by full name,
+as below (see
 [Seneca 3 and Seneca 4: package names](../explanation/seneca-3-and-4.md#package-names)).
 
 ## 2. Expose the entity messages from the service
@@ -30,7 +28,7 @@ entity message:
 
 ```js
 const service = Seneca({ tag: 'service' })
-  .use('seneca-transport')
+  .use('@seneca/transport')
   .use('@seneca/entity')
   .listen({ type: 'web', port: 8270, pin: 'sys:entity' })
 ```
@@ -42,7 +40,7 @@ same pin:
 
 ```js
 const client = Seneca({ tag: 'client' })
-  .use('seneca-transport')
+  .use('@seneca/transport')
   .use('@seneca/entity', { mem_store: false })
   .client({ type: 'web', port: 8270, pin: 'sys:entity' })
 ```
@@ -92,13 +90,23 @@ await alice.save$()
 | `custom$` | no | It lives on the entity object, not in its JSON form. |
 | `directive$` entries | no | They are copied to the top level of the message, and the transport does not forward top level `$` properties. |
 
-## 7. Expect generic errors
+## 7. Handle remote errors
 
-An error raised in the service reaches the client as an `Error`. With
-seneca-transport 8.3.0 and the `web` type, the client does not receive
-the original message: it sees `Response Error: 500 Internal Server Error`
-(on Seneca 3 wrapped as `seneca: Action sys:entity failed: Response Error: 500 Internal Server Error.`).
-The original error is logged by the service.
+An error raised in the service reaches the client as an `Error` with
+the service's message, for example `a person needs a name`. Catch it
+as you would a local error:
+
+```js
+try {
+  await client.entity('person').make$({ location: 'nowhere' }).save$()
+} catch (err) {
+  console.log('remote error:', err.message)
+}
+```
+
+The Seneca 3 package seneca-transport 8.3.0 does not pass the message
+on with the `web` type: the client sees only
+`Response Error: 500 Internal Server Error`.
 
 ## 8. Send only some kinds to the service
 
@@ -110,7 +118,7 @@ specific than the local store's:
 const pin = ['save', 'load', 'list', 'remove'].map((cmd) => 'sys:entity,cmd:' + cmd + ',name:person')
 
 Seneca()
-  .use('seneca-transport')
+  .use('@seneca/transport')
   .use('@seneca/entity')                 // local default store for other kinds
   .client({ type: 'web', port: 8270, pin })
 ```
@@ -125,17 +133,7 @@ await client.close()
 await service.close()
 ```
 
-seneca-transport 8.3.0 stops its HTTP listener in a
-`role:seneca,cmd:close` hook. Seneca 3 and Seneca 4.0.0 call that hook
-when closing; Seneca 4.0.0-rc5 does not, so the listener stays open and
-the process does not exit. On rc5, run the hook before closing:
-
-```js
-if ('4.0.0-rc5' === service.version) {
-  await service.post('role:seneca,cmd:close')
-}
-await service.close()
-```
+Closing the service stops its listener, so the process can exit.
 
 ## The program's output
 
@@ -149,5 +147,5 @@ client saved: Entity {
 client list:  [ 'Alice' ]
 service has:  { name: 'Alice', born: '1970-01-01T00:00:00.000Z', id: 'pucbdy' }
 service sees: Wonderland
-remote error: Response Error: 500 Internal Server Error
+remote error: a person needs a name
 ```

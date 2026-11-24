@@ -1,7 +1,7 @@
-# Test a store plugin with seneca-store-test
+# Test a store plugin with @seneca/store-test
 
 How to run the standard store test suites,
-[seneca-store-test](https://github.com/senecajs/seneca-store-test),
+[@seneca/store-test](https://github.com/senecajs/seneca-store-test),
 against your own store plugin. The official stores use the same suites.
 The commands below were run against the store from
 [Writing a store plugin](../tutorials/writing-a-store-plugin.md)
@@ -10,13 +10,13 @@ The commands below were run against the store from
 ## 1. Install the test dependencies
 
 ```sh
-npm install --save-dev seneca @seneca/entity seneca-store-test @hapi/lab @hapi/code
+npm install --save-dev seneca@^4 @seneca/entity @seneca/store-test @hapi/lab
 ```
 
-seneca-store-test requires `@hapi/lab` and `@hapi/code` at runtime but
-does not declare them as dependencies, so install them yourself. The
-suites are written for lab and need a lab script; they do not run
-under the Node.js test runner.
+Use `@seneca/store-test` 7 or later, the version for Seneca 4 (up to
+6.0.0 it was published as `seneca-store-test`, for Seneca 3). The
+suites are written for lab and need a lab script, so install
+`@hapi/lab` yourself; they do not run under the Node.js test runner.
 
 ## 2. Write the test file
 
@@ -25,7 +25,7 @@ Create `test/store.test.js` in the store's repository:
 ```js
 const Lab = require('@hapi/lab')
 const Seneca = require('seneca')
-const StoreTest = require('seneca-store-test')
+const StoreTest = require('@seneca/store-test')
 
 const lab = (exports.lab = Lab.script())
 
@@ -49,7 +49,7 @@ StoreTest.limitstest({ seneca: makeSeneca(), script: lab })
 Give each suite its own instance: the suites clear and create data in
 the same entity kinds (`foo`, `zen/moon/bar` and others). Load the
 entity plugin by its full name, `@seneca/entity`: the short name
-`entity` finds an installed seneca-entity package first (see
+`entity` can load an installed seneca-entity package (see
 [Seneca 3 and Seneca 4: package names](../explanation/seneca-3-and-4.md#package-names)).
 
 ## 3. Choose the suites your store supports

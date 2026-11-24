@@ -2,8 +2,7 @@
 const Seneca = require('seneca')
 const Entity = require('../../..') // in your own project: require('@seneca/entity')
 
-// Seneca's validator: shape on Seneca 4, Gubu on Seneca 3, with the same
-// builders (Open, Skip, Required, ...).
+// Seneca's validator, shape, with the builders Open, Skip, Required, ...
 const Valid = Seneca.valid
 
 async function main() {

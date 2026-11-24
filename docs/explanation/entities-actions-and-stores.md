@@ -79,9 +79,10 @@ Consequences:
   instances are lost.
 * Entities rebuilt on arrival are made with `seneca.make$`, so they are
   in callback mode.
-* An error raised by the remote store arrives as an `Error`, but with
-  seneca-transport 8.3.0 (`web` type) only as a generic
-  `Response Error: 500 Internal Server Error`.
+* An error raised by the remote store arrives as an `Error` with the
+  remote message (with @seneca/transport; the Seneca 3 package
+  seneca-transport 8.3.0 sends only a generic
+  `Response Error: 500 Internal Server Error` with the `web` type).
 
 ## Why not a real ORM
 

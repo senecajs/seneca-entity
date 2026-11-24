@@ -8,13 +8,15 @@ this page covers what affects entity code. The background is in
 
 ## 1. Update the packages
 
-Seneca 4.0.0 requires Node.js 24 or later. Use version 29.0.0 or
-later of this plugin, published as `@seneca/entity`. Versions up to
-28.1.0 were published as `seneca-entity`; 28.1.0 does not load on
-Seneca 4.0.0.
+Seneca 4 requires Node.js 24 or later. Use version 29.0.0 or later of
+this plugin, published as `@seneca/entity`. Versions up to 28.1.0 were
+published as `seneca-entity`; 28.1.0 does not load on Seneca 4.
+Applications that stay on Seneca 3 keep seneca-entity 28: version 29
+requires Seneca 4 (peer dependency `seneca` `^4.0.0`).
 
 ```sh
-npm install seneca@^4.0.0-rc5 @seneca/entity
+npm uninstall seneca-entity seneca-mem-store seneca-promisify
+npm install seneca@^4 @seneca/entity
 ```
 
 The default store comes with the plugin as `@seneca/mem-store` 10.
@@ -29,38 +31,32 @@ and the store, when you load it yourself, as
 dependency on `seneca-entity`, such as seneca-transport 8.3,
 @seneca/user 6.4, @seneca/owner 6.4 and seneca-msg-test 4.1, make npm
 install seneca-entity 28.1.0 (and with it seneca-mem-store 9.4.0) next
-to the new packages, and the short names `entity` and `mem-store` find
-the old packages first. On Seneca 4.0.0 the instance then stops at
-startup with `plugin_gubu_shape`. See
+to the new packages, and the short names `entity` and `mem-store` can
+load the old packages. The instance then stops at startup with
+`plugin_gubu_shape`. Move such plugins to their Seneca 4 versions. See
 [Seneca 3 and Seneca 4: package names](../explanation/seneca-3-and-4.md#package-names).
-
-The plugin also works on Seneca 3 from 3.38 (earlier 3.x versions are
-no longer supported), so the update can be done before moving to
-Seneca 4.
 
 ## 2. Load a transport where entities cross processes
 
 Seneca 4 has no network transport of its own. Where a service exposes
 or calls entity actions over the network, install and load
-seneca-transport, and pin `sys:entity`:
+`@seneca/transport` (not the Seneca 3 package `seneca-transport`), and
+pin `sys:entity`:
 
 ```js
-seneca.use('seneca-transport').listen({ type: 'web', port: 8270, pin: 'sys:entity' })
+seneca.use('@seneca/transport').listen({ type: 'web', port: 8270, pin: 'sys:entity' })
 ```
 
 See [Share entities over a transport](share-entities-over-a-transport.md).
 
-## 3. Drop seneca-promisify unless Seneca 3 is still supported
+## 3. Drop seneca-promisify
 
 Entity promises (`await seneca.entity('foo').save$()`) never needed
 seneca-promisify. `seneca.post`, `seneca.message`, `await seneca.ready()`
-and `await seneca.close()` are built into Seneca 4. Keep
-seneca-promisify only where the same code must also run on Seneca 3; on
-Seneca 4 it does nothing.
-
-On 4.0.0-rc5, use `await new Promise((resolve) => seneca.ready(resolve))`
-instead of `await seneca.ready()` on an instance that may already be
-idle.
+and `await seneca.close()` are built into Seneca 4. Remove
+`seneca.use('promisify')` and the seneca-promisify dependency; on
+Seneca 4 loading it prints the deprecation warning
+`SENECA_DEP_PROMISIFY`.
 
 ## 4. Read error messages directly
 
@@ -73,14 +69,13 @@ the original error:
 try {
   await seneca.entity('person').save$()
 } catch (err) {
-  console.log(err.message)               // Seneca 4: the store's message
-  console.log((err.orig || err).message) // both versions
+  console.log(err.message)   // the store's message
 }
 ```
 
-Validation errors from `save$` and `valid$` are not wrapped on either
-version. They have the same message and `props` on both, but are a
-`ShapeError` on Seneca 4.0.0 (see step 6).
+Replace `err.orig` with `err`. Validation errors from `save$` and
+`valid$` were never wrapped. They keep their message and `props`, but
+are a `ShapeError` on Seneca 4 (see step 6).
 
 ## 5. Check how options are given
 
@@ -92,15 +87,15 @@ Seneca({ plugin: { entity: { strict: true }, 'mem-store': { merge: false } } })
 ```
 
 The instance option `default_plugins` controls neither the entity plugin
-nor its store on any version; use the plugin's `mem_store` option.
+nor its store; use the plugin's `mem_store` option.
 
 ## 6. Build validation shapes with `seneca.valid`
 
-Seneca 4.0.0 validates with shape, the renamed successor of Gubu;
-Seneca 3.38 and 4.0.0-rc5 validate with Gubu 9. The plugin builds the
-`ent.<canon>.valid` and `valid_json` shapes with the validator of the
-running instance, so write them with plain types and the builders of
-`Seneca.valid` (or `seneca.valid`), which work on every version:
+Seneca 4 validates with shape, the renamed successor of Gubu; Seneca
+3.38 validated with Gubu 9. The plugin builds the `ent.<canon>.valid`
+and `valid_json` shapes with the validator of the running instance, so
+write them with plain types and the builders of `Seneca.valid` (or
+`seneca.valid`):
 
 ```js
 const Valid = Seneca.valid
@@ -110,10 +105,10 @@ seneca.use('@seneca/entity', {
 })
 ```
 
-* Replace `Seneca.util.Gubu` with `Seneca.valid`. On Seneca 4.0.0
+* Replace `Seneca.util.Gubu` with `Seneca.valid`. On Seneca 4
   `Seneca.util.Gubu` is a deprecated alias of shape (deprecation code
   `SENECA_DEP_UTIL_GUBU`); Seneca 5 removes it.
-* On Seneca 4.0.0, do not put builders imported from the gubu package
+* Do not put builders imported from the gubu package
   (`const { Required } = require('gubu')`) in a specification: the
   plugin refuses it when it loads, and the instance stops with
   `plugin_define_failed` (see
@@ -121,37 +116,38 @@ seneca.use('@seneca/entity', {
   Builders imported from the shape package work. Shapes already built
   with `Gubu(...)` from the gubu package are used as they are and keep
   working.
-* A failed validation throws a `ShapeError` (`shape: true`) on Seneca
-  4.0.0 and a `GubuError` (`gubu: true`) on Seneca 3.38 and 4.0.0-rc5.
-  Code that checks `err.gubu` or `err.name` should check `err.code`,
-  which is `'shape'` on both.
-
-With 28.1.0, the plugin does not load on Seneca 4.0.0 at all, and on
-Seneca 3.38 and 4.0.0-rc5 a shape built with `Seneca.util.Gubu` made
-every save fail with "the object is not of type function".
+* A failed validation throws a `ShapeError` (`shape: true`), where
+  Seneca 3 threw a `GubuError` (`gubu: true`). Code that checks
+  `err.gubu` or `err.name` should check `err.code`, which is `'shape'`
+  for both.
 
 ## 7. Keep or rename `role:entity` patterns
 
 The plugin translates `role:entity,cmd:save|load|list|remove` to
-`sys:entity`, in messages and in patterns you add, on both versions. Old
-priors keep working. New code should use `sys:entity`.
+`sys:entity`, in messages and in patterns you add. Old priors keep
+working. New code should use `sys:entity`.
 
 ## 8. Check store plugins
 
 Stores built on the entity plugin's initializer (`entity/init`) close
-correctly on both versions: their `close` command is attached to
-`sys:seneca,cmd:close`, which Seneca 3 translates to its own close
-pattern. A store that adds its own close hook on `role:seneca,cmd:close`
-is not closed by Seneca 4.0.0-rc5 (4.0.0 calls such hooks for
-compatibility). Register the hook on the pattern of the running version:
+correctly: their `close` command is attached to `sys:seneca,cmd:close`.
+A store that adds its own close hook on the Seneca 3 pattern
+`role:seneca,cmd:close` still closes on Seneca 4, but the hook is
+deprecated (`SENECA_DEP_LEGACY_CLOSE_HOOK`; Seneca 5 removes it).
+Release resources with `this.destroy(fn)` in the plugin definition
+instead:
 
 ```js
-const close_pattern = seneca.version.startsWith('3.')
-  ? 'role:seneca,cmd:close' : 'sys:seneca,cmd:close'
+function my_store(options) {
+  const client = connect(options)   // your database client
+  this.destroy(async function () {
+    await client.end()
+  })
+}
 ```
 
 A store whose option `defaults` are built with builders from the gubu
-package does not load on Seneca 4.0.0 (`plugin_gubu_shape`). Write
+package does not load on Seneca 4 (`plugin_gubu_shape`). Write
 `defaults` as a plain object, or as a function of `{ valid }` that
 builds the shape with the builders Seneca passes in, as this plugin and
 @seneca/mem-store 10 do:
@@ -160,7 +156,7 @@ builds the shape with the builders Seneca passes in, as this plugin and
 my_store.defaults = ({ valid }) => ({ map: {}, url: valid.Skip(String) })
 ```
 
-Run the store's tests with seneca-store-test on Seneca 4
+Run the store's tests with @seneca/store-test on Seneca 4
 ([Test a store plugin](test-a-store-plugin-with-store-test.md)).
 
 ## 9. Run the tests

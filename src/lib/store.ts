@@ -33,11 +33,12 @@ function Store(plugin_opts: any) {
         entspecs.push({ canon: '-/-/-', cmds: allcmds })
       }
 
-      // TODO: messy!
-      const plugin_tag =
-        instance.fixedargs &&
-        instance.fixedargs.plugin$ &&
-        instance.fixedargs.plugin$.tag
+      // The fixed message properties of the store's plugin delegate hold
+      // the plugin tag. Seneca 4 names them fixedmsg; fixedargs is the
+      // deprecated alias (SENECA_DEP_FIXEDARGS), read only when fixedmsg
+      // is absent.
+      const fixedmsg = instance.fixedmsg ?? instance.fixedargs
+      const plugin_tag = fixedmsg?.plugin$?.tag
       // plugin_tag cannot be a strict null equal
       const tag =
         plugin_tag == null || plugin_tag === '-'

@@ -13,7 +13,7 @@ async function main() {
     // A second store for one entity kind: only -/-/log messages reach it.
     .use({ name: '@seneca/mem-store', tag: 'logs' }, { map: { '-/-/log': '*' } })
 
-  await new Promise((resolve) => seneca.ready(resolve))
+  await seneca.ready()
 
   console.log('plugins:', Object.keys(seneca.list_plugins()).filter((n) => n.startsWith('mem-store')))
 

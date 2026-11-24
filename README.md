@@ -8,9 +8,9 @@ built on Seneca messages. `seneca.entity('person')` gives you objects
 with `save$`, `load$`, `list$` and `remove$` methods, and each method
 is a message (`sys:entity,cmd:save`) answered by a store plugin, so
 stores, validation, business rules and remote services plug in through
-ordinary Seneca patterns. An in-memory store is included. Works with
-Seneca 4 (4.0.0, and the 4.0.0-rc5 prerelease) and Seneca 3 from 3.38,
-on Node.js 18 or later (Seneca 4.0.0 requires 24 or later).
+ordinary Seneca patterns. An in-memory store is included. Requires
+Seneca 4 and Node.js 24 or later. Seneca 3 applications keep
+seneca-entity 28.
 
 [![npm version](https://img.shields.io/npm/v/@seneca/entity.svg)](https://npmjs.com/package/@seneca/entity)
 [![build](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml/badge.svg)](https://github.com/senecajs/seneca-entity/actions/workflows/build.yml)
@@ -24,27 +24,29 @@ on Node.js 18 or later (Seneca 4.0.0 requires 24 or later).
 ## Install
 
 ```sh
-npm install seneca @seneca/entity
+npm install seneca@^4 @seneca/entity
 ```
 
 Versions up to 28.1.0 were published as `seneca-entity`; from 29.0.0
 the package is `@seneca/entity` (28.2.0 was prepared but not
-published). The default store, `@seneca/mem-store`, is installed with
-it. TypeScript declarations are included.
+published). Version 29 requires Seneca 4 (peer dependency `seneca`
+`^4.0.0`). The default store, `@seneca/mem-store`, is installed with
+it.
+
+TypeScript declarations are included. They add `make$`, `make` and
+`entity` to Seneca's `Instance` interface, so `seneca.entity('person')`
+compiles in any project that imports `@seneca/entity` (also with
+`import type {} from '@seneca/entity'`).
 
 Load the plugin by package, `seneca.use(require('@seneca/entity'))`,
-or by its full name, `seneca.use('@seneca/entity')`. Avoid
-`seneca.use('entity')` until the plugins that declare a peer
-dependency on the old name are republished: seneca-transport 8.3 (a
-dependency of Seneca 3.38), @seneca/user 6.4, @seneca/owner 6.4 and
-seneca-msg-test 4.1, for example. To satisfy them npm installs
-seneca-entity 28.1.0 next to @seneca/entity, and `seneca.use('entity')`
-tries `seneca-entity` before `@seneca/entity`, so it loads 28.1.0. On
-Seneca 4.0.0 that stops the instance at startup (`plugin_gubu_shape`);
-on Seneca 3.38 and 4.0.0-rc5 you get the old version. Likewise, when
-you load the store yourself, load it as `@seneca/mem-store`, not
-`mem-store`: seneca-entity 28.1.0 brings seneca-mem-store 9.4.0, which
-does not load on Seneca 4.0.0 either.
+or by its full name, `seneca.use('@seneca/entity')`, not as
+`seneca.use('entity')`. Plugins that still declare a peer dependency
+on the old name, such as seneca-transport 8.3, @seneca/user 6.4,
+@seneca/owner 6.4 and seneca-msg-test 4.1, make npm install
+seneca-entity 28.1.0 (and seneca-mem-store 9.4.0) next to the new
+packages, and a short name can load the old one, which stops Seneca 4
+at startup (`plugin_gubu_shape`). Likewise, when you load the store
+yourself, load it as `@seneca/mem-store`, not `mem-store`.
 
 ## Quick Example
 
@@ -171,29 +173,17 @@ participation: documentation, examples, tests and features are all
 welcome. To work on the plugin:
 
 ```sh
-npm install       # .npmrc sets legacy-peer-deps while Seneca 4 is a prerelease
+npm install
 npm run build     # compile src/ to dist/ (tsc)
 npm test          # jest, with coverage
 ```
 
-The tests run on Node.js 24 and 22 against the Seneca 4 prerelease
-(the `seneca@^4.0.0-rc5` development dependency). To test against
-another Seneca version, install it without saving, run the tests, and
-restore the development dependency afterwards:
-
-```sh
-npm install --no-save seneca@3   # or the path of a seneca tarball
-npm test
-npm install
-```
+The tests run on Node.js 24 and 26 against Seneca 4 (the
+`seneca@^4.0.0` development dependency).
 
 The programs in [docs/examples](docs/examples/) must run to completion
 (`node docs/examples/<dir>/<file>.js`). `npm run maintain` runs the
 `@seneca/maintain` repository checks.
-
-Changes to the GitHub Actions workflow are provided as patches in
-`.patches/`, because they cannot be pushed without the `workflow`
-permission; see `.patches/README.md` for how to apply them.
 
 ## Background
 
@@ -207,7 +197,7 @@ pattern. Versions up to 28.1.0 were published as `seneca-entity`; from
 
 | Plugin | Seneca | Node.js |
 | ------ | ------ | ------- |
-| 29.0.0 | 3 from 3.38 (tested with 3.38.0) and 4 (tested with 4.0.0 and 4.0.0-rc5) | 18 or later (tested on 22; Seneca 4.0.0 requires 24 or later) |
-| 28.1.0 | 3.x; on 3.38 and on 4.0.0-rc5 a `valid` shape built with `Seneca.util.Gubu` fails every save; does not load on 4.0.0 (`plugin_gubu_shape`) | 16 or later |
+| 29.0.0 | 4 (`^4.0.0`) | 24 or later |
+| 28.1.0 | 3.x; on 3.38 a `valid` shape built with `Seneca.util.Gubu` fails every save; does not load on 4.0.0 (`plugin_gubu_shape`) | 16 or later |
 
 Licensed under the MIT license; see [LICENSE](LICENSE).
